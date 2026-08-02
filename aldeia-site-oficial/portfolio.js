@@ -67,15 +67,19 @@ document.addEventListener('DOMContentLoaded', () => {
             el.className = 'portfolio-card';
             el.style.animationDelay = `${delay}s`;
             
+            const accentColor = p.accentColor || p.color || '#a855f7';
+            el.style.setProperty('--card-accent', accentColor);
+            
             const catLabel = p.categoryLabel || CATEGORY_MAP[p.category] || 'Arte Avulsa';
+            const badgeStyle = `background: ${accentColor}22; border: 1px solid ${accentColor}66; color: ${accentColor === '#ffffff' ? '#fff' : accentColor};`;
             
             el.innerHTML = `
                 <div class="portfolio-card-img">
                     <img src="${p.cover}" alt="${p.title}" loading="lazy" onerror="this.onerror=null;this.src='assets/portfolio/${(index % 21) + 1}.webp';">
                 </div>
-                <div class="portfolio-card-badge">${catLabel}</div>
+                <div class="portfolio-card-badge" style="${badgeStyle}">${catLabel}</div>
                 <div class="portfolio-card-overlay">
-                    <span class="portfolio-card-cat">${catLabel}</span>
+                    <span class="portfolio-card-cat" style="color:${accentColor}">${catLabel}</span>
                     <h3 class="portfolio-card-title">${p.title}</h3>
                 </div>
             `;

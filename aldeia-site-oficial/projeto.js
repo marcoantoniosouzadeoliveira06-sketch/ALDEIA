@@ -37,11 +37,19 @@ document.addEventListener('DOMContentLoaded', () => {
             project = getFallbackProject(projectId);
         }
 
+        // Aplicando a cor de destaque dinâmica da equipe no projeto
+        const accentColor = project.accentColor || project.color || '#a855f7';
+        document.documentElement.style.setProperty('--accent', accentColor);
+        document.documentElement.style.setProperty('--accent-glow', accentColor + '44');
+
         // Preenchendo os dados
         const titleEl = document.getElementById('project-page-title');
         const catEl = document.getElementById('project-page-category');
         if (titleEl) titleEl.textContent = project.title;
-        if (catEl) catEl.textContent = project.categoryLabel;
+        if (catEl) {
+            catEl.textContent = project.categoryLabel;
+            catEl.style.color = accentColor;
+        }
 
         const bodyContainer = document.getElementById('project-page-body');
         if (bodyContainer) {

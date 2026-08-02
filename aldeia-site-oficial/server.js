@@ -287,6 +287,7 @@ app.post('/api/portfolio', requireAuth, (req, res) => {
         title: req.body.title || 'Sem Título',
         category: req.body.category || 'artes',
         categoryLabel: req.body.categoryLabel || 'Artes Avulsas',
+        accentColor: req.body.accentColor || req.body.color || '#a855f7',
         cover: req.body.cover || '',
         assets: req.body.assets || []
     };

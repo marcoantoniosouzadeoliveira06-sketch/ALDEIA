@@ -732,8 +732,9 @@
                     <div class="box-header">
                         <h2 class="box-title">Adicionar Novo Projeto</h2>
                     </div>
-                    <div style="padding: 20px 30px;">
                         <form id="portfolio-form" style="display: flex; flex-direction: column; gap: 15px;">
+                            <input type="hidden" id="port-edit-id" value="">
+                            
                             <input type="text" id="port-title" placeholder="Título do Projeto (Ex: Identidade FURY)" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 6px; color:#fff;" required>
                             
                             <select id="port-category" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 6px; color:#fff;" required>
@@ -742,6 +743,22 @@
                                 <option value="social" style="background: #111;">Social Media</option>
                                 <option value="videos" style="background: #111;">Vídeos</option>
                             </select>
+
+                            <!-- Seletor de Cor de Destaque da Equipe -->
+                            <div class="input-group" style="background: rgba(255,255,255,0.01); padding: 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                                <label class="input-label" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px; display: block;">Cor de Destaque / Iluminação da Equipe</label>
+                                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                    <input type="color" id="port-accent-color" value="#a855f7" onchange="document.getElementById('port-color-hex').textContent = this.value" style="width: 44px; height: 40px; padding: 2px; border-radius: 6px; background: transparent; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;">
+                                    <button type="button" onclick="setAccentPreset('#a855f7')" style="width:28px; height:28px; border-radius:50%; background:#a855f7; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" title="Roxo (FURY)"></button>
+                                    <button type="button" onclick="setAccentPreset('#ef4444')" style="width:28px; height:28px; border-radius:50%; background:#ef4444; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" title="Vermelho (LOUD / Vermelho)"></button>
+                                    <button type="button" onclick="setAccentPreset('#3b82f6')" style="width:28px; height:28px; border-radius:50%; background:#3b82f6; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" title="Azul (MIBR / Cod)"></button>
+                                    <button type="button" onclick="setAccentPreset('#10b981')" style="width:28px; height:28px; border-radius:50%; background:#10b981; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" title="Verde (Green)"></button>
+                                    <button type="button" onclick="setAccentPreset('#f59e0b')" style="width:28px; height:28px; border-radius:50%; background:#f59e0b; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" title="Amarelo / Ouro"></button>
+                                    <button type="button" onclick="setAccentPreset('#ec4899')" style="width:28px; height:28px; border-radius:50%; background:#ec4899; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" title="Rosa (Pink)"></button>
+                                    <button type="button" onclick="setAccentPreset('#ffffff')" style="width:28px; height:28px; border-radius:50%; background:#ffffff; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" title="Branco / Prata"></button>
+                                    <span id="port-color-hex" style="color: #aaa; font-size: 0.85rem; font-family: monospace;">#a855f7</span>
+                                </div>
+                            </div>
 
                             <!-- Capa -->
                             <div class="input-group" style="background: rgba(255,255,255,0.01); padding: 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
@@ -765,7 +782,10 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn-action" style="padding: 12px; border-radius: 6px; border:none; background: #fff; color: #000; font-weight: 600; cursor: pointer;">Salvar Projeto</button>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" id="port-submit-btn" class="btn-action" style="flex: 1; padding: 12px; border-radius: 6px; border:none; background: #fff; color: #000; font-weight: 600; cursor: pointer;">Salvar Projeto</button>
+                                <button type="button" id="port-cancel-btn" onclick="resetPortForm()" style="display: none; padding: 12px 18px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: #aaa; cursor: pointer;">Cancelar</button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -2340,9 +2360,13 @@
         let sessionToken = null;
 
         function getAuthHeaders() {
-            const headers = {};
-            if (sessionToken) {
-                headers['Authorization'] = `Bearer ${sessionToken}`;
+            const token = sessionToken || sessionStorage.getItem('aldeia_admin_token') || localStorage.getItem('aldeia_admin_token');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (token) {
+                sessionToken = token;
+                headers['Authorization'] = `Bearer ${token}`;
             }
             return headers;
         }
@@ -2618,29 +2642,46 @@
             }
         }
 
+        // Presets de cor de destaque da equipe
+        function setAccentPreset(color) {
+            document.getElementById('port-accent-color').value = color;
+            document.getElementById('port-color-hex').textContent = color;
+        }
+
+        let rawPortfolioProjects = [];
+
         // ===== PORTFOLIO MANAGER =====
         async function loadPortfolio() {
             const listEl = document.getElementById('portfolio-list');
             if (!listEl) return;
             
-            listEl.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Carregando portfólio...</td></tr>';
+            listEl.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Carregando portfólio...</td></tr>';
             
             try {
                 const res = await fetch('/api/portfolio');
                 if (res.ok) {
-                    const projects = await res.json();
+                    rawPortfolioProjects = await res.json();
                     listEl.innerHTML = '';
-                    if (projects.length === 0) {
-                        listEl.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Nenhum projeto cadastrado.</td></tr>';
+                    if (rawPortfolioProjects.length === 0) {
+                        listEl.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum projeto cadastrado.</td></tr>';
                         return;
                     }
-                    projects.forEach(p => {
+                    rawPortfolioProjects.forEach(p => {
                         const tr = document.createElement('tr');
+                        const colorHex = p.accentColor || p.color || '#a855f7';
                         tr.innerHTML = `
-                            <td><strong style="color:#fff;">${escapeHTML(p.title)}</strong></td>
-                            <td><span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${escapeHTML(p.categoryLabel)}</span></td>
                             <td>
-                                <button onclick="deleteProject('${p.id}')" style="background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Excluir</button>
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <div style="width:12px; height:12px; border-radius:50%; background:${colorHex}; border:1px solid rgba(255,255,255,0.3); flex-shrink:0;"></div>
+                                    <strong style="color:#fff;">${escapeHTML(p.title)}</strong>
+                                </div>
+                            </td>
+                            <td><span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${escapeHTML(p.categoryLabel || p.category)}</span></td>
+                            <td>
+                                <div style="display:flex; gap:8px;">
+                                    <button onclick="editProject('${p.id}')" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Editar</button>
+                                    <button onclick="deleteProject('${p.id}')" style="background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Excluir</button>
+                                </div>
                             </td>
                         `;
                         listEl.appendChild(tr);
@@ -2648,8 +2689,51 @@
                 }
             } catch (err) {
                 console.error(err);
-                listEl.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Erro ao carregar portfólio.</td></tr>';
+                listEl.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Erro ao carregar portfólio.</td></tr>';
             }
+        }
+
+        function editProject(id) {
+            const project = rawPortfolioProjects.find(p => p.id === id);
+            if (!project) return;
+
+            document.getElementById('port-edit-id').value = project.id;
+            document.getElementById('port-title').value = project.title || '';
+            document.getElementById('port-category').value = project.category || 'artes';
+            
+            const accent = project.accentColor || project.color || '#a855f7';
+            document.getElementById('port-accent-color').value = accent;
+            document.getElementById('port-color-hex').textContent = accent;
+
+            document.getElementById('port-cover').value = project.cover || '';
+            const preview = document.getElementById('port-cover-preview');
+            if (project.cover) {
+                preview.src = project.cover;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+
+            portGalleryAssets = Array.isArray(project.assets) ? JSON.parse(JSON.stringify(project.assets)) : [];
+            renderPortGalleryBuilder();
+
+            document.getElementById('port-submit-btn').textContent = 'Atualizar Projeto';
+            document.getElementById('port-cancel-btn').style.display = 'block';
+            
+            // Scroll to form
+            document.getElementById('portfolio-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetPortForm() {
+            document.getElementById('port-edit-id').value = '';
+            document.getElementById('portfolio-form').reset();
+            document.getElementById('port-cover-preview').style.display = 'none';
+            document.getElementById('port-accent-color').value = '#a855f7';
+            document.getElementById('port-color-hex').textContent = '#a855f7';
+            portGalleryAssets = [];
+            renderPortGalleryBuilder();
+            document.getElementById('port-submit-btn').textContent = 'Salvar Projeto';
+            document.getElementById('port-cancel-btn').style.display = 'none';
         }
 
         async function deleteProject(id) {
@@ -2662,10 +2746,11 @@
                 if (res.ok) {
                     loadPortfolio();
                 } else {
-                    alert('Erro ao excluir.');
+                    alert('Erro ao excluir projeto.');
                 }
             } catch (err) {
                 console.error(err);
+                alert('Erro de conexão ao excluir.');
             }
         }
 
@@ -2749,7 +2834,6 @@
             
             uploadFileBinary(file, (url) => {
                 portGalleryAssets[index].src = url;
-                // Auto-detect video by extension
                 if (url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov')) {
                     portGalleryAssets[index].type = 'video';
                 }
@@ -2758,20 +2842,21 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            renderPortGalleryBuilder(); // Initialize empty builder
+            renderPortGalleryBuilder();
 
             const portForm = document.getElementById('portfolio-form');
             if (portForm) {
                 portForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     
+                    const editId = document.getElementById('port-edit-id').value;
                     const title = document.getElementById('port-title').value;
                     const categoryEl = document.getElementById('port-category');
                     const category = categoryEl.value;
                     const categoryLabel = categoryEl.options[categoryEl.selectedIndex].text;
+                    const accentColor = document.getElementById('port-accent-color').value || '#a855f7';
                     const cover = document.getElementById('port-cover').value;
                     
-                    // Filter out items without src
                     const assets = portGalleryAssets.filter(a => a.src.trim() !== '');
 
                     if (!cover) {
@@ -2779,26 +2864,29 @@
                         return;
                     }
 
+                    const payload = { title, category, categoryLabel, accentColor, cover, assets };
+                    const isEdit = !!editId;
+                    const url = isEdit ? `/api/portfolio/${editId}` : '/api/portfolio';
+                    const method = isEdit ? 'PUT' : 'POST';
+
                     try {
-                        const res = await fetch('/api/portfolio', {
-                            method: 'POST',
+                        const res = await fetch(url, {
+                            method: method,
                             headers: getAuthHeaders(),
-                            body: JSON.stringify({ title, category, categoryLabel, cover, assets })
+                            body: JSON.stringify(payload)
                         });
                         
                         if (res.ok) {
-                            alert('Projeto adicionado com sucesso!');
-                            portForm.reset();
-                            document.getElementById('port-cover-preview').style.display = 'none';
-                            portGalleryAssets = [];
-                            renderPortGalleryBuilder();
+                            alert(isEdit ? 'Projeto atualizado com sucesso!' : 'Projeto adicionado com sucesso!');
+                            resetPortForm();
                             loadPortfolio();
                         } else {
-                            alert('Erro ao adicionar projeto.');
+                            const errData = await res.json().catch(() => ({}));
+                            alert(errData.message || 'Erro ao salvar projeto.');
                         }
                     } catch (err) {
                         console.error(err);
-                        alert('Erro de conexão ao adicionar projeto.');
+                        alert('Erro de conexão ao salvar projeto.');
                     }
                 });
             }
