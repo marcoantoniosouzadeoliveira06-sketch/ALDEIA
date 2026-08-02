@@ -1558,13 +1558,88 @@
     }
     window.initMetallicPaint = initMetallicPaint;
 
-    // Initialize all components
-    initGradualBlur();
-    initScrollFloat();
-    initMetallicPaint();
+    // ===== CARREGAMENTO DINÂMICO DO CMS (SITE CONTENT) =====
+    async function loadDynamicCMSContent() {
+        try {
+            const res = await fetch('/api/content?t=' + Date.now());
+            if (!res.ok) return;
+            const data = await res.json();
+            if (!data || Object.keys(data).length === 0) return;
 
-    // Initialize Gooey Navigation
-    initGooeyNav();
+            if (data.heroTitleLine1) {
+                const el = document.getElementById('hero-title-l1');
+                if (el) el.textContent = data.heroTitleLine1;
+            }
+            if (data.heroTitleLine2) {
+                const el = document.getElementById('hero-title-l2');
+                if (el) el.textContent = data.heroTitleLine2;
+            }
+            if (data.heroSubtitle) {
+                const el = document.getElementById('hero-subtitle');
+                if (el) el.innerHTML = data.heroSubtitle;
+            }
+
+            if (data.about && data.about.bigText) {
+                const el = document.querySelector('.about-big-text');
+                if (el) el.innerHTML = data.about.bigText;
+            }
+
+            if (data.services && data.services.items && data.services.items.length > 0) {
+                const serviceCards = document.querySelectorAll('.service-card');
+                data.services.items.forEach((item, idx) => {
+                    if (serviceCards[idx]) {
+                        const titleEl = serviceCards[idx].querySelector('h3, .service-title');
+                        const textEl = serviceCards[idx].querySelector('p, .service-desc');
+                        if (titleEl && item.title) titleEl.textContent = item.title;
+                        if (textEl && item.text) textEl.textContent = item.text;
+                    }
+                });
+            }
+
+            if (data.faqs && data.faqs.length > 0) {
+                const faqContainer = document.querySelector('.faq-list');
+                if (faqContainer) {
+                    faqContainer.innerHTML = data.faqs.map(faq => `
+                        <div class="faq-item">
+                            <button class="faq-question">
+                                <span>${faq.q}</span>
+                                <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div class="faq-answer">
+                                <p>${faq.a}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                    initFaqAccordion();
+                }
+            }
+        } catch (e) {
+            console.warn('[CMS] Erro ao carregar conteúdo dinâmico:', e);
+        }
+    }
+
+    function initFaqAccordion() {
+        const faqQuestions = document.querySelectorAll('.faq-question');
+        faqQuestions.forEach(q => {
+            q.removeEventListener('click', handleFaqClick);
+            q.addEventListener('click', handleFaqClick);
+        });
+    }
+
+    function handleFaqClick(e) {
+        const btn = e.currentTarget;
+        const item = btn.closest('.faq-item');
+        const isActive = item.classList.contains('active');
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+        if (!isActive) item.classList.add('active');
+    }
+
+    try { if (typeof initGradualBlur === 'function') initGradualBlur(); } catch (e) {}
+    try { if (typeof initScrollFloat === 'function') initScrollFloat(); } catch (e) {}
+    try { if (typeof initMetallicPaint === 'function') initMetallicPaint(); } catch (e) {}
+    try { if (typeof initGooeyNav === 'function') initGooeyNav(); } catch (e) {}
+
+    loadDynamicCMSContent();
 
     // ===== DOME GALLERY INITIALIZATION (ALDEIA STYLE) =====
     function initDomeGallery() {
@@ -1579,68 +1654,35 @@
 
         if (!main || !sphere || !viewer || !scrim || !frame) return;
 
-        // Configurations (matching defaults)
         const segments = 35;
         const dragSensitivity = 20;
         const maxVerticalRotationDeg = 5;
-        const dragDampening = 2; // custom inertia multiplier
-        const enlargeTransitionMs = 300;
 
-        // Portfolio Images (all 21 from folder, colorful!)
         const images = window.aldeiaPortfolioImages || Array.from({ length: 21 }, (_, i) => ({
             src: `assets/portfolio/${i + 1}.webp`,
             alt: `Projeto ${i + 1}`
         }));
 
-        // Build items list mapping to grid coords
         function buildItems(pool, seg) {
             const xCols = Array.from({ length: seg }, (_, i) => -37 + i * 2);
             const evenYs = [-4, -2, 0, 2, 4];
             const oddYs = [-3, -1, 1, 3, 5];
-
             const coords = xCols.flatMap((x, c) => {
                 const ys = c % 2 === 0 ? evenYs : oddYs;
                 return ys.map(y => ({ x, y, sizeX: 2, sizeY: 2 }));
             });
-
             const totalSlots = coords.length;
-            if (pool.length === 0) return coords.map(c => ({ ...c, src: '', alt: '' }));
-
             const usedImages = Array.from({ length: totalSlots }, (_, i) => pool[i % pool.length]);
-
-            // Avoid same image adjacent
-            for (let i = 1; i < usedImages.length; i++) {
-                if (usedImages[i].src === usedImages[i - 1].src) {
-                    for (let j = i + 1; j < usedImages.length; j++) {
-                        if (usedImages[j].src !== usedImages[i].src) {
-                            const tmp = usedImages[i];
-                            usedImages[i] = usedImages[j];
-                            usedImages[j] = tmp;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return coords.map((c, i) => ({
-                ...c,
-                src: usedImages[i].src,
-                alt: usedImages[i].alt
-            }));
+            return coords.map((c, i) => ({ ...c, src: usedImages[i].src, alt: usedImages[i].alt }));
         }
 
         const items = buildItems(images, segments);
 
-        // Build DOM elements
         sphere.innerHTML = '';
-        items.forEach((it, idx) => {
+        items.forEach((it) => {
             const itemEl = document.createElement('div');
             itemEl.className = 'item';
             itemEl.setAttribute('data-src', it.src);
-            itemEl.setAttribute('data-offset-x', it.x);
-            itemEl.setAttribute('data-offset-y', it.y);
-            itemEl.setAttribute('data-size-x', it.sizeX);
-            itemEl.setAttribute('data-size-y', it.sizeY);
             itemEl.style.setProperty('--offset-x', it.x);
             itemEl.style.setProperty('--offset-y', it.y);
             itemEl.style.setProperty('--item-size-x', it.sizeX);
@@ -1650,7 +1692,7 @@
             imgWrap.className = 'item__image';
             imgWrap.setAttribute('role', 'button');
             imgWrap.setAttribute('tabindex', '0');
-            imgWrap.setAttribute('aria-label', it.alt || 'Open image');
+            imgWrap.setAttribute('aria-label', it.alt || 'Abrir imagem');
 
             const img = document.createElement('img');
             img.src = it.src;
@@ -1660,4 +1702,66 @@
             imgWrap.appendChild(img);
             itemEl.appendChild(imgWrap);
             sphere.appendChild(itemEl);
+        });
+
+        let rotationX = 0;
+        let rotationY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let startRotX = 0;
+        let startRotY = 0;
+
+        function updateRotation() {
+            sphere.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+        }
+
+        main.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('.item__image')) return;
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startRotX = rotationX;
+            startRotY = rotationY;
+            main.style.cursor = 'grabbing';
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            const deltaX = (e.clientX - startX) / dragSensitivity;
+            const deltaY = (e.clientY - startY) / dragSensitivity;
+            rotationY = startRotY + deltaX;
+            rotationX = Math.max(-maxVerticalRotationDeg, Math.min(maxVerticalRotationDeg, startRotX - deltaY));
+            updateRotation();
+        });
+
+        window.addEventListener('pointerup', () => {
+            if (isDragging) {
+                isDragging = false;
+                main.style.cursor = 'grab';
+            }
+        });
+
+        sphere.addEventListener('click', (e) => {
+            const wrap = e.target.closest('.item__image');
+            if (!wrap) return;
+            const realSrc = wrap.querySelector('img')?.src;
+            if (realSrc && frame) {
+                frame.innerHTML = `<img src="${realSrc}" alt="Ampliação" style="max-width: 90vw; max-height: 85vh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); object-fit: contain;">`;
+                root.classList.add('enlarged');
+            }
+        });
+
+        if (scrim) {
+            scrim.addEventListener('click', () => {
+                root.classList.remove('enlarged');
+            });
+        }
+    }
+
+    try {
+        initDomeGallery();
+    } catch (e) {
+        console.warn('[DomeGallery] Erro na inicialização:', e);
+    }
 })();

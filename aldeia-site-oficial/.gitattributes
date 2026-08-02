@@ -1,0 +1,11 @@
+# Auto detect text files and perform LF -> CRLF conversion on checkout on Windows
+* text=auto eol=crlf
+
+# Binary files
+*.mp4 binary
+*.webp binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.svg binary
+*.db binary

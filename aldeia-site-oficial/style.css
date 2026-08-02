@@ -224,20 +224,23 @@ button {
    CINEMATIC LENS-FOCUS CONTENT REVEAL
    =================================================== */
 
-/* Initial hidden state */
-main {
+/* Defensiva: Se o preloader estiver presente e ativo, aplica transição de revelação */
+#preloader:not(.loaded) ~ main,
+body:not(.preloader-done) main {
     opacity: 0;
-    transform: scale(0.94);
-    filter: blur(15px);
-    transition: transform 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, filter 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, opacity 1.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s;
+    transform: scale(0.96);
+    filter: blur(10px);
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Revealed focused state */
-body.preloader-done main {
-    opacity: 1;
-    transform: scale(1);
-    filter: blur(0);
+/* Estado focado e visível */
+body.preloader-done main,
+body:not(:has(#preloader)) main {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+    filter: blur(0) !important;
 }
+
 
 /* ===== CURSOR ===== */
 #custom-cursor {

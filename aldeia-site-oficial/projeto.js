@@ -2,71 +2,93 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get('id');
 
+    function getFallbackProject(id) {
+        const numMatch = id ? id.match(/\d+/) : null;
+        const index = numMatch ? parseInt(numMatch[0], 10) : 1;
+        const safeIdx = ((Math.max(1, index) - 1) % 21) + 1;
+        return {
+            id: id || 'p1',
+            title: `Projeto ALDEIA #${safeIdx}`,
+            categoryLabel: 'Design & Performance',
+            cover: `assets/portfolio/${safeIdx}.webp`,
+            assets: [
+                { type: 'image', src: `assets/portfolio/${safeIdx}.webp` },
+                { type: 'image', src: `assets/portfolio/${((safeIdx % 21) + 1)}.webp` },
+                { type: 'image', src: `assets/portfolio/${(((safeIdx + 1) % 21) + 1)}.webp` }
+            ]
+        };
+    }
+
     async function loadProject() {
+        let project = null;
         try {
             const res = await fetch('/api/portfolio');
             if (res.ok) {
                 const projects = await res.json();
-                const project = projects.find(p => p.id === projectId);
-
-    if (!project) {
-        // Se o projeto não for encontrado, volta pro portfólio
-        window.location.href = 'portfolio.html';
-        return;
-    }
-
-    // Preenchendo os dados
-    document.getElementById('project-page-title').textContent = project.title;
-    document.getElementById('project-page-category').textContent = project.categoryLabel;
-
-    const bodyContainer = document.getElementById('project-page-body');
-    bodyContainer.innerHTML = '';
-
-    project.assets.forEach((asset, index) => {
-        const delay = index * 0.1;
-        if (asset.type === 'video') {
-            bodyContainer.innerHTML += `
-                <div class="project-asset-wrap reveal-up" style="animation-delay: ${delay}s">
-                    <video src="${asset.src}" autoplay loop muted playsinline></video>
-                </div>
-            `;
-        } else {
-            bodyContainer.innerHTML += `
-                <div class="project-asset-wrap reveal-up" style="animation-delay: ${delay}s">
-                    <img src="${asset.src}" alt="Detalhe de ${project.title}" loading="lazy">
-                </div>
-            `;
-        }
-    });
-
-    // Observer para animar os assets on scroll
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('revealed');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.project-asset-wrap').forEach(el => {
-        observer.observe(el);
-    });
-
-    // Animação de Lado (Vruum)
-    const container = document.getElementById('project-page-container');
-    if(container) {
-        // Inicialmente escondido no CSS, disparamos a classe aqui
-        setTimeout(() => {
-            container.classList.add('vruum-active');
-            if (window.lenis) window.lenis.start();
-        }, 100);
-    }
+                if (Array.isArray(projects) && projects.length > 0) {
+                    project = projects.find(p => p.id === projectId);
+                }
             }
         } catch (e) {
-            console.error('Erro ao carregar projeto:', e);
+            console.warn('Erro ao carregar do servidor, utilizando fallback:', e);
+        }
+
+        if (!project) {
+            project = getFallbackProject(projectId);
+        }
+
+        // Preenchendo os dados
+        const titleEl = document.getElementById('project-page-title');
+        const catEl = document.getElementById('project-page-category');
+        if (titleEl) titleEl.textContent = project.title;
+        if (catEl) catEl.textContent = project.categoryLabel;
+
+        const bodyContainer = document.getElementById('project-page-body');
+        if (bodyContainer) {
+            bodyContainer.innerHTML = '';
+
+            (project.assets || []).forEach((asset, index) => {
+                const delay = index * 0.1;
+                if (asset.type === 'video') {
+                    bodyContainer.innerHTML += `
+                        <div class="project-asset-wrap reveal-up" style="animation-delay: ${delay}s">
+                            <video src="${asset.src}" autoplay loop muted playsinline></video>
+                        </div>
+                    `;
+                } else {
+                    bodyContainer.innerHTML += `
+                        <div class="project-asset-wrap reveal-up" style="animation-delay: ${delay}s">
+                            <img src="${asset.src}" alt="Detalhe de ${project.title}" loading="lazy">
+                        </div>
+                    `;
+                }
+            });
+
+            // Observer para animar os assets on scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('revealed');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.project-asset-wrap').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Animação de Lado (Vruum)
+        const container = document.getElementById('project-page-container');
+        if (container) {
+            setTimeout(() => {
+                container.classList.add('vruum-active');
+                if (window.lenis) window.lenis.start();
+            }, 100);
         }
     }
 
     loadProject();
 });
+
