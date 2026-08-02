@@ -1827,244 +1827,13 @@
             startPos = null;
         });
 
-        // Zoom Click Flow
+        // Zoom Click Flow (Redirecionado para a Nova Galeria Modal)
         function openItem(el) {
-            if (opening) return;
-            opening = true;
-            openStartedAt = performance.now();
-            
-            // Lock body scroll
-            document.body.classList.add('dg-scroll-lock');
-            if (window.lenis) window.lenis.stop();
-
-            const parent = el.parentElement;
-            focusedEl = el;
-            el.setAttribute('data-focused', 'true');
-
-            const offsetX = parseFloat(parent.getAttribute('data-offset-x') || 0);
-            const offsetY = parseFloat(parent.getAttribute('data-offset-y') || 0);
-            const sizeX = parseFloat(parent.getAttribute('data-size-x') || 2);
-            const sizeY = parseFloat(parent.getAttribute('data-size-y') || 2);
-
-            // Calculate rotations
-            const unit = 360 / segments / 2;
-            const parentRotY = unit * (offsetX + (sizeX - 1) / 2);
-            const parentRotX = unit * (offsetY - (sizeY - 1) / 2);
-
-            let rotY = -(parentRotY + rotation.y) % 360;
-            if (rotY < -180) rotY += 360;
-            const rotX = -parentRotX - rotation.x;
-
-            parent.style.setProperty('--rot-y-delta', `${rotY}deg`);
-            parent.style.setProperty('--rot-x-delta', `${rotX}deg`);
-
-            // Create reference div to locate initial tile position
-            const refDiv = document.createElement('div');
-            refDiv.className = 'item__image item__image--reference';
-            refDiv.style.opacity = '0';
-            refDiv.style.transform = `rotateX(${-parentRotX}deg) rotateY(${-parentRotY}deg)`;
-            parent.appendChild(refDiv);
-
-            void refDiv.offsetHeight; // trigger reflow
-
-            const tileR = refDiv.getBoundingClientRect();
-            const mainR = main.getBoundingClientRect();
-            const frameR = frame.getBoundingClientRect();
-
-            if (tileR.width <= 0 || tileR.height <= 0) {
-                opening = false;
-                focusedEl = null;
-                parent.removeChild(refDiv);
-                document.body.classList.remove('dg-scroll-lock');
-                if (window.lenis) window.lenis.start();
-                return;
+            if (typeof openPortfolioModal === 'function') {
+                openPortfolioModal();
             }
-
-            originalTilePosition = {
-                left: tileR.left,
-                top: tileR.top,
-                width: tileR.width,
-                height: tileR.height
-            };
-
-            el.style.visibility = 'hidden';
-            el.style.zIndex = '0';
-
-            const overlay = document.createElement('div');
-            overlay.className = 'enlarge';
-            overlay.style.position = 'absolute';
-            overlay.style.left = `${frameR.left - mainR.left}px`;
-            overlay.style.top = `${frameR.top - mainR.top}px`;
-            overlay.style.width = `${frameR.width}px`;
-            overlay.style.height = `${frameR.height}px`;
-            overlay.style.opacity = '0';
-            overlay.style.zIndex = '30';
-            overlay.style.willChange = 'transform, opacity';
-            overlay.style.transformOrigin = 'top left';
-            overlay.style.transition = `transform ${enlargeTransitionMs}ms ease, opacity ${enlargeTransitionMs}ms ease`;
-
-            const img = document.createElement('img');
-            img.src = parent.getAttribute('data-src');
-            overlay.appendChild(img);
-            viewer.appendChild(overlay);
-
-            // Compute scale to start from the size of the initial tile
-            const tx0 = tileR.left - frameR.left;
-            const ty0 = tileR.top - frameR.top;
-            const sx0 = tileR.width / frameR.width;
-            const sy0 = tileR.height / frameR.height;
-
-            overlay.style.transform = `translate(${tx0}px, ${ty0}px) scale(${sx0}, ${sy0})`;
-
-            setTimeout(() => {
-                if (!overlay.parentElement) return;
-                overlay.style.opacity = '1';
-                overlay.style.transform = 'translate(0px, 0px) scale(1, 1)';
-                root.setAttribute('data-enlarging', 'true');
-            }, 16);
-
-            // Resize transition handler
-            const onFirstEnd = ev => {
-                if (ev.propertyName !== 'transform') return;
-                overlay.removeEventListener('transitionend', onFirstEnd);
-
-                const prevTransition = overlay.style.transition;
-                overlay.style.transition = 'none';
-                
-                const tempWidth = '250px';
-                const tempHeight = '350px';
-                
-                overlay.style.width = tempWidth;
-                overlay.style.height = tempHeight;
-                const newRect = overlay.getBoundingClientRect();
-                
-                overlay.style.width = `${frameR.width}px`;
-                overlay.style.height = `${frameR.height}px`;
-                
-                void overlay.offsetWidth;
-                
-                overlay.style.transition = `left ${enlargeTransitionMs}ms ease, top ${enlargeTransitionMs}ms ease, width ${enlargeTransitionMs}ms ease, height ${enlargeTransitionMs}ms ease`;
-                
-                const centeredLeft = frameR.left - mainR.left + (frameR.width - newRect.width) / 2;
-                const centeredTop = frameR.top - mainR.top + (frameR.height - newRect.height) / 2;
-                
-                requestAnimationFrame(() => {
-                    overlay.style.left = `${centeredLeft}px`;
-                    overlay.style.top = `${centeredTop}px`;
-                    overlay.style.width = tempWidth;
-                    overlay.style.height = tempHeight;
-                });
-
-                const cleanupSecond = () => {
-                    overlay.removeEventListener('transitionend', cleanupSecond);
-                    overlay.style.transition = prevTransition;
-                };
-                overlay.addEventListener('transitionend', cleanupSecond, { once: true });
-            };
-            overlay.addEventListener('transitionend', onFirstEnd);
         }
-
-        function closeItem() {
-            if (performance.now() - openStartedAt < 250) return;
-            const el = focusedEl;
-            if (!el) return;
-
-            const parent = el.parentElement;
-            const overlay = viewer.querySelector('.enlarge');
-            if (!overlay) return;
-
-            const refDiv = parent.querySelector('.item__image--reference');
-            const originalPos = originalTilePosition;
-
-            if (!originalPos) {
-                overlay.remove();
-                if (refDiv) refDiv.remove();
-                parent.style.setProperty('--rot-y-delta', '0deg');
-                parent.style.setProperty('--rot-x-delta', '0deg');
-                el.style.visibility = '';
-                el.style.zIndex = '0';
-                focusedEl = null;
-                root.removeAttribute('data-enlarging');
-                opening = false;
-                
-                document.body.classList.remove('dg-scroll-lock');
-                if (window.lenis) window.lenis.start();
-                return;
-            }
-
-            const currentRect = overlay.getBoundingClientRect();
-            const rootRect = root.getBoundingClientRect();
-
-            const originalPosRelativeToRoot = {
-                left: originalPos.left - rootRect.left,
-                top: originalPos.top - rootRect.top,
-                width: originalPos.width,
-                height: originalPos.height
-            };
-
-            const overlayRelativeToRoot = {
-                left: currentRect.left - rootRect.left,
-                top: currentRect.top - rootRect.top,
-                width: currentRect.width,
-                height: currentRect.height
-            };
-
-            const animatingOverlay = document.createElement('div');
-            animatingOverlay.className = 'enlarge-closing';
-            animatingOverlay.style.cssText = `position:absolute;left:${overlayRelativeToRoot.left}px;top:${overlayRelativeToRoot.top}px;width:${overlayRelativeToRoot.width}px;height:${overlayRelativeToRoot.height}px;z-index:9999;border-radius:30px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:all ${enlargeTransitionMs}ms ease-out;pointer-events:none;margin:0;transform:none;`;
-
-            const img = overlay.querySelector('img').cloneNode();
-            img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-            animatingOverlay.appendChild(img);
-
-            overlay.remove();
-            root.appendChild(animatingOverlay);
-
-            void animatingOverlay.getBoundingClientRect(); // trigger reflow
-
-            requestAnimationFrame(() => {
-                animatingOverlay.style.left = `${originalPosRelativeToRoot.left}px`;
-                animatingOverlay.style.top = `${originalPosRelativeToRoot.top}px`;
-                animatingOverlay.style.width = `${originalPosRelativeToRoot.width}px`;
-                animatingOverlay.style.height = `${originalPosRelativeToRoot.height}px`;
-                animatingOverlay.style.opacity = '0';
-            });
-
-            const cleanup = () => {
-                animatingOverlay.remove();
-                originalTilePosition = null;
-                if (refDiv) refDiv.remove();
-
-                parent.style.transition = 'none';
-                el.style.transition = 'none';
-                parent.style.setProperty('--rot-y-delta', '0deg');
-                parent.style.setProperty('--rot-x-delta', '0deg');
-
-                requestAnimationFrame(() => {
-                    el.style.visibility = '';
-                    el.style.opacity = '0';
-                    el.style.zIndex = '0';
-                    focusedEl = null;
-                    root.removeAttribute('data-enlarging');
-
-                    requestAnimationFrame(() => {
-                        parent.style.transition = '';
-                        el.style.transition = 'opacity 300ms ease-out';
-                        requestAnimationFrame(() => {
-                            el.style.opacity = '1';
-                            setTimeout(() => {
-                                el.style.transition = '';
-                                el.style.opacity = '';
-                                opening = false;
-                                document.body.classList.remove('dg-scroll-lock');
-                                if (window.lenis) window.lenis.start();
-                            }, 300);
-                        });
-                    });
-                });
-            };
-            animatingOverlay.addEventListener('transitionend', cleanup, { once: true });
-        }
+        // Lógica de zoom 3D antiga removida (agora usa o Modal de Galeria)
 
         // Attach click triggers to items
         const itemImages = sphere.querySelectorAll('.item__image');
@@ -2092,4 +1861,86 @@
     window.initDomeGallery = initDomeGallery;
 
 })();
+
+/* =========================================
+   PORTFOLIO MODAL GALLERY LOGIC
+   ========================================= */
+function initPortfolioModalGallery() {
+    const modal = document.getElementById('portfolio-modal');
+    const closeBtn = document.getElementById('modal-close');
+    const overlay = document.getElementById('modal-overlay');
+    const tabs = document.querySelectorAll('.modal-tab');
+    const grid = document.getElementById('modal-gallery-grid');
+    
+    if (!modal || !grid) return;
+
+    // Dummy data for the gallery (You can replace this with actual backend fetch)
+    const galleryItems = [
+        { type: 'video', src: 'assets/hero-bg.mp4', thumb: '', title: 'Campanha FURY', cat: 'Vídeo' },
+        { type: 'id', src: 'assets/portfolio/1.webp', title: 'Identidade INFURIOUS', cat: 'Identidade Visual' },
+        { type: 'social', src: 'assets/portfolio/2.webp', title: 'Feed STRESSED GAMING', cat: 'Social Media' },
+        { type: 'id', src: 'assets/portfolio/3.webp', title: 'Branding POCOYO', cat: 'Identidade Visual' },
+        { type: 'social', src: 'assets/portfolio/4.webp', title: 'Posts VIKINGS', cat: 'Social Media' },
+        { type: 'video', src: 'assets/hero-bg.mp4', thumb: '', title: 'Lançamento Rush', cat: 'Vídeo' },
+        { type: 'id', src: 'assets/portfolio/5.webp', title: 'Logo FURY', cat: 'Identidade Visual' },
+        { type: 'social', src: 'assets/portfolio/6.webp', title: 'Marketing INFURIOUS', cat: 'Social Media' }
+    ];
+
+    function renderGrid(filterTab) {
+        grid.innerHTML = '';
+        const filtered = filterTab === 'all' ? galleryItems : galleryItems.filter(item => item.type === filterTab);
+        
+        filtered.forEach((item, index) => {
+            const delay = index * 0.05;
+            let mediaHtml = '';
+            
+            if (item.type === 'video') {
+                mediaHtml = `<video src="${item.src}" autoplay loop muted playsinline></video>`;
+            } else {
+                mediaHtml = `<img src="${item.src}" alt="${item.title}" loading="lazy">`;
+            }
+
+            const html = `
+                <div class="gallery-item" style="animation-delay: ${delay}s">
+                    ${mediaHtml}
+                    <div class="gallery-item-overlay">
+                        <span class="gallery-item-cat">${item.cat}</span>
+                        <h3 class="gallery-item-title">${item.title}</h3>
+                    </div>
+                </div>
+            `;
+            grid.insertAdjacentHTML('beforeend', html);
+        });
+    }
+
+    // Expose open function globally
+    window.openPortfolioModal = function() {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        if (window.lenis) window.lenis.stop();
+        renderGrid('all');
+        tabs.forEach(t => t.classList.remove('active'));
+        document.querySelector('.modal-tab[data-tab="all"]').classList.add('active');
+    };
+
+    function closeModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        if (window.lenis) window.lenis.start();
+        setTimeout(() => { grid.innerHTML = ''; }, 400); // clear after animation
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', closeModal);
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            renderGrid(tab.getAttribute('data-tab'));
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initPortfolioModalGallery);
 

@@ -10,6 +10,8 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const multer = require('multer');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +40,27 @@ const storage = multer.diskStorage({
 const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
 
 // ===== MIDDLEWARES =====
+// Segurança
+app.use(helmet({
+    contentSecurityPolicy: false, // desativado para permitir assets e scripts do próprio site
+    crossOriginEmbedderPolicy: false
+}));
+
+// Proteção contra DDoS e Força Bruta
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 1000, // Limita cada IP a 1000 requisições por janela
+    message: 'Muitas requisições deste IP, tente novamente mais tarde.'
+});
+const apiLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000, // 5 minutos
+    max: 100, // Limita requisições à API
+    message: 'Muitas tentativas de API, tente novamente mais tarde.'
+});
+
+app.use(globalLimiter);
+app.use('/api', apiLimiter);
+
 app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));

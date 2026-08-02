@@ -974,33 +974,60 @@
 
         // --- DYNAMIC CONTENT (CMS) ---
         function bindAccordionTriggers() {
-            document.querySelectorAll('.svc-item').forEach(item => {
+            const allItems = document.querySelectorAll('.svc-item');
+            allItems.forEach(item => {
                 const header = item.querySelector('.svc-header');
                 const close = item.querySelector('.svc-close');
-                if (header) {
+                const body = item.querySelector('.svc-body');
+                
+                if (header && body) {
                     header.addEventListener('click', () => {
                         const active = item.classList.contains('active');
-                        document.querySelectorAll('.svc-item').forEach(s => s.classList.remove('active'));
-                        if (!active) item.classList.add('active');
+                        
+                        // Close all
+                        allItems.forEach(s => {
+                            s.classList.remove('active');
+                            const b = s.querySelector('.svc-body');
+                            if (b) b.style.maxHeight = '0px';
+                        });
+                        
+                        if (!active) {
+                            item.classList.add('active');
+                            body.style.maxHeight = body.scrollHeight + 'px';
+                        }
                     });
                 }
-                if (close) {
+                if (close && body) {
                     close.addEventListener('click', (e) => {
                         e.stopPropagation();
                         item.classList.remove('active');
+                        body.style.maxHeight = '0px';
                     });
                 }
             });
         }
 
         function bindFaqTriggers() {
-            document.querySelectorAll('.faq-item').forEach(item => {
+            const allItems = document.querySelectorAll('.faq-item');
+            allItems.forEach(item => {
                 const btn = item.querySelector('.faq-btn');
-                if (btn) {
+                const answer = item.querySelector('.faq-answer');
+                
+                if (btn && answer) {
                     btn.addEventListener('click', () => {
                         const active = item.classList.contains('active');
-                        document.querySelectorAll('.faq-item').forEach(f => f.classList.remove('active'));
-                        if (!active) item.classList.add('active');
+                        
+                        // Close all
+                        allItems.forEach(f => {
+                            f.classList.remove('active');
+                            const a = f.querySelector('.faq-answer');
+                            if (a) a.style.maxHeight = '0px';
+                        });
+                        
+                        if (!active) {
+                            item.classList.add('active');
+                            answer.style.maxHeight = answer.scrollHeight + 'px';
+                        }
                     });
                 }
             });
@@ -1303,6 +1330,28 @@
             });
         }
     </script>
+
+    <!-- PORTFOLIO MODAL GALLERY -->
+    <div class="portfolio-modal" id="portfolio-modal">
+        <div class="modal-overlay" id="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">
+                <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <div class="modal-header">
+                <h2>Galeria de Trabalhos</h2>
+                <div class="modal-tabs">
+                    <button class="modal-tab active" data-tab="all">Todos</button>
+                    <button class="modal-tab" data-tab="video">Vídeos</button>
+                    <button class="modal-tab" data-tab="id">Identidade Visual</button>
+                    <button class="modal-tab" data-tab="social">Social Media</button>
+                </div>
+            </div>
+            <div class="modal-gallery-grid" id="modal-gallery-grid">
+                <!-- Populated dynamically by JS -->
+            </div>
+        </div>
+    </div>
 
     <!-- FLOATING WIDGETS -->
     <a href="https://wa.me/5521980638271?text=Olá!%20Gostaria%20de%20solicitar%20um%20orçamento%20com%20a%20Aldeia." target="_blank" id="floating-whatsapp-widget" class="floating-cta" aria-label="Falar no WhatsApp">
