@@ -1986,17 +1986,70 @@
             }
         }
 
-        // AJAX Upload Helper (Multer-compatible FormData)
+        // Helper de Compressão Automática de Imagem para WebP (Reduz até 90% do tamanho sem perder qualidade)
+        async function compressImageForWeb(file) {
+            if (!file || !file.type.startsWith('image/') || file.type === 'image/svg+xml') {
+                return file;
+            }
+            return new Promise((resolve) => {
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxDim = 1920;
+
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        if (blob && blob.size < file.size) {
+                            const compressedName = file.name.replace(/\.[^/.]+$/, "") + ".webp";
+                            const compressedFile = new File([blob], compressedName, { type: 'image/webp' });
+                            resolve(compressedFile);
+                        } else {
+                            resolve(file);
+                        }
+                    }, 'image/webp', 0.82);
+                };
+                img.onerror = () => resolve(file);
+                img.src = url;
+            });
+        }
+
+        // AJAX Upload Helper (Compressão Automática + Token Válido)
         async function uploadFileBinary(file, callback) {
             try {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const headers = {};
-                const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
-                if (token) {
-                    headers['Authorization'] = 'Bearer ' + token;
+                const token = sessionToken || sessionStorage.getItem('aldeia_admin_token') || localStorage.getItem('aldeia_admin_token');
+                if (!token) {
+                    alert('Sessão expirada. Por favor, faça login novamente.');
+                    showLoginForm();
+                    return;
                 }
+
+                // Compressão automática antes do envio
+                const finalFile = await compressImageForWeb(file);
+
+                const formData = new FormData();
+                formData.append('file', finalFile);
+
+                const headers = {
+                    'Authorization': 'Bearer ' + token
+                };
 
                 const res = await fetch('/api/upload', {
                     method: 'POST',
@@ -2011,6 +2064,9 @@
                     } else {
                         alert(data.message || 'Erro no envio da imagem.');
                     }
+                } else if (res.status === 401) {
+                    alert('Sessão não autorizada ou expirada. Por favor, faça login novamente.');
+                    showLoginForm();
                 } else {
                     let errText = 'Erro no envio da imagem.';
                     try {
