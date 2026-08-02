@@ -3945,28 +3945,36 @@ body.light-theme .scroll-to-top:hover {
 /* =========================================
    DEDICATED PROJECT PAGE & VRUUM ANIMATION
    ========================================= */
+/* =========================================================
+   PROJECT PAGE (PORTFOLIO INTERNO) - DESIGN RESPIRÁVEL
+   ========================================================= */
+
 .project-page-container {
     opacity: 0;
-    transform: translateX(100vw);
-    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+    transform: translateY(60px) scale(0.98);
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1s ease;
+    will-change: transform, opacity;
 }
 
 .project-page-container.vruum-active {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0) scale(1);
 }
 
 .project-hero {
     position: relative;
-    padding: 150px 20px 60px;
+    padding: 180px 4vw 80px;
     text-align: center;
-    background: #050505;
+    background: #020202; /* Fundo mais denso */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .project-hero-bg {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at top, rgba(124, 58, 237, 0.1), transparent 60%);
+    background: radial-gradient(circle at top, rgba(168, 85, 247, 0.15), transparent 60%);
     pointer-events: none;
 }
 
@@ -3976,56 +3984,84 @@ body.light-theme .scroll-to-top:hover {
     gap: 8px;
     color: var(--color-gray-400);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 30px;
-    transition: color 0.3s ease;
+    letter-spacing: 0.15em;
+    margin-bottom: 40px;
+    transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .btn-back-portfolio:hover {
     color: var(--color-white);
+    transform: translateX(-4px);
 }
 
 .btn-back-portfolio svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
 }
 
 .project-category {
     color: var(--color-gray-400);
-    font-size: 1rem;
+    font-family: var(--font-m);
+    font-size: 0.95rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 10px;
+    letter-spacing: 0.15em;
+    margin-bottom: 20px;
 }
 
 .project-title {
     font-family: var(--font-h);
-    font-size: 4rem;
+    font-size: clamp(3rem, 6vw, 5.5rem); /* Tipografia fluida e majestosa */
     font-weight: 500;
     color: var(--color-white);
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
     text-transform: uppercase;
+    line-height: 1.1;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 .project-gallery {
-    padding: 40px 20px 120px;
-    background: #050505;
+    padding: 0 4vw 160px;
+    background: #020202;
 }
 
 #project-page-body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 40px;
+    gap: 8vw; /* Espaçamento luxuoso entre as mídias */
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.project-asset-wrap {
+    width: 100%;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 1s ease, transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-asset-wrap.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.project-asset-wrap img,
+.project-asset-wrap video {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    display: block;
 }
 
 @media (max-width: 768px) {
-    .project-title {
-        font-size: 2.5rem;
-    }
     .project-hero {
-        padding: 120px 20px 40px;
+        padding: 140px 6vw 60px;
+    }
+    #project-page-body {
+        gap: 60px;
     }
 }

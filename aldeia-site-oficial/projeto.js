@@ -39,12 +39,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Observer para animar os assets on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.project-asset-wrap').forEach(el => {
+        observer.observe(el);
+    });
+
     // Animação de Lado (Vruum)
     const container = document.getElementById('project-page-container');
     if(container) {
         // Inicialmente escondido no CSS, disparamos a classe aqui
         setTimeout(() => {
             container.classList.add('vruum-active');
+            if (window.lenis) window.lenis.start();
         }, 100);
     }
             }
