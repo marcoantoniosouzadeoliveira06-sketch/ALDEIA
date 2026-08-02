@@ -2,6 +2,7 @@
   "name": "aldeia-root",
   "version": "1.0.0",
   "scripts": {
+    "start": "npm start --prefix aldeia-site-oficial",
     "dev": "npm run dev --prefix aldeia-site-oficial",
     "telemetry": "node aldeia-site-oficial/telemetry-server.js"
   },
