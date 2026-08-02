@@ -62,17 +62,7 @@
 </head>
 <body>
 
-    <!-- PRELOADER -->
-    <div id="preloader">
-        <canvas id="preloader-grain"></canvas>
-        <div class="preloader-content">
-            <div class="preloader-logo-wrap">
-                <img src="assets/logo-tp.svg" class="preloader-logo" id="preloader-text" alt="ALDEIA">
-            </div>
-        </div>
-        <div class="preloader-panel left-panel"></div>
-        <div class="preloader-panel right-panel"></div>
-    </div>
+
 
     <!-- CUSTOM CURSOR -->
     <div id="custom-cursor"></div>
@@ -91,11 +81,8 @@
                 <div class="gooey-nav-container" id="gooey-nav">
                     <nav>
                         <ul>
-                            <li class="active"><a href="#inicio" class="decrypt-hover">Início</a></li>
-                            <li><a href="#sobre" class="decrypt-hover">Sobre</a></li>
-                            <li><a href="#portfolio" class="decrypt-hover">Portfólio</a></li>
-                            <li><a href="#servicos" class="decrypt-hover">Soluções</a></li>
-                            <li><a href="#fundadores" class="decrypt-hover">Fundadores</a></li>
+                            <li><a href="index.html" class="decrypt-hover">Início</a></li>
+                            <li class="active"><a href="#portfolio" class="decrypt-hover">Portfólio</a></li>
                         </ul>
                     </nav>
                     <span class="effect filter"></span>
@@ -145,35 +132,99 @@
         <!-- Mobile Menu Overlay -->
         <div id="mobile-menu">
             <nav class="mobile-nav-links">
-                <a href="#inicio" class="mobile-nav-link">/01 Início</a>
-                <a href="#sobre" class="mobile-nav-link">/02 Sobre</a>
-                <a href="#portfolio" class="mobile-nav-link">/03 Portfólio</a>
-                <a href="#servicos" class="mobile-nav-link">/04 Soluções</a>
-                <a href="#faq" class="mobile-nav-link">/05 Dúvidas</a>
-                <a href="#fundadores" class="mobile-nav-link">/06 Fundadores</a>
-                <a href="#contato" class="mobile-nav-link">/07 Contato</a>
+                <a href="index.html" class="mobile-nav-link">/01 Início</a>
+                <a href="#portfolio" class="mobile-nav-link">/02 Portfólio</a>
             </nav>
         </div>
     </header>
 
     <main>
-        <!-- ===== PORTFOLIO HERO ===== -->
-        <section class="portfolio-page-hero">
-            <div class="portfolio-hero-bg"></div>
-            <div class="section-container">
-                <h1 class="portfolio-hero-title reveal-up">Nosso Portfólio</h1>
-                <p class="portfolio-hero-subtitle reveal-up" data-delay="0.2">Trabalhos que transcendem o comum. Projetos para as maiores equipes de e-sports do Brasil e do mundo.</p>
+        <!-- ===== HERO ===== -->
+        <section id="inicio" class="hero-section">
+            <!-- Background Video Fullscreen in Grayscale -->
+            <div class="hero-video-bg">
+                <video autoplay muted loop playsinline id="hero-video" preload="auto">
+                    <source src="assets/hero-bg.mp4" type="video/mp4">
+                </video>
+                <div class="hero-video-overlay"></div>
+                <canvas id="hero-grain"></canvas>
+            </div>
+
+            <!-- Centered Cinematic Content -->
+            <div class="hero-content-centered">
+                <h1 class="hero-title-cinematic">
+                    <span class="line-1 reveal-line shiny-text" style="--color: #a8a8a8; --shine-color: #ffffff;" id="hero-title-l1">NOSSO PORTFÓLIO</span>
+                    <span class="line-2 reveal-line shiny-text" style="--color: #a8a8a8; --shine-color: #ffffff;" id="hero-title-l2">CONHEÇA OS</span>
+                    <span class="line-3"><span id="typewriter-text" data-text="TRABALHOS DA ALDEIA" class="shiny-text" style="--color: #a8a8a8; --shine-color: #ffffff;">TRABALHOS DA ALDEIA</span><span class="typewriter-cursor">|</span></span>
+                </h1>
+                
+                <p class="hero-subtitle-cinematic" id="hero-subtitle">
+                    Onde você encontra os melhores materiais possíveis e trabalhos da ALDEIA desenvolvidos com alto padrão estético para grandes marcas e equipes de e-sports.
+                </p>
+                
+                <div class="hero-scroll-cinematic">
+                    <span>EXPLORE AS ARTES</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <polyline points="19 12 12 19 5 12"></polyline>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Dual Slanted Infinity Marquee Ribbons -->
+            <div class="hero-marquee-wrapper-dual">
+                <!-- Ribbon 1 (White) -->
+                <div class="hero-marquee-container ribbon-1">
+                    <div class="hero-marquee-track">
+                        <div class="hero-marquee-content">
+                            <span>MOTION DESIGN</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>SOCIAL MEDIA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>ARTES AVULSAS</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>IDENTIDADE VISUAL</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>BRANDING</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>KEYARTS E-SPORTS</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        </div>
+                        <div class="hero-marquee-content">
+                            <span>MOTION DESIGN</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>SOCIAL MEDIA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>ARTES AVULSAS</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>IDENTIDADE VISUAL</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>BRANDING</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>KEYARTS E-SPORTS</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Ribbon 2 (Prata/Dark Metallic - Reverse) -->
+                <div class="hero-marquee-container ribbon-2">
+                    <div class="hero-marquee-track reverse">
+                        <div class="hero-marquee-content">
+                            <span>PORTFÓLIO EXCLUSIVO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>DESEMPENHO & ESTÉTICA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>PROJETOS HIGH-END</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>ALDEIA BOUTIQUE</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>3D & ANIMATION</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        </div>
+                        <div class="hero-marquee-content">
+                            <span>PORTFÓLIO EXCLUSIVO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>DESEMPENHO & ESTÉTICA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>PROJETOS HIGH-END</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>ALDEIA BOUTIQUE</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>3D & ANIMATION</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
         <!-- ===== PORTFOLIO GALLERY TABS E GRID ===== -->
-        <section class="portfolio-gallery-section">
+        <section id="portfolio" class="portfolio-gallery-section">
             <div class="section-container">
                 <div class="portfolio-tabs reveal-up" data-delay="0.3">
                     <button class="portfolio-tab active" data-filter="all">Todas as Artes</button>
                     <button class="portfolio-tab" data-filter="identidade">Identidade Visual</button>
                     <button class="portfolio-tab" data-filter="social">Social Media</button>
                     <button class="portfolio-tab" data-filter="videos">Vídeos</button>
+                    <button class="portfolio-tab" data-filter="artes">Artes Avulsas</button>
                 </div>
 
                 <div class="portfolio-grid" id="portfolio-grid">
@@ -254,7 +305,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="app.js?v=2"></script>
     <script src="portfolio.js?v=2"></script>
-    <script>setTimeout(function(){var p=document.getElementById('preloader');if(p&&!p.classList.contains('loaded')){p.classList.add('loaded');setTimeout(function(){p.style.display='none';if(window.lenis)window.lenis.start()},1200)}},6000);</script>
+
 
     <!-- MODAL ORÇAMENTO -->
     <div id="budget-modal">

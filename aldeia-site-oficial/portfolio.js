@@ -4,18 +4,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let projects = [];
 
-    // Retorna projetos padrão caso a API não tenha dados
+    const CATEGORY_MAP = {
+        'identidade': 'Identidade Visual',
+        'social': 'Social Media',
+        'videos': 'Vídeos',
+        'artes': 'Artes Avulsas'
+    };
+
+    // Retorna projetos padrão caso a API não tenha dados ou esteja offline
     function getFallbackProjects() {
-        return Array.from({ length: 21 }, (_, i) => ({
-            id: `p${i + 1}`,
-            title: `Projeto ALDEIA #${i + 1}`,
-            category: i % 4 === 0 ? 'identidade' : i % 3 === 0 ? 'videos' : i % 2 === 0 ? 'social' : 'artes',
-            categoryLabel: i % 4 === 0 ? 'Identidade Visual' : i % 3 === 0 ? 'Vídeos' : i % 2 === 0 ? 'Social Media' : 'Artes Avulsas',
-            cover: `assets/portfolio/${i + 1}.webp`,
-            assets: [
-                { type: 'image', src: `assets/portfolio/${i + 1}.webp` }
-            ]
-        }));
+        return Array.from({ length: 21 }, (_, i) => {
+            const catKeys = ['identidade', 'videos', 'social', 'artes'];
+            const cat = catKeys[i % catKeys.length];
+            return {
+                id: `p${i + 1}`,
+                title: `Projeto ALDEIA #${i + 1}`,
+                category: cat,
+                categoryLabel: CATEGORY_MAP[cat],
+                cover: `assets/portfolio/${i + 1}.webp`,
+                assets: [
+                    { type: 'image', src: `assets/portfolio/${i + 1}.webp` }
+                ]
+            };
+        });
     }
 
     // Busca os dados da API
@@ -33,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 projects = getFallbackProjects();
             }
         } catch (e) {
-            console.error('Erro ao carregar portfólio:', e);
+            console.warn('Servidor offline ou rota indisponível, carregando portfólio local:', e);
             projects = getFallbackProjects();
         }
         renderGrid('all');
@@ -46,22 +57,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const filtered = filter === 'all' ? projects : projects.filter(p => p.category === filter);
         
         if (filtered.length === 0) {
-            grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">Nenhum projeto encontrado nesta categoria.</p>';
+            grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 60px 20px; font-size: 1.1rem;">Nenhum projeto encontrado nesta categoria.</p>';
             return;
         }
 
         filtered.forEach((p, index) => {
-            const delay = index * 0.05;
+            const delay = index * 0.04;
             const el = document.createElement('div');
             el.className = 'portfolio-card';
             el.style.animationDelay = `${delay}s`;
             
+            const catLabel = p.categoryLabel || CATEGORY_MAP[p.category] || 'Arte Avulsa';
+            
             el.innerHTML = `
                 <div class="portfolio-card-img">
-                    <img src="${p.cover}" alt="${p.title}" loading="lazy">
+                    <img src="${p.cover}" alt="${p.title}" loading="lazy" onerror="this.onerror=null;this.src='assets/portfolio/${(index % 21) + 1}.webp';">
                 </div>
+                <div class="portfolio-card-badge">${catLabel}</div>
                 <div class="portfolio-card-overlay">
-                    <span class="portfolio-card-cat">${p.categoryLabel}</span>
+                    <span class="portfolio-card-cat">${catLabel}</span>
                     <h3 class="portfolio-card-title">${p.title}</h3>
                 </div>
             `;
@@ -73,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Event Listeners
+    // Event Listeners para os botões de abas / filtros
     if (tabs.length > 0) {
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
@@ -84,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Init
+    // Inicialização
     loadPortfolio();
 });
-

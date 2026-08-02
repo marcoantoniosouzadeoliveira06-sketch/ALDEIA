@@ -41,7 +41,7 @@
             // Step 1: Activate cinematic logo fade/blur focus reveal
             setTimeout(() => {
                 preloaderText.classList.add('active');
-            }, 300);
+            }, 100);
 
             // Step 2: Dissolve the logo after it is fully focused
             setTimeout(() => {
@@ -63,9 +63,9 @@
                     // Step 5: Clean up preloader display
                     setTimeout(() => {
                         preloader.style.display = 'none';
-                    }, 1800);
-                }, 700);
-            }, 3100);
+                    }, 800);
+                }, 400);
+            }, 1200);
         } else {
             // Fallback rápido se não houver conteúdo do preloader
             preloader.classList.add('loaded');
@@ -521,7 +521,9 @@
         }, 600);
         
         setTimeout(() => {
-            typeWriter("AGÊNCIA ÚNICA", 'typewriter-text', 120, () => {
+            const twEl = document.getElementById('typewriter-text');
+            const defaultText = (twEl && twEl.getAttribute('data-text')) || (window.location.pathname.includes('portfolio') ? "DESIGN EXCLUSIVO" : "AGÊNCIA ÚNICA");
+            typeWriter(defaultText, 'typewriter-text', 120, () => {
                 setTimeout(() => {
                     if (sub) sub.classList.add('active');
                     if (scrollInd) scrollInd.classList.add('active');

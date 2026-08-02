@@ -18,7 +18,8 @@
     "categoryLabel": "Vídeos",
     "cover": "assets/portfolio/6.webp",
     "assets": [
-      { "type": "video", "src": "assets/hero-bg.mp4" }
+      { "type": "video", "src": "assets/hero-bg.mp4" },
+      { "type": "image", "src": "assets/portfolio/6.webp" }
     ]
   },
   {
@@ -34,12 +35,183 @@
   },
   {
     "id": "p4",
-    "title": "Arte Avulsa X",
+    "title": "Keyart E-Sports",
     "category": "artes",
     "categoryLabel": "Artes Avulsas",
     "cover": "assets/portfolio/7.webp",
     "assets": [
       { "type": "image", "src": "assets/portfolio/7.webp" }
+    ]
+  },
+  {
+    "id": "p5",
+    "title": "Rebrand LOUD Championship",
+    "category": "identidade",
+    "categoryLabel": "Identidade Visual",
+    "cover": "assets/portfolio/5.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/5.webp" },
+      { "type": "image", "src": "assets/portfolio/8.webp" }
+    ]
+  },
+  {
+    "id": "p6",
+    "title": "Motion Reel 2026",
+    "category": "videos",
+    "categoryLabel": "Vídeos",
+    "cover": "assets/portfolio/8.webp",
+    "assets": [
+      { "type": "video", "src": "assets/hero-bg.mp4" }
+    ]
+  },
+  {
+    "id": "p7",
+    "title": "Social Kit Season 4",
+    "category": "social",
+    "categoryLabel": "Social Media",
+    "cover": "assets/portfolio/3.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/3.webp" }
+    ]
+  },
+  {
+    "id": "p8",
+    "title": "Ilustração Concept Art",
+    "category": "artes",
+    "categoryLabel": "Artes Avulsas",
+    "cover": "assets/portfolio/4.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/4.webp" }
+    ]
+  },
+  {
+    "id": "p9",
+    "title": "Branding MIBR Legacy",
+    "category": "identidade",
+    "categoryLabel": "Identidade Visual",
+    "cover": "assets/portfolio/9.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/9.webp" }
+    ]
+  },
+  {
+    "id": "p10",
+    "title": "Teaser World Major",
+    "category": "videos",
+    "categoryLabel": "Vídeos",
+    "cover": "assets/portfolio/10.webp",
+    "assets": [
+      { "type": "video", "src": "assets/hero-bg.mp4" }
+    ]
+  },
+  {
+    "id": "p11",
+    "title": "Feed Creative Series",
+    "category": "social",
+    "categoryLabel": "Social Media",
+    "cover": "assets/portfolio/11.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/11.webp" }
+    ]
+  },
+  {
+    "id": "p12",
+    "title": "Poster Art Championship",
+    "category": "artes",
+    "categoryLabel": "Artes Avulsas",
+    "cover": "assets/portfolio/12.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/12.webp" }
+    ]
+  },
+  {
+    "id": "p13",
+    "title": "Visual System Apex",
+    "category": "identidade",
+    "categoryLabel": "Identidade Visual",
+    "cover": "assets/portfolio/13.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/13.webp" }
+    ]
+  },
+  {
+    "id": "p14",
+    "title": "Aftermovie Major Final",
+    "category": "videos",
+    "categoryLabel": "Vídeos",
+    "cover": "assets/portfolio/14.webp",
+    "assets": [
+      { "type": "video", "src": "assets/hero-bg.mp4" }
+    ]
+  },
+  {
+    "id": "p15",
+    "title": "Campaign Banners 2026",
+    "category": "social",
+    "categoryLabel": "Social Media",
+    "cover": "assets/portfolio/15.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/15.webp" }
+    ]
+  },
+  {
+    "id": "p16",
+    "title": "Wallpaper Pack Limited",
+    "category": "artes",
+    "categoryLabel": "Artes Avulsas",
+    "cover": "assets/portfolio/16.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/16.webp" }
+    ]
+  },
+  {
+    "id": "p17",
+    "title": "Rebrand Red Canids",
+    "category": "identidade",
+    "categoryLabel": "Identidade Visual",
+    "cover": "assets/portfolio/17.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/17.webp" }
+    ]
+  },
+  {
+    "id": "p18",
+    "title": "Promo Trailer 4K",
+    "category": "videos",
+    "categoryLabel": "Vídeos",
+    "cover": "assets/portfolio/18.webp",
+    "assets": [
+      { "type": "video", "src": "assets/hero-bg.mp4" }
+    ]
+  },
+  {
+    "id": "p19",
+    "title": "Stories Interactive Pack",
+    "category": "social",
+    "categoryLabel": "Social Media",
+    "cover": "assets/portfolio/19.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/19.webp" }
+    ]
+  },
+  {
+    "id": "p20",
+    "title": "Digital Painting Series",
+    "category": "artes",
+    "categoryLabel": "Artes Avulsas",
+    "cover": "assets/portfolio/20.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/20.webp" }
+    ]
+  },
+  {
+    "id": "p21",
+    "title": "Special Edition Poster",
+    "category": "artes",
+    "categoryLabel": "Artes Avulsas",
+    "cover": "assets/portfolio/21.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/21.webp" }
     ]
   }
 ]
