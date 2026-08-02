@@ -668,9 +668,9 @@ body.preloader-done #main-nav.hide-nav {
 }
 
 .reveal-line {
-    opacity: 0;
-    transform: translateY(25px);
-    transition: opacity 1.2s var(--ease), transform 1.2s var(--ease);
+    opacity: 1;
+    transform: translateY(0);
+    animation: heroCinematicFade 0.8s var(--ease) forwards;
 }
 
 .reveal-line.active {
@@ -686,12 +686,10 @@ body.preloader-done #main-nav.hide-nav {
 }
 
 @keyframes blink-cursor {
-
     from,
     to {
-        color: transparent
+        color: transparent;
     }
-
     50% {
         color: var(--accent);
     }
@@ -704,9 +702,9 @@ body.preloader-done #main-nav.hide-nav {
     color: var(--text-muted);
     max-width: 640px;
     margin: 0 auto 3.5rem;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 1.2s var(--ease), transform 1.2s var(--ease);
+    opacity: 1;
+    transform: translateY(0);
+    animation: heroCinematicFade 1s var(--ease) 0.2s forwards;
 }
 
 .hero-subtitle-cinematic.active {
@@ -723,12 +721,23 @@ body.preloader-done #main-nav.hide-nav {
     font-size: 0.72rem;
     color: var(--text-dim);
     letter-spacing: 0.25em;
-    opacity: 0;
-    transition: opacity 1.2s var(--ease);
+    opacity: 1;
+    animation: heroCinematicFade 1s var(--ease) 0.4s forwards;
 }
 
 .hero-scroll-cinematic.active {
     opacity: 1;
+}
+
+@keyframes heroCinematicFade {
+    0% {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .hero-scroll-cinematic svg {
