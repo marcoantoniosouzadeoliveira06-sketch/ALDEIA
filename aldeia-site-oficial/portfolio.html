@@ -157,338 +157,47 @@
     </header>
 
     <main>
-        <!-- ===== HERO ===== -->
-        <section id="inicio" class="hero-section">
-            <!-- Background Video Fullscreen in Grayscale -->
-            <div class="hero-video-bg">
-                <video autoplay muted loop playsinline id="hero-video" preload="auto">
-                    <source src="assets/hero-bg.mp4" type="video/mp4">
-                </video>
-                <div class="hero-video-overlay"></div>
-                <canvas id="hero-grain"></canvas>
-            </div>
-
-            <!-- Centered Cinematic Content -->
-            <div class="hero-content-centered">
-                <h1 class="hero-title-cinematic">
-                    <span class="line-1 reveal-line shiny-text" style="--color: #a8a8a8; --shine-color: #ffffff;" id="hero-title-l1">PROJETOS ÚNICOS</span>
-                    <span class="line-2 reveal-line shiny-text" style="--color: #a8a8a8; --shine-color: #ffffff;" id="hero-title-l2">PRECISAM DE UMA</span>
-                    <span class="line-3"><span id="typewriter-text" class="shiny-text" style="--color: #a8a8a8; --shine-color: #ffffff;">AGÊNCIA ÚNICA</span><span class="typewriter-cursor">|</span></span>
-                </h1>
-                
-                <p class="hero-subtitle-cinematic" id="hero-subtitle">
-                    Vc está no site da agência que trabalhou com grandes nomes no cenário de e-sports FURY (FREE FIRE), INFURIOUS (CALL OF COD), STRESSED GAMING (FREE FIRE), POCOYO EVENTS (ORGANIZAÇÃO DE EVENTOS - FREE FIRE), VIKINGS (FREE FIRE) e dentre outros nomes
-                </p>
-                
-                <div class="hero-scroll-cinematic">
-                    <span>ROLE PARA BAIXO</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <polyline points="19 12 12 19 5 12"></polyline>
-                    </svg>
-                </div>
-            </div>
-
-            <!-- Slanted Infinity Marquee Ribbon -->
-            <div class="hero-marquee-container">
-                <div class="hero-marquee-track">
-                    <div class="hero-marquee-content">
-                        <span>ESTRATÉGIA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                        <span>DESIGN</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                        <span>ROTEIRO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                        <span>EXCLUSIVO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                        <span>VALORIZAÇÃO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                        <span>ESTÉTICA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                        <span>PERFORMANCE</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                    </div>
-                    <div class="hero-marquee-content">
-                        <span>ESTRATÉGIA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                        <span>DESIGN</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                        <span>ROTEIRO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                        <span>EXCLUSIVO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                        <span>VALORIZAÇÃO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                        <span>ESTÉTICA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                        <span>PERFORMANCE</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== ABOUT / SOBRE ===== -->
-        <section id="sobre" class="about-section">
+        <!-- ===== PORTFOLIO HERO ===== -->
+        <section class="portfolio-page-hero">
+            <div class="portfolio-hero-bg"></div>
             <div class="section-container">
-                <div class="section-label reveal-up">
-                    <span class="label-num">/01</span>
-                    <span class="label-text">Sobre a Aldeia</span>
-                </div>
-
-                <!-- Big animated text paragraph -->
-                <div class="about-big-text reveal-words">
-                    <p id="about-big-text">Trabalhamos com <em>designers profissionais focados em design e marketing para grandes marcas e equipes de e-sports do Brasil e do exterior</em> há cerca de <strong>1 ano</strong> e já atuamos em praticamente todas as grandes equipes de e-sports do Brasil e exterior, e dentre outros nomes del cenário competitivo. Hoje, o nosso foco é claro: <strong>criação de sites, landing pages, flyers, identidade visual, branding e muito mais,</strong> com atenção máxima à estética, experiência e tecnologia.</p>
-                </div>
-
-                <!-- Info cards with red/orange icons -->
-                <div class="about-cards">
-                    <div class="about-card reveal-up" data-delay="0.1">
-                        <div class="card-icon red">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
-                        </div>
-                        <p id="about-card1-text">Já desenvolvemos projetos para diferentes mercados e também para clientes fora do Brasil, sempre explorando identidade, ritmo visual e interação.</p>
-                    </div>
-                    <div class="about-card reveal-up" data-delay="0.2">
-                        <div class="card-icon orange">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-                        </div>
-                        <p id="about-card2-text">Somos de São Paulo (SP) e Rio de Janeiro (RJ), mas trabalhamos de forma remota com marcas que valorizam design bem executado e presença digital no mais alto nível.</p>
-                    </div>
-                </div>
+                <h1 class="portfolio-hero-title reveal-up">Nosso Portfólio</h1>
+                <p class="portfolio-hero-subtitle reveal-up" data-delay="0.2">Trabalhos que transcendem o comum. Projetos para as maiores equipes de e-sports do Brasil e do mundo.</p>
             </div>
         </section>
 
-        <!-- ===== LOGO LOOP ===== -->
-        <section class="logos-section">
+        <!-- ===== PORTFOLIO GALLERY TABS E GRID ===== -->
+        <section class="portfolio-gallery-section">
             <div class="section-container">
-                <div class="reveal-up logos-section-header">
-                    <div class="section-label logos-section-label">
-                        <span class="label-num">/02</span>
-                        <span class="label-text">Identidade Aldeia</span>
-                    </div>
-                    <h3 class="logos-section-title">DNA DA AGÊNCIA</h3>
+                <div class="portfolio-tabs reveal-up" data-delay="0.3">
+                    <button class="portfolio-tab active" data-filter="all">Todas as Artes</button>
+                    <button class="portfolio-tab" data-filter="identidade">Identidade Visual</button>
+                    <button class="portfolio-tab" data-filter="social">Social Media</button>
+                    <button class="portfolio-tab" data-filter="videos">Vídeos</button>
                 </div>
-                <div class="logoloop logoloop--scale-hover" data-speed="80" data-direction="left" data-pause-on-hover="false" style="padding: 20px 0; --logoloop-logoHeight: 48px; --logoloop-gap: 60px;">
-                    <div class="logoloop__track">
-                        <ul class="logoloop__list" style="display: flex; align-items: center; gap: 60px;">
-                            <li class="logoloop__item"><img src="assets/logo-primaria.svg" alt="Aldeia Primária" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
-                            <li class="logoloop__item"><img src="assets/logo-marca.svg" alt="Aldeia Marca" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
-                            <li class="logoloop__item"><img src="assets/logo-isotype.svg" alt="Aldeia Isotype" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
-                            <li class="logoloop__item"><img src="assets/logo-tp.svg" alt="Aldeia Logo TP" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
-                            <li class="logoloop__item"><img src="assets/logo-secundaria-icon.svg" alt="Aldeia Secundária Icon" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
-                        </ul>
-                        <ul class="logoloop__list" aria-hidden="true" style="display: flex; align-items: center; gap: 60px;">
-                            <li class="logoloop__item"><img src="assets/logo-primaria.svg" alt="Aldeia Primária" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
-                            <li class="logoloop__item"><img src="assets/logo-marca.svg" alt="Aldeia Marca" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
-                            <li class="logoloop__item"><img src="assets/logo-isotype.svg" alt="Aldeia Isotype" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
-                            <li class="logoloop__item"><img src="assets/logo-tp.svg" alt="Aldeia Logo TP" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
-                            <li class="logoloop__item"><img src="assets/logo-secundaria-icon.svg" alt="Aldeia Secundária Icon" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
-                        </ul>
-                    </div>
+
+                <div class="portfolio-grid" id="portfolio-grid">
+                    <!-- Cards de portfólio injetados via JS -->
                 </div>
             </div>
         </section>
 
-        <!-- ===== PORTFOLIO ===== -->
-        <section id="portfolio" class="portfolio-section">
-            <div class="section-container">
-                <div class="portfolio-header">
-                    <div class="reveal-up">
-                        <div class="section-label">
-                            <span class="label-num">/02</span>
-                            <span class="label-text">Projetos</span>
-                        </div>
-                        <h2 class="mega-title scroll-float">PORTFÓLIO</h2>
-                    </div>
-                    <p class="section-desc reveal-up" data-delay="0.2">Projetos que elevam a percepção. Cada detalhe, interação e escolha visual é pensada para posicionar no nível certo.</p>
+        <!-- ===== NESTED PROJECT MODAL (Abre quando clica numa capa) ===== -->
+        <div class="project-modal" id="project-modal">
+            <div class="project-modal-overlay" id="project-modal-overlay"></div>
+            <div class="project-modal-content">
+                <button class="project-modal-close" id="project-modal-close">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                <div class="project-modal-header">
+                    <h2 id="project-modal-title">Título do Projeto</h2>
+                    <p id="project-modal-category">Categoria</p>
                 </div>
-
-                <div class="portfolio-banner-container reveal-up" data-delay="0.3">
-                    <a href="portfolio.html" class="portfolio-banner-link">
-                        <div class="portfolio-banner-img">
-                            <img src="assets/portfolio/1.webp" alt="Veja o Portfólio ALDEIA" loading="lazy">
-                        </div>
-                        <div class="portfolio-banner-overlay"></div>
-                        <div class="portfolio-banner-content">
-                            <h3>Galeria de Casos</h3>
-                            <span class="btn-cta banner-btn">VEJA O PORTFÓLIO COMPLETO ↗</span>
-                        </div>
-                    </a>
+                <div class="project-modal-body" id="project-modal-body">
+                    <!-- Imagens detalhadas do projeto carregadas aqui -->
                 </div>
             </div>
-        </section>
-
-        <!-- ===== SERVICES / SOLUÇÕES ===== -->
-        <section id="servicos" class="services-section">
-            <div class="section-container">
-                <div class="services-header">
-                    <div class="reveal-up">
-                        <div class="section-label">
-                            <span class="label-num">/03</span>
-                            <span class="label-text">Serviços</span>
-                        </div>
-                        <h2 class="mega-title scroll-float">SOLUÇÕES</h2>
-                    </div>
-                    <p class="section-desc reveal-up" data-delay="0.2" id="services-desc"><strong>Não é sobre volume, é sobre nível.</strong><br>Marcas, sites e criativos desenvolvidos com estratégias, estética e intenção.</p>
-                </div>
-
-                <div class="services-accordion reveal-up" id="services-accordion-list">
-                    <!-- Populated dynamically by CMS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== FAQ ===== -->
-        <section id="faq" class="faq-section">
-            <div class="section-container">
-                <div class="faq-header">
-                    <div class="reveal-up">
-                        <div class="section-label">
-                            <span class="label-num">/04</span>
-                            <span class="label-text">FAQ</span>
-                        </div>
-                        <h2 class="mega-title scroll-float">DÚVIDAS</h2>
-                    </div>
-                    <div class="faq-desc reveal-up" data-delay="0.2" id="faq-desc-container">
-                        <p>Algumas respostas importantes antes de começarmos.</p>
-                        <p class="dim">Clareza faz parte de qualquer projeto bem executado.</p>
-                    </div>
-                </div>
-
-                <div class="faq-list reveal-up" id="faq-list-container">
-                    <!-- Populated dynamically by CMS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== FUNDADORES ===== -->
-        <section id="fundadores" class="founders-section">
-            <div class="section-container">
-                <div class="founders-header">
-                    <div class="reveal-up">
-                        <div class="section-label">
-                            <span class="label-num">/05</span>
-                            <span class="label-text">Fundadores & CEOs</span>
-                        </div>
-                        <h2 class="mega-title">MINDSET</h2>
-                    </div>
-                    <p class="section-desc reveal-up" data-delay="0.2">
-                        As mentes por trás do design e posicionamento estratégico da agência.
-                    </p>
-                </div>
-
-                <div class="founders-grid">
-                    <!-- Founder 1: Temari -->
-                    <div class="pc-card-wrapper founder-card reveal-up" data-delay="0.1" id="founder-temari">
-                        <div class="pc-behind"></div>
-                        <div class="pc-card-shell">
-                            <section class="pc-card">
-                                <div class="pc-inside">
-                                    <div class="pc-shine"></div>
-                                    <div class="pc-glare"></div>
-                                    <div class="pc-content pc-avatar-content">
-                                        <img class="avatar" src="assets/temari.webp" alt="Temari avatar" loading="lazy">
-                                        <div class="pc-user-info">
-                                            <div class="pc-user-details">
-                                                <div class="pc-mini-avatar">
-                                                    <img src="assets/temari.webp" alt="Temari mini avatar" loading="lazy">
-                                                </div>
-                                                <div class="pc-user-text">
-                                                    <span class="pc-handle">@temari</span>
-                                                    <span class="pc-status">CEO & Design</span>
-                                                </div>
-                                            </div>
-                                            <a href="https://wa.me/5511959737873?text=Olá!%20Vim%20pelo%20site%20da%20Aldeia%20e%20gostaria%20de%20falar%20com%20a%20Temari." target="_blank" rel="noopener noreferrer" class="pc-contact-btn">Contato</a>
-                                        </div>
-                                    </div>
-                                    <div class="pc-content">
-                                        <div class="pc-details">
-                                            <h3>Temari</h3>
-                                            <p>Designer & CEO</p>
-                                            <span class="pc-bio">Diretora Criativa focada em branding e identidade visual de alto impacto.</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </section>
-                        </div>
-                    </div>
-
-                    <!-- Founder 2: Japex -->
-                    <div class="pc-card-wrapper founder-card reveal-up" data-delay="0.2" id="founder-japex">
-                        <div class="pc-behind"></div>
-                        <div class="pc-card-shell">
-                            <section class="pc-card">
-                                <div class="pc-inside">
-                                    <div class="pc-shine"></div>
-                                    <div class="pc-glare"></div>
-                                    <div class="pc-content pc-avatar-content">
-                                        <img class="avatar" src="assets/japex.webp" alt="Japex avatar" loading="lazy">
-                                        <div class="pc-user-info">
-                                            <div class="pc-user-details">
-                                                <div class="pc-mini-avatar">
-                                                    <img src="assets/japex.webp" alt="Japex mini avatar" loading="lazy">
-                                                </div>
-                                                <div class="pc-user-text">
-                                                    <span class="pc-handle">@japex</span>
-                                                    <span class="pc-status">CEO & Tech</span>
-                                                </div>
-                                            </div>
-                                            <a href="https://wa.me/5521980638271?text=Olá!%20Vim%20pelo%20site%20da%20Aldeia%20e%20gostaria%20de%20falar%20com%20o%20Japex." target="_blank" rel="noopener noreferrer" class="pc-contact-btn">Contato</a>
-                                        </div>
-                                    </div>
-                                    <div class="pc-content">
-                                        <div class="pc-details">
-                                            <h3>Japex</h3>
-                                            <p>Designer & CEO</p>
-                                            <span class="pc-bio">Especialista em interfaces digitais, UI/UX design gráfico e desenvolvimento web.</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </section>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== CTA BANNER ===== -->
-        <section id="contato" class="cta-banner">
-            <div class="cta-video-bg">
-                <video autoplay muted loop playsinline><source src="assets/hero-bg.mp4" type="video/mp4"></video>
-                <div class="cta-overlay"></div>
-            </div>
-            <div class="cta-inner">
-                <div class="logo-contact-wrap reveal-up">
-                    <div class="logo-contact-circle">
-                        <img src="assets/logo-isotype.svg" class="logo-contact" alt="ALDEIA Icon">
-                    </div>
-                </div>
-                <div class="cta-left reveal-up" data-delay="0.1">
-                    <p>Vamos <strong>tirar isso do rascunho</strong> e levar para...</p>
-                </div>
-                <a href="javascript:void(0)" onclick="openBudgetModal()" class="btn-cta reveal-up" data-delay="0.2">Faça um orçamento<span class="btn-arrow-icon">→</span></a>
-            </div>
-        </section>
-
-        <!-- ===== O FUTURO? ===== -->
-        <section class="future-section">
-            <div class="section-container">
-                <div class="future-inner reveal-up">
-                    <div class="future-title-wrapper">
-                        <div class="metallic-paint" 
-                             id="future-metallic" 
-                             data-text="O FUTURO?" 
-                             data-font="Clash Display" 
-                             data-size="220"
-                             data-scale="4"
-                             data-refraction="0.015"
-                             data-blur="0.008"
-                             data-liquid="0.25"
-                             data-speed="0.25"
-                             data-brightness="1.5"
-                             data-contrast="1.0"
-                             data-chroma="0.0"
-                             data-light-color="#e9d5ff"
-                             data-dark-color="#090014"
-                             data-tint="#2a004f"
-                             data-mouse="false"
-                             data-wave="0.4"
-                             >
-                        </div>
-                    </div>
-                    <div class="future-text">
-                        <p id="future-subtitle">Se você quer algo <strong>acima do padrão,</strong> estou pronto para construir.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+        </div>
     </main>
 
     <!-- ===== FOOTER ===== -->
@@ -559,6 +268,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="app.js"></script>
+    <script src="portfolio.js"></script>
     <script>setTimeout(function(){var p=document.getElementById('preloader');if(p&&!p.classList.contains('loaded')){p.classList.add('loaded');setTimeout(function(){p.style.display='none';if(window.lenis)window.lenis.start()},1200)}},6000);</script>
 
     <!-- MODAL ORÇAMENTO -->
