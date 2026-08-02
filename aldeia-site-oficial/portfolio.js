@@ -2,38 +2,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabs = document.querySelectorAll('.portfolio-tab');
     const grid = document.getElementById('portfolio-grid');
 
-    // MOCK DATA: Projetos e suas imagens detalhadas
-    const projects = [
-        {
-            id: 'p1',
-            title: 'Identidade FURY',
-            category: 'identidade',
-            categoryLabel: 'Identidade Visual',
-            cover: 'assets/portfolio/1.webp'
-        },
-        {
-            id: 'p2',
-            title: 'Campanha FURY 2026',
-            category: 'videos',
-            categoryLabel: 'Vídeos',
-            cover: 'assets/portfolio/6.webp'
-        },
-        {
-            id: 'p3',
-            title: 'Lançamento INFURIOUS',
-            category: 'social',
-            categoryLabel: 'Social Media',
-            cover: 'assets/portfolio/2.webp'
-        },
-        {
-            id: 'p4',
-            title: 'Arte Avulsa X',
-            category: 'artes',
-            categoryLabel: 'Artes Avulsas',
-            cover: 'assets/portfolio/7.webp'
+    let projects = [];
+
+    // Busca os dados da API
+    async function loadPortfolio() {
+        try {
+            const res = await fetch('/api/portfolio');
+            if (res.ok) {
+                projects = await res.json();
+                renderGrid('all');
+            }
+        } catch (e) {
+            console.error('Erro ao carregar portfólio:', e);
         }
-        // Você pode expandir este array via backend mais tarde.
-    ];
+    }
 
     function renderGrid(filter) {
         if (!grid) return;
@@ -77,5 +59,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Init
-    renderGrid('all');
+    loadPortfolio();
 });

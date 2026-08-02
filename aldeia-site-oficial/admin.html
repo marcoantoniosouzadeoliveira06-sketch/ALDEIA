@@ -634,6 +634,7 @@
             <nav class="tab-nav">
                 <button class="tab-btn active" onclick="switchTab('leads-tab', this)">Orçamentos (Leads)</button>
                 <button class="tab-btn" onclick="switchTab('clients-tab', this)">Clientes</button>
+                <button class="tab-btn" onclick="switchTab('portfolio-tab', this)">Gerenciar Portfólio</button>
                 <button class="tab-btn" onclick="switchTab('analytics-tab', this)">Analytics</button>
                 <button class="tab-btn" onclick="switchTab('telemetry-tab', this)">Telemetria</button>
                 <button class="tab-btn" onclick="switchTab('logins-tab', this)">Acessos & Logins</button>
@@ -721,6 +722,56 @@
                         </svg>
                         <h3>Nenhum lead encontrado</h3>
                         <p>Os cadastros efetuados no site serão exibidos aqui.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: GERENCIAR PORTFÓLIO -->
+            <div id="portfolio-tab" class="tab-content">
+                <div class="submissions-box" style="margin-bottom: 24px;">
+                    <div class="box-header">
+                        <h2 class="box-title">Adicionar Novo Projeto</h2>
+                    </div>
+                    <div style="padding: 20px 30px;">
+                        <form id="portfolio-form" style="display: flex; flex-direction: column; gap: 15px;">
+                            <input type="text" id="port-title" placeholder="Título do Projeto (Ex: Identidade FURY)" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 6px; color:#fff;" required>
+                            
+                            <select id="port-category" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 6px; color:#fff;" required>
+                                <option value="artes" style="background: #111;">Artes Avulsas</option>
+                                <option value="identidade" style="background: #111;">Identidade Visual</option>
+                                <option value="social" style="background: #111;">Social Media</option>
+                                <option value="videos" style="background: #111;">Vídeos</option>
+                            </select>
+
+                            <input type="text" id="port-cover" placeholder="URL da Capa (Ex: assets/portfolio/1.webp)" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 6px; color:#fff;" required>
+
+                            <div>
+                                <label style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px; display: block;">Galeria Interna (JSON: [{type:'image', src:'...'}])</label>
+                                <textarea id="port-assets" placeholder='[\n  { "type": "image", "src": "assets/portfolio/1.webp" }\n]' rows="4" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 6px; color:#fff; width: 100%; font-family: monospace;" required></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-action" style="padding: 12px; border-radius: 6px; border:none; background: #fff; color: #000; font-weight: 600; cursor: pointer;">Salvar Projeto</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="submissions-box">
+                    <div class="box-header">
+                        <h2 class="box-title">Projetos Cadastrados</h2>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="submissions-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30%">Título</th>
+                                    <th style="width: 30%">Categoria</th>
+                                    <th style="width: 20%">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="portfolio-list">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -2217,6 +2268,7 @@
             
             loadSubmissions();
             loadClients();
+            loadPortfolio();
             loadLoginLogs();
             loadSiteContentForEditor();
             if (typeof loadTelemetryData === 'function') {
@@ -2478,6 +2530,99 @@
                 container.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Erro ao carregar métricas.</td></tr>';
             }
         }
+
+        // ===== PORTFOLIO MANAGER =====
+        async function loadPortfolio() {
+            const listEl = document.getElementById('portfolio-list');
+            if (!listEl) return;
+            
+            listEl.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Carregando portfólio...</td></tr>';
+            
+            try {
+                const res = await fetch('/api/portfolio');
+                if (res.ok) {
+                    const projects = await res.json();
+                    listEl.innerHTML = '';
+                    if (projects.length === 0) {
+                        listEl.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Nenhum projeto cadastrado.</td></tr>';
+                        return;
+                    }
+                    projects.forEach(p => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><strong style="color:#fff;">${escapeHTML(p.title)}</strong></td>
+                            <td><span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${escapeHTML(p.categoryLabel)}</span></td>
+                            <td>
+                                <button onclick="deleteProject('${p.id}')" style="background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Excluir</button>
+                            </td>
+                        `;
+                        listEl.appendChild(tr);
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+                listEl.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Erro ao carregar portfólio.</td></tr>';
+            }
+        }
+
+        async function deleteProject(id) {
+            if (!confirm('Tem certeza que deseja excluir este projeto?')) return;
+            try {
+                const res = await fetch(`/api/portfolio/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                if (res.ok) {
+                    loadPortfolio();
+                } else {
+                    alert('Erro ao excluir.');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const portForm = document.getElementById('portfolio-form');
+            if (portForm) {
+                portForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const title = document.getElementById('port-title').value;
+                    const categoryEl = document.getElementById('port-category');
+                    const category = categoryEl.value;
+                    const categoryLabel = categoryEl.options[categoryEl.selectedIndex].text;
+                    const cover = document.getElementById('port-cover').value;
+                    let assets = [];
+                    
+                    try {
+                        assets = JSON.parse(document.getElementById('port-assets').value);
+                    } catch (err) {
+                        alert('Formato JSON inválido na Galeria Interna. Use aspas duplas, exemplo: [{"type":"image", "src":"..."}]');
+                        return;
+                    }
+
+                    try {
+                        const res = await fetch('/api/portfolio', {
+                            method: 'POST',
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify({ title, category, categoryLabel, cover, assets })
+                        });
+                        
+                        if (res.ok) {
+                            alert('Projeto adicionado com sucesso!');
+                            portForm.reset();
+                            loadPortfolio();
+                        } else {
+                            alert('Erro ao adicionar projeto.');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert('Erro de conexão ao adicionar projeto.');
+                    }
+                });
+            }
+        });
 
         // Setup Live Search for Leads
         document.addEventListener('DOMContentLoaded', () => {

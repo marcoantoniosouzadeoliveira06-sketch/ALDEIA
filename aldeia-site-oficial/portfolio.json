@@ -1,0 +1,45 @@
+[
+  {
+    "id": "p1",
+    "title": "Identidade FURY",
+    "category": "identidade",
+    "categoryLabel": "Identidade Visual",
+    "cover": "assets/portfolio/1.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/1.webp" },
+      { "type": "image", "src": "assets/portfolio/5.webp" },
+      { "type": "image", "src": "assets/portfolio/3.webp" }
+    ]
+  },
+  {
+    "id": "p2",
+    "title": "Campanha FURY 2026",
+    "category": "videos",
+    "categoryLabel": "Vídeos",
+    "cover": "assets/portfolio/6.webp",
+    "assets": [
+      { "type": "video", "src": "assets/hero-bg.mp4" }
+    ]
+  },
+  {
+    "id": "p3",
+    "title": "Lançamento INFURIOUS",
+    "category": "social",
+    "categoryLabel": "Social Media",
+    "cover": "assets/portfolio/2.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/2.webp" },
+      { "type": "image", "src": "assets/portfolio/4.webp" }
+    ]
+  },
+  {
+    "id": "p4",
+    "title": "Arte Avulsa X",
+    "category": "artes",
+    "categoryLabel": "Artes Avulsas",
+    "cover": "assets/portfolio/7.webp",
+    "assets": [
+      { "type": "image", "src": "assets/portfolio/7.webp" }
+    ]
+  }
+]

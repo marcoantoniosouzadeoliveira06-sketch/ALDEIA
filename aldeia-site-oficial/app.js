@@ -36,35 +36,47 @@
     const preloaderContent = document.querySelector('.preloader-content');
     const preloaderText = document.getElementById('preloader-text');
 
-    if (preloader && preloaderContent && preloaderText) {
-        // Step 1: Activate cinematic logo fade/blur focus reveal
-        setTimeout(() => {
-            preloaderText.classList.add('active');
-        }, 300);
-
-        // Step 2: Dissolve the logo after it is fully focused
-        setTimeout(() => {
-            preloaderContent.classList.add('dissolve');
-            
-            // Step 3: Split and slide panels open
+    if (preloader) {
+        if (preloaderContent && preloaderText) {
+            // Step 1: Activate cinematic logo fade/blur focus reveal
             setTimeout(() => {
-                preloader.classList.add('loaded');
-                document.body.classList.add('preloader-done');
-                if (lenis) lenis.start();
+                preloaderText.classList.add('active');
+            }, 300);
+
+            // Step 2: Dissolve the logo after it is fully focused
+            setTimeout(() => {
+                preloaderContent.classList.add('dissolve');
                 
-                // Step 4: Sincronizar digitação com o meio do movimento de abertura
+                // Step 3: Split and slide panels open
                 setTimeout(() => {
-                    if (typeof startHeroAnimations === 'function') {
-                        startHeroAnimations();
-                    }
-                }, 400);
-                
-                // Step 5: Clean up preloader display
-                setTimeout(() => {
-                    preloader.style.display = 'none';
-                }, 1800);
-            }, 700);
-        }, 3100);
+                    preloader.classList.add('loaded');
+                    document.body.classList.add('preloader-done');
+                    if (lenis) lenis.start();
+                    
+                    // Step 4: Sincronizar digitação com o meio do movimento de abertura
+                    setTimeout(() => {
+                        if (typeof startHeroAnimations === 'function') {
+                            startHeroAnimations();
+                        }
+                    }, 400);
+                    
+                    // Step 5: Clean up preloader display
+                    setTimeout(() => {
+                        preloader.style.display = 'none';
+                    }, 1800);
+                }, 700);
+            }, 3100);
+        } else {
+            // Fallback rápido se não houver conteúdo do preloader
+            preloader.classList.add('loaded');
+            document.body.classList.add('preloader-done');
+            if (lenis) lenis.start();
+            setTimeout(() => { preloader.style.display = 'none'; }, 500);
+        }
+    } else {
+        // Se a página nem tiver preloader, libera o scroll
+        document.body.classList.add('preloader-done');
+        if (lenis) lenis.start();
     }
 
     // ===== GRAIN CANVAS =====

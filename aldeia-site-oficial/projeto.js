@@ -2,50 +2,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get('id');
 
-    // MOCK DATA (Idêntico ao do portfolio.js, com assets detalhados)
-    const projects = [
-        {
-            id: 'p1',
-            title: 'Identidade FURY',
-            category: 'identidade',
-            categoryLabel: 'Identidade Visual',
-            assets: [
-                { type: 'image', src: 'assets/portfolio/1.webp' },
-                { type: 'image', src: 'assets/portfolio/5.webp' },
-                { type: 'image', src: 'assets/portfolio/3.webp' }
-            ]
-        },
-        {
-            id: 'p2',
-            title: 'Campanha FURY 2026',
-            category: 'videos',
-            categoryLabel: 'Vídeos',
-            assets: [
-                { type: 'video', src: 'assets/hero-bg.mp4' }
-            ]
-        },
-        {
-            id: 'p3',
-            title: 'Lançamento INFURIOUS',
-            category: 'social',
-            categoryLabel: 'Social Media',
-            assets: [
-                { type: 'image', src: 'assets/portfolio/2.webp' },
-                { type: 'image', src: 'assets/portfolio/4.webp' }
-            ]
-        },
-        {
-            id: 'p4',
-            title: 'Arte Avulsa X',
-            category: 'artes',
-            categoryLabel: 'Artes Avulsas',
-            assets: [
-                { type: 'image', src: 'assets/portfolio/7.webp' }
-            ]
-        }
-    ];
-
-    const project = projects.find(p => p.id === projectId);
+    async function loadProject() {
+        try {
+            const res = await fetch('/api/portfolio');
+            if (res.ok) {
+                const projects = await res.json();
+                const project = projects.find(p => p.id === projectId);
 
     if (!project) {
         // Se o projeto não for encontrado, volta pro portfólio
@@ -83,6 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Inicialmente escondido no CSS, disparamos a classe aqui
         setTimeout(() => {
             container.classList.add('vruum-active');
-        }, 50);
+        }, 100);
     }
+            }
+        } catch (e) {
+            console.error('Erro ao carregar projeto:', e);
+        }
+    }
+
+    loadProject();
 });

@@ -197,6 +197,46 @@ app.post('/api/content', requireAuth, (req, res) => {
     res.json({ status: 'success', message: 'Conteúdo atualizado com sucesso' });
 });
 
+// ===== ROTAS DE PORTFÓLIO =====
+app.get('/api/portfolio', (req, res) => {
+    const file = path.join(ROOT_DIR, 'portfolio.json');
+    if (fs.existsSync(file)) {
+        const content = fs.readFileSync(file, 'utf8');
+        return res.type('application/json').send(content || '[]');
+    }
+    // Retorna MOCK se arquivo não existir (fallback temporário)
+    res.json([]);
+});
+
+app.post('/api/portfolio', requireAuth, (req, res) => {
+    const file = path.join(ROOT_DIR, 'portfolio.json');
+    let data = [];
+    if (fs.existsSync(file)) {
+        const content = fs.readFileSync(file, 'utf8');
+        if (content.trim()) data = JSON.parse(content);
+    }
+    const newProject = {
+        id: 'p' + Date.now(),
+        title: req.body.title || 'Sem Título',
+        category: req.body.category || 'artes',
+        categoryLabel: req.body.categoryLabel || 'Artes Avulsas',
+        cover: req.body.cover || '',
+        assets: req.body.assets || []
+    };
+    data.push(newProject);
+    fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
+    res.json({ status: 'success', project: newProject });
+});
+
+app.delete('/api/portfolio/:id', requireAuth, (req, res) => {
+    const file = path.join(ROOT_DIR, 'portfolio.json');
+    if (!fs.existsSync(file)) return res.json({ status: 'error' });
+    let data = JSON.parse(fs.readFileSync(file, 'utf8') || '[]');
+    data = data.filter(p => p.id !== req.params.id);
+    fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
+    res.json({ status: 'success' });
+});
+
 // POST /api/upload (Protegido)
 app.post('/api/upload', requireAuth, upload.single('file'), (req, res) => {
     if (!req.file) {
