@@ -1576,7 +1576,7 @@
 
         // Portfolio Images (all 21 from folder, colorful!)
         const images = window.aldeiaPortfolioImages || Array.from({ length: 21 }, (_, i) => ({
-            src: `assets/portfolio/${i + 1}.png`,
+            src: `assets/portfolio/${i + 1}.webp`,
             alt: `Projeto ${i + 1}`
         }));
 
