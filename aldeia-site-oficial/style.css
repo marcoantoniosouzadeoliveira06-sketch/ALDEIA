@@ -3941,3 +3941,91 @@ body.light-theme .scroll-to-top:hover {
         padding: 30px 20px;
     }
 }
+
+/* =========================================
+   DEDICATED PROJECT PAGE & VRUUM ANIMATION
+   ========================================= */
+.project-page-container {
+    opacity: 0;
+    transform: translateX(100vw);
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+}
+
+.project-page-container.vruum-active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.project-hero {
+    position: relative;
+    padding: 150px 20px 60px;
+    text-align: center;
+    background: #050505;
+}
+
+.project-hero-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top, rgba(124, 58, 237, 0.1), transparent 60%);
+    pointer-events: none;
+}
+
+.btn-back-portfolio {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-gray-400);
+    text-decoration: none;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 30px;
+    transition: color 0.3s ease;
+}
+
+.btn-back-portfolio:hover {
+    color: var(--color-white);
+}
+
+.btn-back-portfolio svg {
+    width: 18px;
+    height: 18px;
+}
+
+.project-category {
+    color: var(--color-gray-400);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+}
+
+.project-title {
+    font-family: var(--font-h);
+    font-size: 4rem;
+    font-weight: 500;
+    color: var(--color-white);
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+}
+
+.project-gallery {
+    padding: 40px 20px 120px;
+    background: #050505;
+}
+
+#project-page-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+
+@media (max-width: 768px) {
+    .project-title {
+        font-size: 2.5rem;
+    }
+    .project-hero {
+        padding: 120px 20px 40px;
+    }
+}

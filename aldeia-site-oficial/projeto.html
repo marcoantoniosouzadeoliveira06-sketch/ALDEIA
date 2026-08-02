@@ -157,32 +157,31 @@
     </header>
 
     <main>
-        <!-- ===== PORTFOLIO HERO ===== -->
-        <section class="portfolio-page-hero">
-            <div class="portfolio-hero-bg"></div>
-            <div class="section-container">
-                <h1 class="portfolio-hero-title reveal-up">Nosso Portfólio</h1>
-                <p class="portfolio-hero-subtitle reveal-up" data-delay="0.2">Trabalhos que transcendem o comum. Projetos para as maiores equipes de e-sports do Brasil e do mundo.</p>
-            </div>
-        </section>
-
-        <!-- ===== PORTFOLIO GALLERY TABS E GRID ===== -->
-        <section class="portfolio-gallery-section">
-            <div class="section-container">
-                <div class="portfolio-tabs reveal-up" data-delay="0.3">
-                    <button class="portfolio-tab active" data-filter="all">Todas as Artes</button>
-                    <button class="portfolio-tab" data-filter="identidade">Identidade Visual</button>
-                    <button class="portfolio-tab" data-filter="social">Social Media</button>
-                    <button class="portfolio-tab" data-filter="videos">Vídeos</button>
+        <!-- O container vai entrar com a animação lateral (vruum) -->
+        <div id="project-page-container" class="project-page-container">
+            <!-- ===== PROJECT HERO ===== -->
+            <section class="project-hero">
+                <div class="project-hero-bg"></div>
+                <div class="section-container">
+                    <a href="portfolio.html" class="btn-back-portfolio">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                        Voltar ao Portfólio
+                    </a>
+                    <p class="project-category" id="project-page-category">Categoria</p>
+                    <h1 class="project-title" id="project-page-title">Carregando...</h1>
                 </div>
+            </section>
 
-                <div class="portfolio-grid" id="portfolio-grid">
-                    <!-- Cards de portfólio injetados via JS -->
+            <!-- ===== PROJECT GALLERY ===== -->
+            <section class="project-gallery">
+                <div class="section-container" id="project-page-body">
+                    <!-- Imagens detalhadas do projeto carregadas aqui via projeto.js -->
+                    <div class="project-loader" style="text-align:center; padding: 100px 0;">
+                        <span class="shiny-text" style="--color: #a8a8a8; --shine-color: #ffffff;">Carregando assets...</span>
+                    </div>
                 </div>
-            </div>
-        </section>
-
-
+            </section>
+        </div>
     </main>
 
     <!-- ===== FOOTER ===== -->
@@ -253,7 +252,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="app.js"></script>
-    <script src="portfolio.js"></script>
+    <script src="projeto.js"></script>
     <script>setTimeout(function(){var p=document.getElementById('preloader');if(p&&!p.classList.contains('loaded')){p.classList.add('loaded');setTimeout(function(){p.style.display='none';if(window.lenis)window.lenis.start()},1200)}},6000);</script>
 
     <!-- MODAL ORÇAMENTO -->
