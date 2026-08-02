@@ -12,7 +12,7 @@
     <link href="https://api.fontshare.com/v2/css?f[]=clash-display@300,400,500,600,700&display=swap" rel="stylesheet">
 
     <style>html.lenis,html.lenis-smooth{scroll-behavior:auto!important}.lenis-target{scroll-behavior:auto!important}</style>
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=5">
     <link rel="stylesheet" href="components/LogoLoop.css">
     <link rel="stylesheet" href="components/GradualBlur.css">
     <link rel="stylesheet" href="components/ShinyText.css">
@@ -303,8 +303,8 @@
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="app.js?v=4"></script>
-    <script src="portfolio.js?v=4"></script>
+    <script src="app.js?v=5"></script>
+    <script src="portfolio.js?v=5"></script>
 
 
     <!-- MODAL ORÇAMENTO -->
@@ -780,20 +780,7 @@
                 if (res.ok) {
                     const content = await res.json();
                     
-                    // Hero texts
-                    if (content.heroTitleLine1) {
-                        document.getElementById('hero-title-l1').textContent = content.heroTitleLine1;
-                    }
-                    if (content.heroTitleLine2) {
-                        document.getElementById('hero-title-l2').textContent = content.heroTitleLine2;
-                    }
-                    if (content.heroTitleLine3) {
-                        const l3 = document.getElementById('typewriter-text');
-                        if (l3) l3.textContent = content.heroTitleLine3;
-                    }
-                    if (content.heroSubtitle) {
-                        document.getElementById('hero-subtitle').textContent = content.heroSubtitle;
-                    }
+                    // Content Loaded
 
                     // About
                     if (content.about) {

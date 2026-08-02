@@ -127,28 +127,13 @@
 
     if (cursor && follower && window.innerWidth > 768) {
         document.body.classList.add('custom-cursor-active');
-        let mx = 0, my = 0;
-        let cx = 0, cy = 0;
-        let fx = 0, fy = 0;
 
         document.addEventListener('mousemove', (e) => {
-            mx = e.clientX;
-            my = e.clientY;
-        });
-
-        function animateCursor() {
-            // Lerp - identical coordinates to keep central dot and outer circle fully synced
-            cx += (mx - cx) * 0.22;
-            cy += (my - cy) * 0.22;
-            fx = cx;
-            fy = cy;
-
-            cursor.style.transform = `translate3d(${cx}px, ${cy}px, 0) translate(-50%, -50%)`;
-            follower.style.transform = `translate3d(${fx}px, ${fy}px, 0) translate(-50%, -50%)`;
-
-            requestAnimationFrame(animateCursor);
-        }
-        animateCursor();
+            const x = e.clientX;
+            const y = e.clientY;
+            cursor.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+            follower.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+        }, { passive: true });
 
         // Hover interactions
         const hoverTargets = document.querySelectorAll('a, button, .portfolio-card, .svc-header, .faq-btn, .svc-close, .color-chip');
@@ -1568,17 +1553,20 @@
             const data = await res.json();
             if (!data || Object.keys(data).length === 0) return;
 
-            if (data.heroTitleLine1) {
-                const el = document.getElementById('hero-title-l1');
-                if (el) el.textContent = data.heroTitleLine1;
-            }
-            if (data.heroTitleLine2) {
-                const el = document.getElementById('hero-title-l2');
-                if (el) el.textContent = data.heroTitleLine2;
-            }
-            if (data.heroSubtitle) {
-                const el = document.getElementById('hero-subtitle');
-                if (el) el.innerHTML = data.heroSubtitle;
+            const isPortfolioPage = window.location.pathname.includes('portfolio.html');
+            if (!isPortfolioPage) {
+                if (data.heroTitleLine1) {
+                    const el = document.getElementById('hero-title-l1');
+                    if (el) el.textContent = data.heroTitleLine1;
+                }
+                if (data.heroTitleLine2) {
+                    const el = document.getElementById('hero-title-l2');
+                    if (el) el.textContent = data.heroTitleLine2;
+                }
+                if (data.heroSubtitle) {
+                    const el = document.getElementById('hero-subtitle');
+                    if (el) el.innerHTML = data.heroSubtitle;
+                }
             }
 
             if (data.about && data.about.bigText) {

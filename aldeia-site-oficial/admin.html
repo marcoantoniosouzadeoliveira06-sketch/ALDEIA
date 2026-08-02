@@ -1986,22 +1986,38 @@
             }
         }
 
-        // Binary AJAX Upload Helper
+        // AJAX Upload Helper (Multer-compatible FormData)
         async function uploadFileBinary(file, callback) {
             try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const headers = {};
+                const token = sessionStorage.getItem('admin_token') || localStorage.getItem('admin_token');
+                if (token) {
+                    headers['Authorization'] = 'Bearer ' + token;
+                }
+
                 const res = await fetch('/api/upload', {
                     method: 'POST',
-                    headers: {
-                        'X-File-Name': file.name,
-                        ...getAuthHeaders()
-                    },
-                    body: file
+                    headers: headers,
+                    body: formData
                 });
+                
                 if (res.ok) {
                     const data = await res.json();
-                    callback(data.url);
+                    if (data.status === 'success' && data.url) {
+                        callback(data.url);
+                    } else {
+                        alert(data.message || 'Erro no envio da imagem.');
+                    }
                 } else {
-                    alert('Erro no envio da imagem.');
+                    let errText = 'Erro no envio da imagem.';
+                    try {
+                        const errData = await res.json();
+                        if (errData.message) errText = errData.message;
+                    } catch (_) {}
+                    alert(errText);
                 }
             } catch (err) {
                 console.error(err);
