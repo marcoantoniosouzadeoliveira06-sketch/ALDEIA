@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALDEIA | Agência de Design Boutique & Performance Digital</title>
+    <meta name="description" content="Criação de sites com UI/UX e design de alto padrão. Projetos para empresas exigentes que buscam presença digital diferenciada.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Fragment+Mono&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@300,400,500,600,700&display=swap" rel="stylesheet">
+
+    <style>html.lenis,html.lenis-smooth{scroll-behavior:auto!important}.lenis-target{scroll-behavior:auto!important}</style>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="components/LogoLoop.css">
+    <link rel="stylesheet" href="components/GradualBlur.css">
+    <link rel="stylesheet" href="components/ShinyText.css">
+    <link rel="stylesheet" href="components/ScrollFloat.css">
+    <link rel="stylesheet" href="components/MetallicPaint.css">
+    <!-- JSON-LD Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "name": "ALDEIA",
+      "image": "assets/logo-primaria.webp",
+      "@id": "http://localhost:3000/#agency",
+      "url": "http://localhost:3000",
+      "telephone": "+5521980638271",
+      "priceRange": "$$$",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Av. Ataulfo de Paiva",
+        "addressLocality": "Rio de Janeiro",
+        "addressRegion": "RJ",
+        "postalCode": "22440-033",
+        "addressCountry": "BR"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": -22.9826,
+        "longitude": -43.2168
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "opens": "09:00",
+        "closes": "19:00"
+      },
+      "sameAs": [
+        "https://instagram.com/aldeia.boutique"
+      ]
+    }
+    </script>
+</head>
+<body>
+
+    <!-- PRELOADER -->
+    <div id="preloader">
+        <canvas id="preloader-grain"></canvas>
+        <div class="preloader-content">
+            <div class="preloader-logo-wrap">
+                <img src="assets/logo-tp.svg" class="preloader-logo" id="preloader-text" alt="ALDEIA">
+            </div>
+        </div>
+        <div class="preloader-panel left-panel"></div>
+        <div class="preloader-panel right-panel"></div>
+    </div>
+
+    <!-- CUSTOM CURSOR -->
+    <div id="custom-cursor"></div>
+    <div id="cursor-follower"></div>
+
+    <!-- HEADER -->
+    <header id="main-nav">
+        <!-- GRADUAL BLUR BACKGROUND -->
+        <div class="gradual-blur" data-position="top" data-strength="3" data-div-count="8" data-curve="ease-out" style="position: absolute; inset: 0; height: 100%; z-index: -1;"></div>
+        <div class="nav-inner">
+            <a href="#inicio" class="nav-logo">
+                <img src="assets/logo-tp.svg" class="logo-nav" alt="ALDEIA Logo">
+            </a>
+
+            <div class="nav-center">
+                <div class="gooey-nav-container" id="gooey-nav">
+                    <nav>
+                        <ul>
+                            <li class="active"><a href="#inicio" class="decrypt-hover">Início</a></li>
+                            <li><a href="#sobre" class="decrypt-hover">Sobre</a></li>
+                            <li><a href="#portfolio" class="decrypt-hover">Portfólio</a></li>
+                            <li><a href="#servicos" class="decrypt-hover">Soluções</a></li>
+                            <li><a href="#fundadores" class="decrypt-hover">Fundadores</a></li>
+                        </ul>
+                    </nav>
+                    <span class="effect filter"></span>
+                    <span class="effect text"></span>
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                <!-- Seletor de Idioma -->
+                <div class="lang-selector">
+                    <button class="lang-btn" id="lang-btn" aria-label="Mudar Idioma">
+                        <svg class="globe-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"></path>
+                        </svg>
+                        <span class="lang-current">PT</span>
+                        <span class="lang-arrow">▾</span>
+                    </button>
+                    <div class="lang-dropdown" id="lang-dropdown">
+                        <button onclick="changeLanguage('pt')">Português</button>
+                        <button onclick="changeLanguage('en')">English</button>
+                        <button onclick="changeLanguage('es')">Español</button>
+                        <button onclick="changeLanguage('fr')">Français</button>
+                        <button onclick="changeLanguage('de')">Deutsch</button>
+                        <button onclick="changeLanguage('it')">Italiano</button>
+                        <button onclick="changeLanguage('nl')">Nederlands</button>
+                        <button onclick="changeLanguage('pl')">Polski</button>
+                        <button onclick="changeLanguage('sv')">Svenska</button>
+                    </div>
+                </div>
+
+                <!-- Theme Switcher Widget -->
+                <button id="theme-toggle-btn" class="theme-toggle" aria-label="Alternar Tema" style="margin-right: 15px;">
+                    <svg id="theme-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+
+                <a href="#contato" class="btn-vamos">Vamos?<span class="btn-arrow">→</span></a>
+                <button class="nav-hamburger" id="nav-toggle" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu">
+            <nav class="mobile-nav-links">
+                <a href="#inicio" class="mobile-nav-link">/01 Início</a>
+                <a href="#sobre" class="mobile-nav-link">/02 Sobre</a>
+                <a href="#portfolio" class="mobile-nav-link">/03 Portfólio</a>
+                <a href="#servicos" class="mobile-nav-link">/04 Soluções</a>
+                <a href="#faq" class="mobile-nav-link">/05 Dúvidas</a>
+                <a href="#fundadores" class="mobile-nav-link">/06 Fundadores</a>
+                <a href="#contato" class="mobile-nav-link">/07 Contato</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- ===== HERO ===== -->
+        <section id="inicio" class="hero-section">
+            <!-- Background Video Fullscreen in Grayscale -->
+            <div class="hero-video-bg">
+                <video autoplay muted loop playsinline id="hero-video" preload="auto">
+                    <source src="assets/hero-bg.mp4" type="video/mp4">
+                </video>
+                <div class="hero-video-overlay"></div>
+                <canvas id="hero-grain"></canvas>
+            </div>
+
+            <!-- Centered Cinematic Content -->
+            <div class="hero-content-centered">
+                <h1 class="hero-title-cinematic">
+                    <span class="line-1 reveal-line shiny-text" style="--color: #a8a8a8; --shine-color: #ffffff;" id="hero-title-l1">PROJETOS ÚNICOS</span>
+                    <span class="line-2 reveal-line shiny-text" style="--color: #a8a8a8; --shine-color: #ffffff;" id="hero-title-l2">PRECISAM DE UMA</span>
+                    <span class="line-3"><span id="typewriter-text" class="shiny-text" style="--color: #a8a8a8; --shine-color: #ffffff;">AGÊNCIA ÚNICA</span><span class="typewriter-cursor">|</span></span>
+                </h1>
+                
+                <p class="hero-subtitle-cinematic" id="hero-subtitle">
+                    Vc está no site da agência que trabalhou com grandes nomes no cenário de e-sports FURY (FREE FIRE), INFURIOUS (CALL OF COD), STRESSED GAMING (FREE FIRE), POCOYO EVENTS (ORGANIZAÇÃO DE EVENTOS - FREE FIRE), VIKINGS (FREE FIRE) e dentre outros nomes
+                </p>
+                
+                <div class="hero-scroll-cinematic">
+                    <span>ROLE PARA BAIXO</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <polyline points="19 12 12 19 5 12"></polyline>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Slanted Infinity Marquee Ribbon -->
+            <div class="hero-marquee-container">
+                <div class="hero-marquee-track">
+                    <div class="hero-marquee-content">
+                        <span>ESTRATÉGIA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        <span>DESIGN</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        <span>ROTEIRO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        <span>EXCLUSIVO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        <span>VALORIZAÇÃO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        <span>ESTÉTICA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        <span>PERFORMANCE</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                    </div>
+                    <div class="hero-marquee-content">
+                        <span>ESTRATÉGIA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        <span>DESIGN</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        <span>ROTEIRO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        <span>EXCLUSIVO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        <span>VALORIZAÇÃO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        <span>ESTÉTICA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        <span>PERFORMANCE</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ABOUT / SOBRE ===== -->
+        <section id="sobre" class="about-section">
+            <div class="section-container">
+                <div class="section-label reveal-up">
+                    <span class="label-num">/01</span>
+                    <span class="label-text">Sobre a Aldeia</span>
+                </div>
+
+                <!-- Big animated text paragraph -->
+                <div class="about-big-text reveal-words">
+                    <p id="about-big-text">Trabalhamos com <em>designers profissionais focados em design e marketing para grandes marcas e equipes de e-sports do Brasil e do exterior</em> há cerca de <strong>1 ano</strong> e já atuamos em praticamente todas as grandes equipes de e-sports do Brasil e exterior, e dentre outros nomes del cenário competitivo. Hoje, o nosso foco é claro: <strong>criação de sites, landing pages, flyers, identidade visual, branding e muito mais,</strong> com atenção máxima à estética, experiência e tecnologia.</p>
+                </div>
+
+                <!-- Info cards with red/orange icons -->
+                <div class="about-cards">
+                    <div class="about-card reveal-up" data-delay="0.1">
+                        <div class="card-icon red">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+                        </div>
+                        <p id="about-card1-text">Já desenvolvemos projetos para diferentes mercados e também para clientes fora do Brasil, sempre explorando identidade, ritmo visual e interação.</p>
+                    </div>
+                    <div class="about-card reveal-up" data-delay="0.2">
+                        <div class="card-icon orange">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                        </div>
+                        <p id="about-card2-text">Somos de São Paulo (SP) e Rio de Janeiro (RJ), mas trabalhamos de forma remota com marcas que valorizam design bem executado e presença digital no mais alto nível.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== LOGO LOOP ===== -->
+        <section class="logos-section">
+            <div class="section-container">
+                <div class="reveal-up logos-section-header">
+                    <div class="section-label logos-section-label">
+                        <span class="label-num">/02</span>
+                        <span class="label-text">Identidade Aldeia</span>
+                    </div>
+                    <h3 class="logos-section-title">DNA DA AGÊNCIA</h3>
+                </div>
+                <div class="logoloop logoloop--scale-hover" data-speed="80" data-direction="left" data-pause-on-hover="false" style="padding: 20px 0; --logoloop-logoHeight: 48px; --logoloop-gap: 60px;">
+                    <div class="logoloop__track">
+                        <ul class="logoloop__list" style="display: flex; align-items: center; gap: 60px;">
+                            <li class="logoloop__item"><img src="assets/logo-primaria.svg" alt="Aldeia Primária" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-marca.svg" alt="Aldeia Marca" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-isotype.svg" alt="Aldeia Isotype" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-tp.svg" alt="Aldeia Logo TP" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-secundaria-icon.svg" alt="Aldeia Secundária Icon" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                        </ul>
+                        <ul class="logoloop__list" aria-hidden="true" style="display: flex; align-items: center; gap: 60px;">
+                            <li class="logoloop__item"><img src="assets/logo-primaria.svg" alt="Aldeia Primária" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-marca.svg" alt="Aldeia Marca" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-isotype.svg" alt="Aldeia Isotype" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-tp.svg" alt="Aldeia Logo TP" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-secundaria-icon.svg" alt="Aldeia Secundária Icon" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== PORTFOLIO ===== -->
+        <section id="portfolio" class="portfolio-section">
+            <div class="section-container">
+                <div class="portfolio-header">
+                    <div class="reveal-up">
+                        <div class="section-label">
+                            <span class="label-num">/02</span>
+                            <span class="label-text">Projetos</span>
+                        </div>
+                        <h2 class="mega-title scroll-float">PORTFÓLIO</h2>
+                    </div>
+                    <p class="section-desc reveal-up" data-delay="0.2">Projetos que elevam a percepção. Cada detalhe, interação e escolha visual é pensada para posicionar no nível certo.</p>
+                </div>
+
+                <div class="sphere-root" id="portfolio-dome">
+                    <main class="sphere-main">
+                        <div class="stage">
+                            <div class="sphere">
+                                <!-- Populated dynamically by app.js -->
+                            </div>
+                        </div>
+                        <div class="overlay"></div>
+                        <div class="overlay overlay--blur"></div>
+                        <div class="edge-fade edge-fade--top"></div>
+                        <div class="edge-fade edge-fade--bottom"></div>
+                        <div class="viewer">
+                            <div class="scrim"></div>
+                            <div class="frame"></div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SERVICES / SOLUÇÕES ===== -->
+        <section id="servicos" class="services-section">
+            <div class="section-container">
+                <div class="services-header">
+                    <div class="reveal-up">
+                        <div class="section-label">
+                            <span class="label-num">/03</span>
+                            <span class="label-text">Serviços</span>
+                        </div>
+                        <h2 class="mega-title scroll-float">SOLUÇÕES</h2>
+                    </div>
+                    <p class="section-desc reveal-up" data-delay="0.2" id="services-desc"><strong>Não é sobre volume, é sobre nível.</strong><br>Marcas, sites e criativos desenvolvidos com estratégias, estética e intenção.</p>
+                </div>
+
+                <div class="services-accordion reveal-up" id="services-accordion-list">
+                    <!-- Populated dynamically by CMS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== FAQ ===== -->
+        <section id="faq" class="faq-section">
+            <div class="section-container">
+                <div class="faq-header">
+                    <div class="reveal-up">
+                        <div class="section-label">
+                            <span class="label-num">/04</span>
+                            <span class="label-text">FAQ</span>
+                        </div>
+                        <h2 class="mega-title scroll-float">DÚVIDAS</h2>
+                    </div>
+                    <div class="faq-desc reveal-up" data-delay="0.2" id="faq-desc-container">
+                        <p>Algumas respostas importantes antes de começarmos.</p>
+                        <p class="dim">Clareza faz parte de qualquer projeto bem executado.</p>
+                    </div>
+                </div>
+
+                <div class="faq-list reveal-up" id="faq-list-container">
+                    <!-- Populated dynamically by CMS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== FUNDADORES ===== -->
+        <section id="fundadores" class="founders-section">
+            <div class="section-container">
+                <div class="founders-header">
+                    <div class="reveal-up">
+                        <div class="section-label">
+                            <span class="label-num">/05</span>
+                            <span class="label-text">Fundadores & CEOs</span>
+                        </div>
+                        <h2 class="mega-title">MINDSET</h2>
+                    </div>
+                    <p class="section-desc reveal-up" data-delay="0.2">
+                        As mentes por trás do design e posicionamento estratégico da agência.
+                    </p>
+                </div>
+
+                <div class="founders-grid">
+                    <!-- Founder 1: Temari -->
+                    <div class="pc-card-wrapper founder-card reveal-up" data-delay="0.1" id="founder-temari">
+                        <div class="pc-behind"></div>
+                        <div class="pc-card-shell">
+                            <section class="pc-card">
+                                <div class="pc-inside">
+                                    <div class="pc-shine"></div>
+                                    <div class="pc-glare"></div>
+                                    <div class="pc-content pc-avatar-content">
+                                        <img class="avatar" src="assets/temari.webp" alt="Temari avatar" loading="lazy">
+                                        <div class="pc-user-info">
+                                            <div class="pc-user-details">
+                                                <div class="pc-mini-avatar">
+                                                    <img src="assets/temari.webp" alt="Temari mini avatar" loading="lazy">
+                                                </div>
+                                                <div class="pc-user-text">
+                                                    <span class="pc-handle">@temari</span>
+                                                    <span class="pc-status">CEO & Design</span>
+                                                </div>
+                                            </div>
+                                            <a href="https://wa.me/5511959737873?text=Olá!%20Vim%20pelo%20site%20da%20Aldeia%20e%20gostaria%20de%20falar%20com%20a%20Temari." target="_blank" rel="noopener noreferrer" class="pc-contact-btn">Contato</a>
+                                        </div>
+                                    </div>
+                                    <div class="pc-content">
+                                        <div class="pc-details">
+                                            <h3>Temari</h3>
+                                            <p>Designer & CEO</p>
+                                            <span class="pc-bio">Diretora Criativa focada em branding e identidade visual de alto impacto.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                    <!-- Founder 2: Japex -->
+                    <div class="pc-card-wrapper founder-card reveal-up" data-delay="0.2" id="founder-japex">
+                        <div class="pc-behind"></div>
+                        <div class="pc-card-shell">
+                            <section class="pc-card">
+                                <div class="pc-inside">
+                                    <div class="pc-shine"></div>
+                                    <div class="pc-glare"></div>
+                                    <div class="pc-content pc-avatar-content">
+                                        <img class="avatar" src="assets/japex.webp" alt="Japex avatar" loading="lazy">
+                                        <div class="pc-user-info">
+                                            <div class="pc-user-details">
+                                                <div class="pc-mini-avatar">
+                                                    <img src="assets/japex.webp" alt="Japex mini avatar" loading="lazy">
+                                                </div>
+                                                <div class="pc-user-text">
+                                                    <span class="pc-handle">@japex</span>
+                                                    <span class="pc-status">CEO & Tech</span>
+                                                </div>
+                                            </div>
+                                            <a href="https://wa.me/5521980638271?text=Olá!%20Vim%20pelo%20site%20da%20Aldeia%20e%20gostaria%20de%20falar%20com%20o%20Japex." target="_blank" rel="noopener noreferrer" class="pc-contact-btn">Contato</a>
+                                        </div>
+                                    </div>
+                                    <div class="pc-content">
+                                        <div class="pc-details">
+                                            <h3>Japex</h3>
+                                            <p>Designer & CEO</p>
+                                            <span class="pc-bio">Especialista em interfaces digitais, UI/UX design gráfico e desenvolvimento web.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== CTA BANNER ===== -->
+        <section id="contato" class="cta-banner">
+            <div class="cta-video-bg">
+                <video autoplay muted loop playsinline><source src="assets/hero-bg.mp4" type="video/mp4"></video>
+                <div class="cta-overlay"></div>
+            </div>
+            <div class="cta-inner">
+                <div class="logo-contact-wrap reveal-up">
+                    <div class="logo-contact-circle">
+                        <img src="assets/logo-isotype.svg" class="logo-contact" alt="ALDEIA Icon">
+                    </div>
+                </div>
+                <div class="cta-left reveal-up" data-delay="0.1">
+                    <p>Vamos <strong>tirar isso do rascunho</strong> e levar para...</p>
+                </div>
+                <a href="javascript:void(0)" onclick="openBudgetModal()" class="btn-cta reveal-up" data-delay="0.2">Faça um orçamento<span class="btn-arrow-icon">→</span></a>
+            </div>
+        </section>
+
+        <!-- ===== O FUTURO? ===== -->
+        <section class="future-section">
+            <div class="section-container">
+                <div class="future-inner reveal-up">
+                    <div class="future-title-wrapper">
+                        <div class="metallic-paint" 
+                             id="future-metallic" 
+                             data-text="O FUTURO?" 
+                             data-font="Clash Display" 
+                             data-size="220"
+                             data-scale="4"
+                             data-refraction="0.015"
+                             data-blur="0.008"
+                             data-liquid="0.25"
+                             data-speed="0.25"
+                             data-brightness="1.5"
+                             data-contrast="1.0"
+                             data-chroma="0.0"
+                             data-light-color="#e9d5ff"
+                             data-dark-color="#090014"
+                             data-tint="#2a004f"
+                             data-mouse="false"
+                             data-wave="0.4"
+                             >
+                        </div>
+                    </div>
+                    <div class="future-text">
+                        <p id="future-subtitle">Se você quer algo <strong>acima do padrão,</strong> estou pronto para construir.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-col footer-brand">
+                <div class="footer-logo-wrap">
+                    <img src="assets/logo-tp.svg" class="logo-footer" alt="ALDEIA Logo">
+                </div>
+                <p id="footer-desc">Buscando algo <strong>fora do padrão?</strong><br>Vamos conversar.</p>
+                <a href="javascript:void(0)" onclick="openBudgetModal()" class="btn-cta btn-cta-sm">Faça um orçamento<span class="btn-arrow-icon">→</span></a>
+            </div>
+            <div class="footer-col">
+                <h4>Navegação</h4>
+                <nav>
+                    <a href="#inicio">/01 Início</a>
+                    <a href="#portfolio">/02 Portfólio</a>
+                    <a href="#servicos">/03 Soluções</a>
+                    <a href="#faq">/04 Dúvidas</a>
+                    <a href="#fundadores">/05 Fundadores</a>
+                </nav>
+            </div>
+            <div class="footer-col">
+                <h4>Redes</h4>
+                <nav>
+                    <a href="https://instagram.com" id="footer-instagram" target="_blank" rel="noopener">Instagram <span class="ext">↗</span></a>
+                    <a href="https://facebook.com" target="_blank" rel="noopener">Facebook <span class="ext">↗</span></a>
+                    <a href="https://tiktok.com" target="_blank" rel="noopener">TikTok <span class="ext">↗</span></a>
+                    <a href="https://behance.net" id="footer-behance" target="_blank" rel="noopener">Behance <span class="ext">↗</span></a>
+                </nav>
+            </div>
+            <div class="footer-col">
+                <h4>Contato</h4>
+                <nav>
+                    <a href="tel:+5521980638271" id="footer-phone">+55 (21) 98063-8271</a>
+                    <a href="mailto:contato@aldeiadesign.com.br" id="footer-email">contato@aldeiadesign.com.br</a>
+                </nav>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>Aldeia Studio © <strong>2026.</strong> Todos os direitos reservados.</span>
+        </div>
+    </footer>
+
+    <!-- SVG Filter for Gooey Navigation Effect -->
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display: none;">
+        <defs>
+            <filter id="gooey-nav-filter">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- GOOGLE TRANSLATE ELEMENT -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'pt',
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="app.js"></script>
+    <script>setTimeout(function(){var p=document.getElementById('preloader');if(p&&!p.classList.contains('loaded')){p.classList.add('loaded');setTimeout(function(){p.style.display='none';if(window.lenis)window.lenis.start()},1200)}},6000);</script>
+
+    <!-- MODAL ORÇAMENTO -->
+    <div id="budget-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeBudgetModal()">✕</button>
+            <div id="modal-success-screen" style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                <svg style="width: 64px; height: 64px; stroke: #a855f7; margin-bottom: 24px; fill: none;" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <h3 style="font-family: var(--font-h); font-size: 1.8rem; margin-bottom: 12px; text-transform: uppercase;">Cadastro Enviado!</h3>
+                <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 30px; max-width: 320px; line-height: 1.6;">Recebemos suas informações com sucesso.</p>
+                <a href="" id="modal-wa-btn" target="_blank" class="btn-cta" style="padding: 14px 28px; width: auto; font-size: 0.95rem;">Falar Conosco via WhatsApp <span style="margin-left: 6px;">↗</span></a>
+            </div>
+            <div id="modal-form-screen">
+                <h2 style="font-family: var(--font-h); font-size: 2rem; font-weight: 600; text-transform: uppercase; margin-bottom: 10px;">Faça seu Orçamento</h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 30px; line-height: 1.5;">Conte-nos sua ideia e vamos dar vida ao seu projeto.</p>
+                <form id="modal-cadastro-form">
+                    <div class="input-group">
+                        <label class="input-label" for="m-nome">Nome Completo</label>
+                        <input class="input-control" type="text" id="m-nome" required placeholder="Ex: João Silva">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="m-email">E-mail de Contato</label>
+                        <input class="input-control" type="email" id="m-email" required placeholder="Ex: joao@empresa.com">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="m-telefone">WhatsApp</label>
+                        <input class="input-control" type="tel" id="m-telefone" required placeholder="Ex: (21) 98063-8271">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="m-instagram">Instagram (Opcional)</label>
+                        <input class="input-control" type="text" id="m-instagram" placeholder="Ex: @sua.marca ou @seu.perfil">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="m-projeto">Ideia do Projeto</label>
+                        <textarea class="input-control" id="m-projeto" required placeholder="Descreva brevemente o projeto, soluções necessárias, e-sports ou identidade visual..." style="min-height: 100px; resize: vertical;"></textarea>
+                    </div>
+                    <button class="btn-submit" type="submit" id="m-btn-envio" style="width: 100%; background: #fff; color: #000; padding: 16px; border-radius: 6px; font-weight: 600; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <span class="m-spinner" style="display: none; width: 20px; height: 20px; border: 2px solid rgba(0,0,0,0.1); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite;"></span>
+                        <span id="m-btn-text">Enviar Proposta</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        #budget-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.4s var(--ease);
+        }
+        #budget-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        #budget-modal .modal-content {
+            width: 90%;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 35px 30px;
+            border-radius: 12px;
+            position: relative;
+            transform: scale(0.92);
+            transition: transform 0.4s var(--ease);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+        }
+        #budget-modal.active .modal-content {
+            transform: scale(1);
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.3s;
+            background: none;
+            border: none;
+        }
+        .modal-close:hover {
+            color: #fff;
+        }
+        #budget-modal .input-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        #budget-modal .input-label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        #budget-modal .input-control {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-family: var(--font-b);
+            font-size: 0.9rem;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+        #budget-modal .input-control:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        #budget-modal .btn-submit:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+        }
+        #budget-modal .btn-submit:disabled .m-spinner {
+            display: inline-block !important;
+        }
+    </style>
+
+    <script>
+        /* ============================================
+           ALDEIA TELEMETRY MODULE — Zero-CLS Tracker
+           AES-256-CBC | sendBeacon | performance.now
+           ============================================ */
+        (function() {
+            const host = window.location.hostname || 'localhost';
+            const TELEMETRY_URL = `http://${host}:3001/api/telemetry`;
+            const KEY_URL = `http://${host}:3001/api/telemetry/encryption-key`;
+
+            // Session state
+            window.__aldeiaTelemetry = {
+                sessionId: null,
+                modalOpenTime: null,
+                converted: false,
+                encryptionKey: null,
+                initialized: false
+            };
+
+            // Generate anonymous session ID
+            function generateSessionId() {
+                const arr = new Uint8Array(16);
+                crypto.getRandomValues(arr);
+                return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            // Fetch encryption key from server (async, non-blocking)
+            async function fetchEncryptionKey() {
+                try {
+                    const res = await fetch(KEY_URL);
+                    if (res.ok) {
+                        const data = await res.json();
+                        window.__aldeiaTelemetry.encryptionKey = data.key;
+                    }
+                } catch (e) {
+                    console.warn('[Telemetry] Chave de criptografia indisponível, usando fallback.');
+                }
+            }
+
+            // AES-256-CBC encrypt using Web Crypto API
+            async function encryptPayload(payload) {
+                const keyHex = window.__aldeiaTelemetry.encryptionKey;
+                if (!keyHex || !window.crypto || !window.crypto.subtle) return null;
+
+                try {
+                    const keyBytes = new Uint8Array(keyHex.match(/.{2}/g).map(b => parseInt(b, 16)));
+                    const iv = crypto.getRandomValues(new Uint8Array(16));
+                    const cryptoKey = await crypto.subtle.importKey(
+                        'raw', keyBytes, { name: 'AES-CBC' }, false, ['encrypt']
+                    );
+                    const encoded = new TextEncoder().encode(JSON.stringify(payload));
+                    const encrypted = await crypto.subtle.encrypt(
+                        { name: 'AES-CBC', iv: iv }, cryptoKey, encoded
+                    );
+                    return {
+                        iv: Array.from(iv, b => b.toString(16).padStart(2, '0')).join(''),
+                        data: Array.from(new Uint8Array(encrypted), b => b.toString(16).padStart(2, '0')).join('')
+                    };
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            // Send telemetry (non-blocking)
+            async function sendTelemetry(eventType, converted) {
+                const t = window.__aldeiaTelemetry;
+                if (!t.modalOpenTime) return;
+
+                const dwellTime = parseFloat(((performance.now() - t.modalOpenTime) / 1000).toFixed(2));
+                const payload = {
+                    session_id: t.sessionId,
+                    event_type: eventType,
+                    converted: converted,
+                    dwell_time: dwellTime,
+                    page_url: window.location.pathname
+                };
+
+                // Try encrypted send
+                const encrypted = await encryptPayload(payload);
+                if (encrypted) {
+                    const blob = new Blob([JSON.stringify(encrypted)], { type: 'application/json' });
+                    if (navigator.sendBeacon) {
+                        // sendBeacon doesn't support custom headers, use fetch with keepalive
+                        fetch(TELEMETRY_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Telemetry-Encrypted': 'true'
+                            },
+                            body: JSON.stringify(encrypted),
+                            keepalive: true
+                        }).catch(() => {});
+                    } else {
+                        fetch(TELEMETRY_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Telemetry-Encrypted': 'true'
+                            },
+                            body: JSON.stringify(encrypted)
+                        }).catch(() => {});
+                    }
+                } else {
+                    // Fallback: send unencrypted via sendBeacon
+                    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                    if (navigator.sendBeacon) {
+                        navigator.sendBeacon(TELEMETRY_URL, blob);
+                    } else {
+                        fetch(TELEMETRY_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload),
+                            keepalive: true
+                        }).catch(() => {});
+                    }
+                }
+            }
+
+            // Initialize on page load
+            window.__aldeiaTelemetry.sessionId = generateSessionId();
+            fetchEncryptionKey();
+            window.__aldeiaTelemetry.initialized = true;
+
+            // Abandonment on page unload (if modal was open and not converted)
+            window.addEventListener('beforeunload', function() {
+                const t = window.__aldeiaTelemetry;
+                if (t.modalOpenTime && !t.converted) {
+                    const dwellTime = parseFloat(((performance.now() - t.modalOpenTime) / 1000).toFixed(2));
+                    const payload = {
+                        session_id: t.sessionId,
+                        event_type: 'abandonment',
+                        converted: false,
+                        dwell_time: dwellTime,
+                        page_url: window.location.pathname
+                    };
+                    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                    navigator.sendBeacon(TELEMETRY_URL, blob);
+                }
+            });
+
+            window.sendTelemetry = sendTelemetry;
+        })();
+
+        function openBudgetModal() {
+            const modal = document.getElementById('budget-modal');
+            const formScreen = document.getElementById('modal-form-screen');
+            const successScreen = document.getElementById('modal-success-screen');
+            
+            formScreen.style.display = 'block';
+            successScreen.style.display = 'none';
+            document.getElementById('modal-cadastro-form').reset();
+            
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+            
+            if (window.lenis) window.lenis.stop();
+
+            // [TELEMETRY] Start tracking dwell time
+            window.__aldeiaTelemetry.modalOpenTime = performance.now();
+            window.__aldeiaTelemetry.converted = false;
+        }
+
+        function closeBudgetModal() {
+            const modal = document.getElementById('budget-modal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 400);
+            
+            if (window.lenis) window.lenis.start();
+
+            // [TELEMETRY] Track abandonment if not converted
+            const t = window.__aldeiaTelemetry;
+            if (t.modalOpenTime && !t.converted) {
+                sendTelemetry('abandonment', false);
+                t.modalOpenTime = null;
+            }
+        }
+
+        const modalForm = document.getElementById('modal-cadastro-form');
+        const modalSubmitBtn = document.getElementById('m-btn-envio');
+        const modalBtnText = document.getElementById('m-btn-text');
+        
+        modalForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            modalSubmitBtn.disabled = true;
+            modalBtnText.textContent = 'Enviando...';
+
+            const nome = document.getElementById('m-nome').value;
+            const email = document.getElementById('m-email').value;
+            const telefone = document.getElementById('m-telefone').value;
+            const instagram = document.getElementById('m-instagram') ? document.getElementById('m-instagram').value : '';
+            const projeto = document.getElementById('m-projeto').value;
+
+            let userGeo = { city: 'Desconhecida', region: '' };
+            try {
+                const geoRes = await fetch('https://ipapi.co/json/');
+                if (geoRes.ok) {
+                    const geoData = await geoRes.json();
+                    userGeo.city = geoData.city || 'Desconhecida';
+                    userGeo.region = geoData.region || geoData.region_code || '';
+                }
+            } catch (err) {
+                console.warn('Geolocation lookup failed:', err);
+            }
+
+            const data = {
+                nome: nome,
+                email: email,
+                telefone: telefone,
+                instagram: instagram,
+                projeto: projeto,
+                cidade: userGeo.city,
+                regiao: userGeo.region
+            };
+
+            try {
+                const response = await fetch('/api/cadastro', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    let submissionId = null;
+                    try {
+                        const resData = await response.json();
+                        submissionId = resData.id;
+                    } catch (e) {
+                        console.warn('Failed to parse submission ID:', e);
+                    }
+
+                    // [TELEMETRY] Track conversion
+                    window.__aldeiaTelemetry.converted = true;
+                    sendTelemetry('conversion', true);
+                    window.__aldeiaTelemetry.modalOpenTime = null;
+
+                    const cleanPhone = telefone.replace(/\D/g, '');
+                    const waBtn = document.getElementById('modal-wa-btn');
+                    waBtn.href = `https://wa.me/5521980638271?text=Olá!%20Meu%20nome%20é%20${encodeURIComponent(nome)}.%20Acabei%20de%20solicitar%20um%20orçamento%20no%20site%20para%20o%20projeto:%20${encodeURIComponent(projeto)}.`;
+
+                    // Register WhatsApp click event
+                    if (submissionId) {
+                        waBtn.onclick = async function() {
+                            try {
+                                await fetch('/api/cadastro/click-link', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ id: submissionId })
+                                });
+                            } catch (clickErr) {
+                                console.error('Failed to register WA click:', clickErr);
+                            }
+                        };
+                    }
+
+                    document.getElementById('modal-form-screen').style.display = 'none';
+                    document.getElementById('modal-success-screen').style.display = 'flex';
+                } else {
+                    alert('Erro ao enviar. Tente novamente.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erro na conexão com o servidor.');
+            } finally {
+                modalSubmitBtn.disabled = false;
+                modalBtnText.textContent = 'Enviar Proposta';
+            }
+        });
+
+        // --- DYNAMIC CONTENT (CMS) ---
+        function bindAccordionTriggers() {
+            document.querySelectorAll('.svc-item').forEach(item => {
+                const header = item.querySelector('.svc-header');
+                const close = item.querySelector('.svc-close');
+                if (header) {
+                    header.addEventListener('click', () => {
+                        const active = item.classList.contains('active');
+                        document.querySelectorAll('.svc-item').forEach(s => s.classList.remove('active'));
+                        if (!active) item.classList.add('active');
+                    });
+                }
+                if (close) {
+                    close.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        item.classList.remove('active');
+                    });
+                }
+            });
+        }
+
+        function bindFaqTriggers() {
+            document.querySelectorAll('.faq-item').forEach(item => {
+                const btn = item.querySelector('.faq-btn');
+                if (btn) {
+                    btn.addEventListener('click', () => {
+                        const active = item.classList.contains('active');
+                        document.querySelectorAll('.faq-item').forEach(f => f.classList.remove('active'));
+                        if (!active) item.classList.add('active');
+                    });
+                }
+            });
+        }
+
+        async function loadContent() {
+            try {
+                const res = await fetch('/api/content?t=' + Date.now());
+                if (res.ok) {
+                    const content = await res.json();
+                    
+                    // Hero texts
+                    if (content.heroTitleLine1) {
+                        document.getElementById('hero-title-l1').textContent = content.heroTitleLine1;
+                    }
+                    if (content.heroTitleLine2) {
+                        document.getElementById('hero-title-l2').textContent = content.heroTitleLine2;
+                    }
+                    if (content.heroTitleLine3) {
+                        const l3 = document.getElementById('typewriter-text');
+                        if (l3) l3.textContent = content.heroTitleLine3;
+                    }
+                    if (content.heroSubtitle) {
+                        document.getElementById('hero-subtitle').textContent = content.heroSubtitle;
+                    }
+
+                    // About
+                    if (content.about) {
+                        const ab = content.about;
+                        const abText = document.getElementById('about-big-text');
+                        if (abText) abText.innerHTML = ab.bigText;
+                        const c1Text = document.getElementById('about-card1-text');
+                        if (c1Text) c1Text.textContent = ab.card1;
+                        const c2Text = document.getElementById('about-card2-text');
+                        if (c2Text) c2Text.textContent = ab.card2;
+                    }
+
+                    // Services
+                    if (content.services) {
+                        const sDesc = document.getElementById('services-desc');
+                        if (sDesc) sDesc.innerHTML = content.services.desc;
+                        
+                        const sAccordion = document.getElementById('services-accordion-list');
+                        if (sAccordion && content.services.items) {
+                            sAccordion.innerHTML = '';
+                            content.services.items.forEach((item, index) => {
+                                const num = String(index + 1).padStart(2, '0');
+                                const tagsHtml = item.tags.map(t => `<span>${t}</span>`).join('');
+                                const itemHtml = `
+                                    <div class="svc-item" data-svc="${index + 1}">
+                                        <div class="svc-header">
+                                            <span class="svc-num">${num}</span>
+                                            <h3 class="svc-title">${item.title}</h3>
+                                            <div class="svc-toggle"><span></span><span></span></div>
+                                        </div>
+                                        <div class="svc-body">
+                                            <div class="svc-text">
+                                                <p>${item.text}</p>
+                                                <div class="svc-tags">${tagsHtml}</div>
+                                            </div>
+                                            <div class="svc-image">
+                                                <img src="${item.image}" alt="${item.title}" loading="lazy">
+                                                <button class="svc-close">✕</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                sAccordion.insertAdjacentHTML('beforeend', itemHtml);
+                            });
+                            bindAccordionTriggers();
+                        }
+                    }
+
+                    // FAQs
+                    if (content.faqs) {
+                        const faqContainer = document.getElementById('faq-list-container');
+                        if (faqContainer) {
+                            faqContainer.innerHTML = '';
+                            content.faqs.forEach((faq, index) => {
+                                const num = String(index + 1).padStart(2, '0');
+                                const faqHtml = `
+                                    <div class="faq-item">
+                                        <button class="faq-btn">
+                                            <span class="faq-num">/${num}</span>
+                                            <span class="faq-q">${faq.q}</span>
+                                            <span class="faq-icon"><span></span><span></span></span>
+                                        </button>
+                                        <div class="faq-answer">${faq.a}</div>
+                                    </div>
+                                `;
+                                faqContainer.insertAdjacentHTML('beforeend', faqHtml);
+                            });
+                            bindFaqTriggers();
+                        }
+                    }
+
+                    // Future Section & WebGL
+                    if (content.future) {
+                        const fut = content.future;
+                        const sub = document.getElementById('future-subtitle');
+                        if (sub) sub.innerHTML = fut.subtitle;
+                        
+                        const paint = document.getElementById('future-metallic');
+                        if (paint) {
+                            paint.setAttribute('data-text', fut.text || 'O FUTURO?');
+                            paint.setAttribute('data-scale', fut.scale);
+                            paint.setAttribute('data-refraction', fut.refraction);
+                            paint.setAttribute('data-blur', fut.blur);
+                            paint.setAttribute('data-liquid', fut.liquid);
+                            paint.setAttribute('data-speed', fut.speed);
+                            paint.setAttribute('data-brightness', fut.brightness);
+                            paint.setAttribute('data-contrast', fut.contrast);
+                            paint.setAttribute('data-chroma', fut.chroma);
+                            paint.setAttribute('data-light-color', fut.lightColor);
+                            paint.setAttribute('data-dark-color', fut.darkColor);
+                            paint.setAttribute('data-tint', fut.tint);
+                            paint.setAttribute('data-wave', fut.wave);
+                            
+                            const canvas = paint.querySelector('.paint-container');
+                            if (canvas) canvas.remove();
+                            
+                            if (typeof window.initMetallicPaint === 'function') {
+                                window.initMetallicPaint();
+                            }
+                        }
+                    }
+
+                    // Founders
+                    if (content.founders) {
+                        const temari = content.founders.temari;
+                        if (temari) {
+                            const rootT = document.getElementById('founder-temari');
+                            if (rootT) {
+                                rootT.querySelector('.avatar').src = temari.image;
+                                rootT.querySelector('.pc-mini-avatar img').src = temari.image;
+                                rootT.querySelector('.pc-handle').textContent = temari.handle;
+                                rootT.querySelector('.pc-status').textContent = temari.status;
+                                rootT.querySelector('h3').textContent = temari.name;
+                                rootT.querySelector('p').textContent = temari.role;
+                                rootT.querySelector('.pc-bio').textContent = temari.bio;
+                            }
+                        }
+
+                        const japex = content.founders.japex;
+                        if (japex) {
+                            const rootJ = document.getElementById('founder-japex');
+                            if (rootJ) {
+                                rootJ.querySelector('.avatar').src = japex.image;
+                                rootJ.querySelector('.pc-mini-avatar img').src = japex.image;
+                                rootJ.querySelector('.pc-handle').textContent = japex.handle;
+                                rootJ.querySelector('.pc-status').textContent = japex.status;
+                                rootJ.querySelector('h3').textContent = japex.name;
+                                rootJ.querySelector('p').textContent = japex.role;
+                                rootJ.querySelector('.pc-bio').textContent = japex.bio;
+                            }
+                        }
+                    }
+
+                    // Portfolio Gallery Dome
+                    if (content.portfolio && content.portfolio.length > 0) {
+                        window.aldeiaPortfolioImages = content.portfolio;
+                        if (typeof window.initDomeGallery === 'function') {
+                            window.initDomeGallery();
+                        }
+                    }
+
+                    // Footer
+                    if (content.footer) {
+                        const foot = content.footer;
+                        const fDesc = document.getElementById('footer-desc');
+                        if (fDesc) fDesc.innerHTML = foot.desc;
+                        
+                        const fPhone = document.getElementById('footer-phone');
+                        if (fPhone) {
+                            fPhone.href = `tel:${foot.phone}`;
+                            fPhone.textContent = foot.phoneDisplay;
+                        }
+                        
+                        const fEmail = document.getElementById('footer-email');
+                        if (fEmail) {
+                            fEmail.href = `mailto:${foot.email}`;
+                            fEmail.textContent = foot.email;
+                        }
+                        
+                        const fInsta = document.getElementById('footer-instagram');
+                        if (fInsta) fInsta.href = foot.instagram;
+                        
+                        const fBehance = document.getElementById('footer-behance');
+                        if (fBehance) fBehance.href = foot.behance;
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to load dynamic content:', err);
+            }
+        }
+        loadContent();
+
+        // --- DECRYPT TEXT EFFECT ---
+        function decryptText(element, duration = 800) {
+            const originalText = element.getAttribute('data-original-text') || element.textContent;
+            if (!element.getAttribute('data-original-text')) {
+                element.setAttribute('data-original-text', originalText);
+            }
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%-+*';
+            let start = null;
+            
+            function step(timestamp) {
+                if (!start) start = timestamp;
+                const progress = timestamp - start;
+                const percentage = Math.min(progress / duration, 1);
+                
+                let result = '';
+                for (let i = 0; i < originalText.length; i++) {
+                    if (originalText[i] === ' ') {
+                        result += ' ';
+                        continue;
+                    }
+                    if (i / originalText.length < percentage) {
+                        result += originalText[i];
+                    } else {
+                        result += chars[Math.floor(Math.random() * chars.length)];
+                    }
+                }
+                element.textContent = result;
+                if (progress < duration) {
+                    requestAnimationFrame(step);
+                }
+            }
+            requestAnimationFrame(step);
+        }
+
+        document.querySelectorAll('.decrypt-hover').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                decryptText(el);
+            });
+        });
+
+        // Scroll to Top Button Toggle
+        const scrollTopBtn = document.getElementById('scroll-to-top-btn');
+        if (scrollTopBtn) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 400) {
+                    scrollTopBtn.classList.add('visible');
+                } else {
+                    scrollTopBtn.classList.remove('visible');
+                }
+            });
+            scrollTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        // Phone Input Mask (Brazilian (XX) XXXXX-XXXX)
+        const phoneInput = document.getElementById('m-telefone');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 11) value = value.substring(0, 11);
+                
+                let formatted = '';
+                if (value.length > 0) {
+                    formatted = '(' + value.substring(0, 2);
+                    if (value.length > 2) {
+                        formatted += ') ' + value.substring(2, 7);
+                        if (value.length > 7) {
+                            formatted += '-' + value.substring(7, 11);
+                        }
+                    }
+                }
+                e.target.value = formatted;
+            });
+        }
+
+        // Theme Switcher Logic
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const themeIcon = document.getElementById('theme-icon');
+        
+        const sunSvgHtml = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+        const moonSvgHtml = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+
+        function updateThemeUI(isLight) {
+            if (isLight) {
+                document.body.classList.add('light-theme');
+                if (themeIcon) themeIcon.innerHTML = sunSvgHtml;
+            } else {
+                document.body.classList.remove('light-theme');
+                if (themeIcon) themeIcon.innerHTML = moonSvgHtml;
+            }
+        }
+
+        // Check saved preference
+        const savedTheme = localStorage.getItem('aldeia_theme');
+        updateThemeUI(savedTheme === 'light');
+
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                const isLight = document.body.classList.toggle('light-theme');
+                localStorage.setItem('aldeia_theme', isLight ? 'light' : 'dark');
+                updateThemeUI(isLight);
+            });
+        }
+    </script>
+
+    <!-- FLOATING WIDGETS -->
+    <a href="https://wa.me/5521980638271?text=Olá!%20Gostaria%20de%20solicitar%20um%20orçamento%20com%20a%20Aldeia." target="_blank" id="floating-whatsapp-widget" class="floating-cta" aria-label="Falar no WhatsApp">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+            <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 001.37 5.054L2 22l5.077-1.331a9.907 9.907 0 004.93 1.317h.005c5.507 0 9.99-4.478 9.99-9.986 0-2.67-1.037-5.178-2.923-7.067C17.195 3.044 14.685 2 12.012 2zm5.794 13.916c-.246.695-1.206 1.272-1.666 1.34-.46.069-.884.288-2.946-.527-2.615-1.033-4.24-3.708-4.37-3.882-.132-.174-1.077-1.431-1.077-2.731 0-1.3 0-1.879-.383-2.274-.383-.395-.838-.493-1.07-.493-.23 0-.495.033-.709.247-.215.214-.82.802-.82 1.954 0 1.152.838 2.261.955 2.418.118.158 1.616 2.467 3.973 3.483 2.357 1.016 2.357.677 2.784.637.428-.04 1.38-.564 1.576-1.11.196-.546.196-1.016.138-1.115-.058-.1-.214-.158-.474-.288-.26-.13-1.536-.757-1.774-.842-.238-.085-.411-.13-.585.13-.174.26-.673.842-.825 1.016-.152.174-.304.196-.564.066-.26-.13-1.101-.407-2.096-1.293-.775-.69-1.3-1.547-1.452-1.807-.152-.26-.016-.4.113-.529.117-.116.26-.304.39-.456.13-.152.173-.26.26-.434.086-.174.043-.326-.021-.456-.065-.13-.585-1.41-.801-1.93-.216-.52-.452-.45-.618-.45h-.52c-.173 0-.455.065-.693.321C7.39 6.26 6.57 7.04 6.57 8.602c0 1.562 1.134 3.076 1.286 3.28 1.48 1.996 3.328 3.056 5.518 3.86 2.19.804 2.19.536 2.628.496.438-.04 1.41-.577 1.61-1.139a2.023 2.023 0 00.138-1.12c-.058-.099-.214-.157-.474-.287z"/>
+        </svg>
+    </a>
+
+    <button id="scroll-to-top-btn" class="scroll-to-top" aria-label="Voltar ao Topo">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </button>
+
+    <!-- TELEMETRIA DE CHECKOUT (Conversão, Dwell-Time, Anti-Spoofing) -->
+    <script src="assets/telemetry.js"></script>
+</body>
+</html>

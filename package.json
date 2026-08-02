@@ -1,0 +1,18 @@
+{
+  "name": "aldeia-root",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npm run dev --prefix aldeia-site-oficial",
+    "telemetry": "node aldeia-site-oficial/telemetry-server.js"
+  },
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1",
+    "sqlite3": "^6.0.1"
+  }
+}

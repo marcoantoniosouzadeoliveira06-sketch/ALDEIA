@@ -1,0 +1,83 @@
+Created At: 2026-05-21T19:09:55Z
+Completed At: 2026-05-21T19:09:55Z
+File Path: `file:///c:/Users/User/Documents/ALDEIA/aldeia-site-oficial/index.html`
+Total Lines: 358
+Total Bytes: 19953
+Showing lines 1 to 358
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: <!DOCTYPE html>
+2: <html lang="pt-BR">
+3: <head>
+4:     <meta charset="UTF-8">
+5:     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+6:     <title>ALDEIA | Agência de Design Premium</title>
+7:     <meta name="description" content="ALDEIA é uma agência de design boutique especializada em identidade visual, branding e soluções visuais estratégicas para marcas que querem liderar o seu mercado.">
+8:     <link rel="stylesheet" href="style.css">
+9:     <link rel="preconnect" href="https://fonts.googleapis.com">
+10:     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+11:     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+12: </head>
+13: <body>
+14: 
+15:             <!-- ===== PRELOADER CINEMATOGRÁFICO ===== -->
+16:     <div id="preloader">
+17:         <div class="preloader-panel left"></div>
+18:         <div class="preloader-panel right"></div>
+19:         <div class="preloader-logo">
+20:             <img src="assets/logo-secundaria.png" alt="ALDEIA Logo">
+21:         </div>
+22:     </div>
+23: 
+24:     <!-- ===== CURSOR PERSONALIZADO ===== -->
+25:     <div id="custom-cursor"></div>
+26:     <div id="cursor-follower"></div>
+27: 
+28:     <!-- ===== CONFIGURAÇÕES DE BACKGROUND ESTILO LENIS ===== -->
+29:     <!-- Linhas de Grade de Fundo (Grid Lines) -->
+30:     <div class="grid-lines-bg" aria-hidden="true">
+31:         <div class="grid-line"></div>
+32:  
+<truncated 18074 bytes>
+e-link" class="social-link">Behance</a>
+318:                     <span class="social-sep">Â·</span>
+319:                     <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" id="linkedin-link" class="social-link">LinkedIn</a>
+320:                 </div>
+321: 
+322:             </div>
+323:         </section>
+324: 
+325:     </main>
+326: 
+327:     <!-- ===== RODAPÃ‰ ===== -->
+328:     <footer class="footer">
+329:         <div class="footer-inner">
+330:             <div class="footer-logo">
+331:                 <img src="assets/logo-tp.svg" alt="ALDEIA" class="footer-logo-img">
+332:             </div>
+333:             <p class="footer-copy">Â© 2025 Aldeia Agência. Todos os direitos reservados.</p>
+334:             <p class="footer-tagline">Feito com intenção. Entregue com excelência.</p>
+335:         </div>
+336:     </footer>
+337: 
+338:         <!-- Lenis Smooth Scroll CDN -->
+339:     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+340:     <script src="app.js"></script>
+341:     <script>
+342:         // Fail-safe de segurança: Se por qualquer motivo o preloader não sumir em 3.2s, força a abertura suave do site
+343:         setTimeout(function() {
+344:             var pre = document.getElementById('preloader');
+345:             if (pre && pre.style.display !== 'none' && !pre.classList.contains('fade-out')) {
+346:                 console.warn('Fail-safe preloader triggered: revelando site automaticamente...');
+347:                 pre.classList.add('fade-out');
+348:                 document.body.classList.add('loaded');
+349:                 var vw = document.getElementById('hero-video-wrap');
+350:                 if (vw) vw.classList.add('focal-revealed');
+351:                 setTimeout(function() { pre.style.display = 'none'; }, 1500);
+352:             }
+353:         }, 3200);
+354:     </script>
+355: </body>
+356: </html>
+357: 
+358: 
+The above content shows the entire, complete file contents of the requested file.

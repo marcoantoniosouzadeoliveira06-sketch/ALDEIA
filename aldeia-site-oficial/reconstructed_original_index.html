@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALDEIA | Agência de Design Boutique & Performance Digital</title>
+    <meta name="description"
+        content="Criação de sites com UI/UX e design de alto padrão. Projetos para empresas exigentes que buscam presença digital diferenciada.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Fragment+Mono&display=swap"
+        rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@300,400,500,600,700&display=swap" rel="stylesheet">
+
+    <style>
+        html.lenis,
+        html.lenis-smooth {
+            scroll-behavior: auto !important
+        }
+
+        .lenis-target {
+            scroll-behavior: auto !important
+        }
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- PRELOADER -->
+    <div id="preloader">
+        <canvas id="preloader-grain"></canvas>
+        <div class="preloader-content">
+            <div class="preloader-logo-wrap">
+                <img src="assets/logo-tp.svg" class="preloader-logo" id="preloader-text" alt="ALDEIA">
+            </div>
+            <div class="preloader-bar-wrap">
+                <div class="preloader-bar" id="preloader-bar"></div>
+            </div>
+            <div class="preloader-counter" id="preloader-counter">0%</ <body
+                    class="bg-[#F9F9F9] text-[#0A0A0A] antialiased selection:bg-[#FF462E] selection:text-white overflow-x-hidden">
+
+                <!-- ===== PRELOADER CINEMATOGR 
+        <div class="grid-line"></div>
+
+        <div class="grid-line"></div>
+
+    </div>
+
+
+
+    <!-- Painel de Monitoramento de Scroll (Scroll Dashboard) -->
+
+                <div class="scroll-dashboard" id="scroll-dashboard">
+
+                    <div class="dash-item"><span class="dash-label">SCROLL // Y-POS:</span><span class="dash-val"
+                            id="dash-y">0px</span></div>
+
+                    <div class="dash-item"><span class="dash-label">VELOCITY // SPEED:</span><span class="dash-val"
+                            id="dash-v">0px/s</span></div>
+
+                    <div class="dash-item"><span class="dash-label">PROGRESS // PCT:</span><span class="dash-val"
+                            id="dash-p">0.00%</span></div>
+
+                </div>
+
+
+
+                <!-- ===== NAVEGAÇÃO (FluidGlass nav) ===== -->
+
+                <nav class="glass-nav fluid-glass" id="main-nav">
+
+                    <div class="fluid-glass-inner">
+
+                        <div class="nav-logo">
+
+                            <img src="assets/logo-tp.svg" alt="ALDEIA" class="nav-logo-img">
+
+                        </div>
+
+                        <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
+
+                            <span></span><span></span>
+
+                        </button>
+
+                        <div class="nav-links-wrap" id="nav-links">
+
+                            <div class="nav-pill" id="nav-pill" aria-hidden="true"></div>
+
+                            <ul class="nav-links">
+
+                                <li><a href="#home" class="nav-link" data-pill>Início</a></li>
+
+                                <li><a href="#sobre" class="nav-link" data-pill>Manifesto</a></li>
+
+                                <li><a href="#portfolio" class="nav-link" data-pill>Portfólio</a></li>
+
+                                <li><a href="#servicos" class="nav-link" data-pill>Expertise</a></li>
+
+                            </ul>
+
+                            pre.classList.add('fade-out');
+
+                            document.body.classList.add('loaded');
+
+                            var vw = document.getElementById('hero-video-wrap');
+
+                            if (vw) vw.classList.add('focal-revealed');
+
+
+                            <!-- Mobile Menu Overlay -->
+                            <div id="mobile-menu">
+                                <nav class="mobile-nav-links">
+                                    <a href="#inicio" class="mobile-nav-link">/01 Início</a>
+                                    <a href="#sobre" class="mobile-nav-link">/02 Sobre</a>
+                                    <a href="#portfolio" class="mobile-nav-link">/03 Portfólio</a>
+                                    <a href="#servicos" class="mobile-nav-link">/04 Soluções</a>
+                                    <a href="#faq" class="mobile-nav-link">/05 Dúvidas</a>
+                                    <a href="#contato" class="mobile-nav-link">/06 Contato</a>
+                                    <section id="inicio" class="hero-section">
+                                        <div class="hero-wordmark" aria-hidden="true">
+                                            <span class="wordmark-text" data-text="ALDEIA">ALDEIA</span>
+                                            <span class="wordmark-r">®</span>
+                                        </div>
+
+                                        <div class="hero-layout">
+                                            <!-- Left: Globe Icon + Tagline -->
+                                            <div class="hero-left">
+                                                <div class="hero-tagline reveal-up" data-delay="0.3">
+                                                    <div class="hero-globe">
+                                                        <svg viewBox="0 0 48 48" fill="none"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <circle cx="24" cy="24" r="18" stroke="#FF462E"
+                                                                stroke-width="1.2" />
+                                                            <ellipse cx="24" cy="24" rx="10" ry="18" stroke="#FF462E"
+                                                                stroke-width="1.2" />
+                                                            <line x1="6" y1="16" x2="42" y2="16" stroke="#FF462E"
+                                                                stroke-width="0.8" />
+                                                            <line x1="6" y1="32" x2="42" y2="32" stroke="#FF462E"
+                                                                stroke-width="0.8" />
+                                                            <line x1="24" y1="6" x2="24" y2="42" stroke="#FF462E"
+                                                                stroke-width="0.8" />
+                                                            <!-- Crosshair -->
+                                                            <circle cx="24" cy="24" r="4" stroke="#FF462E"
+                                                                stroke-width="1.5" />
+                                                            <line x1="24" y1="2" x2="24" y2="8" stroke="#FF462E"
+                                                                stroke-width="1" />
+                                                            <line x1="24" y1="40" x2="24" y2="46" stroke="#FF462E"
+                                                                stroke-width="1" />
+
+                                                            <line x1="24" y1="6" x2="24" y2="42" stroke="#FF462E"
+                                                                stroke-width="0.8" />
+                                                            <!-- Crosshair -->
+                                                            <circle cx="24" cy="24" r="4" stroke="#FF462E"
+                                                                stroke-width="1.5" />
+                                                            <line x1="24" y1="2" x2="24" y2="8" stroke="#FF462E"
+                                                                stroke-width="1" />
+                                                            <line x1="24" y1="40" x2="24" y2="46" stroke="#FF462E"
+                                                                stroke-width="1" />
+                                                            <line x1="2" y1="24" x2="8" y2="24" stroke="#FF462E"
+                                                                stroke-width="1" />
+                                                            <line x1="40" y1="24" x2="46" y2="24" stroke="#FF462E"
+                                                                stroke-width="1" />
+                                                        </svg>
+                                                    </div>
+                                                    <p>Sites que parecem do futuro,<br>feitos para o seu presente.</p>
+                                                </div>
+                                                <!-- Scroll indicator dots -->
+                                                <div class="hero-scroll-dots reveal-up" data-delay="0.6">
+                                                    <span class="dot active"></span>
+                                                    <span class="dot"></span>
+                                                    <span class="dot"></span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Center: Video with grid overlay -->
+                                            <div class="hero-center">
+                                                <div class="hero-video-wrapper reveal-scale" data-delay="0.2">
+                                                    <div class="grid-overlay"></div>
+                                                    <video id="hero-video" autoplay muted loop playsinline
+                                                        preload="auto">
+                                                        <source src="assets/hero-bg.mp4" type="video/mp4">
+                                                    </video>
+                                                    <canvas id="hero-grain"></canvas>
+                                                </div>
+                                            </div>
+
+                                            <!-- Right: Stats + CTA -->
+                                            <d <a href="#portfolio" class="btn btn-ghost">Ver portfólio →</a>
+
+                                        </div>
+
+                            </div>
+
+
+
+                            <div class="hero-scroll-indicator">
+
+                                <div class="scroll-line"></div>
+
+                                <span>scroll</span>
+
+                            </div>
+
+                            </section>
+
+
+
+                            <!-- ===== SEÃ‡ÃƒO 2: MANIFESTO (TrueFocus) ===== -->
+
+                            <section id="sobre" class="manifesto">
+
+                                <div class="manifesto-inner">
+
+                                    <div class="manifesto-label scroll-reveal text-mono">
+
+                                        <span>[ 02 // MANIFESTO ]</span>
+
+                                    </div>
+
+
+
+                                    <!-- TrueFocus no título do manifesto -->
+
+                                    <div class="manifesto-text scroll-reveal delay-s1">
+
+                                        <h2 id="true-focus-title"
+                                            aria-label="Uma aldeia não é apenas um lugar. Ã‰ uma força coletiva.">
+
+                                            <!-- palavras injetadas pelo JS com efeito TrueFocus -->
+
+                                        </h2>
+
+                                    </div>
+
+
+
+                                    <div class="manifesto-body scroll-reveal delay-s2">
+
+                                        <p>
+
+                                            Nascemos da crença de que o design mais poderoso nasce da união de mentes
+                                            criativas com propósitos alinhados. Na Aldeia, cada projeto é tratado como
+                                            uma missão: entender o que a sua marca precisa dizer ao mundo — e criar a
+                                            linguagem visual perfeita para dizê-lo.
+
+                                        </p>
+
+                                        <p>
+
+                                            Não fazemos volume. Fazemos impacto. Selecionamos os projetos que
+                                            acreditamos, mergulhamos fundo na essência de cada marca e entregamos o
+                                            extraordinário. Sempre.
+
+                                        </p>
+
+                                        <a href="#servicos" class="text-link">Conheça nossa expertise →</a>
+
+                                        <!-- MISSING LINE 161 -->
+                                        <!-- MISSING LINE 162 -->
+                                        <!-- MISSING LINE 163 -->
+                                        <!-- MISSING LINE 164 -->
+                                        <!-- MISSING LINE 165 -->
+                                        <!-- MISSING LINE 166 -->
+                                        <!-- MISSING LINE 167 -->
+                                        <!-- MISSING LINE 168 -->
+                                        <!-- MISSING LINE 169 -->
+                                        <!-- MISSING LINE 170 -->
+                                        <!-- MISSING LINE 171 -->
+                                        <!-- MISSING LINE 172 -->
+                                        <!-- MISSING LINE 173 -->
+                                        <!-- MISSING LINE 174 -->
+                                        <!-- MISSING LINE 175 -->
+                                        <!-- MISSING LINE 176 -->
+                                        <!-- MISSING LINE 177 -->
+                                        <!-- MISSING LINE 178 -->
+                                        <!-- MISSING LINE 179 -->
+                                        <!-- ===== SEÃ‡ÃƒO 3: PORTFÓLIO (SpotlightCard + DomeGallery) ===== -->
+
+                                        <!-- ===== SEÇÃO 3: PORTFÓLIO (CircularGallery 3D) ===== -->
+
+                                        <!-- ===== SEÇÃO 3: PORTFÓLIO (DomeGallery 3D Original) ===== -->
+
+                                        <section id="portfolio" class="portfolio sphere-main-section">
+
+                                            <div class="section-header scroll-reveal">
+
+                                                <p class="section-label text-mono">[ 03 // PORTFÓLIO ]</p>
+
+                                                <h2 class="section-title">Trabalho que<br><span class="highlight">fala
+                                                        por si.</span></h2>
+
+                                            </div>
+
+
+
+                                            <!-- Palco do DomeGallery (React Bits original) -->
+
+                                    </div>
+                                </div>
+                        </div>
+                        </section>
+
+                        <!-- ===== PORTFOLIO ===== -->
+                        <section id="portfolio" class="portfolio-section">
+                            <div class="section-container">
+                                <div class="portfolio-header">
+                                    <div class="reveal-up">
+                                        <div class="section-label">
+                                            <span class="label-num">/02</span>
+                                            <span class="label-text">Projetos</span>
+                                        </div>
+                                        <h2 class="mega-title">PORTFÓLIO</h2>
+                                    </div>
+                                    <p class="section-desc reveal-up" data-delay="0.2">Projetos que elevam a percepção.
+                                        Cada detalhe, interação e escolha visual é pensada para posicionar no nível
+                                        certo.</p>
+                                </div>
+
+
+
+                                <div class="portfolio-cta scroll-reveal">
+
+                                    <a href="#contato" class="btn btn-outline">Quero um projeto assim →</a>
+
+                                </div>
+
+                        </section>
+
+
+
+                        <!-- ===== SEÃ‡ÃƒO 4: SERVIÃ‡OS (BorderGlow) ===== -->
+
+                        <section id="servicos" class="services">
+
+                            <div class="services-inner">
+
+                                <div class="section-header scroll-reveal">
+
+                                    <p class="section-label text-mono">[ 04 // EXPERTISE ]</p>
+
+                                    <h2 class="section-title">Expertise que<br><span class="highlight">transforma
+                                            marcas.</span></h2>
+
+                                </div>
+
+
+
+                                <div class="services-list" id="services-list">
+
+                                    <!-- BorderGlow em cada item -->
+
+                                    <div class="service-item border-glow scroll-reveal" id="svc-1">
+
+                                        <!-- MISSING LINE 226 -->
+                                        <!-- MISSING LINE 227 -->
+                                        <!-- MISSING LINE 228 -->
+                                        <!-- MISSING LINE 229 -->
+                                        <!-- MISSING LINE 230 -->
+                                        <!-- MISSING LINE 231 -->
+                                        Explore as variações da nossa identidade de marca. Vetores puros e proporções
+                                        calibradas para máxima legibilidade e impacto estético.
+                                        </p>
+                                    </div>
+
+                                    <!-- Branding Grid -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                                        <!-- Card 1: Primary Logo -->
+                                        <div class="bg-[#0A0A0A] text-white p-6 flex flex-col justify-between min-h-[450px] transition-all duration-500 group hover:bg-[#121212] relative border-glow"
+                                            id="brand-card-1">
+                                            <div class="spec-line"><span class="spec-label">DIMENSÃO:</span> <span
+                                                    class="spec-val">500 x 500 px</span></div>
+                                            <div class="spec-line"><span class="spec-label">FORMATO:</span> <span
+                                                    class="spec-val">SVG / Vetorial</span></div>
+                                            <div class="spec-line"><span class="spec-label">APLICAÇÃO:</span> <span
+                                                    class="spec-val">Favicon, avatares e selos de qualidade.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card 4: Logomarca -->
+                                    <div class="identity-card reveal-up" data-delay="0.4">
+                                        <div class="canvas-box canvas-grid">
+                                            <img src="assets/logo-marca.svg" alt="Logomarca ALDEIA"
+                                                class="logo-display logo-display-marca">
+                                        </div>
+                                        <div class="card-specs">
+                                            <div class="spec-line"><span class="spec-label">NOME:</span> <span
+                                                    class="spec-val">Logomarca</span></div>
+                                            <div class="spec-line"><span class="spec-label">DIMENSÃO:</span> <span
+                                                    class="spec-val">1000 x 250 px</span></div>
+                                            <div class="spec-line"><span class="spec-label">FORMATO:</span> <span
+                                                    class="spec-val">SVG / Vetorial</span></div>
+                                            <div class="spec-line"><span class="spec-label">APLICAÇÃO:</span> <span
+                                                    class="spec-val">Letterhead corporativo e tipografia isolada.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Color Palette -->
+                                <div class="color-palette-container reveal-up" data-delay="0.5">
+                                    <h3 class="palette-title">Paleta de Cores Oficiais</h3>
+                                    <div class="color-chips-grid">
+                                        <div class="color-chip" data-hex="#FF462E" style="--chip-color: #FF462E;">
+                                            <div class="chip-preview"></div>
+                                            <div class="chip-info">
+                                                <span class="chip-name">Vermelho-Laranja</span>
+                                                <span class="chip-hex">#FF462E</span>
+                                            </div>
+                                        </div>
+                                        <div class="color-chip" data-hex="#080808" style="--chip-color: #080808;">
+                                            <div class="chip-preview"></div>
+                                            <div class="chip-info">
+                                                <span class="chip-name">Deep Black</span>
+                                                <span class="chip-hex">#080808</span>
+                                            </div>
+                                        </div>
+                                        <div class="color-chip" data-hex="#A8A8A8" style="--chip-color: #A8A8A8;">
+                                            <div class="chip-preview"></div>
+                                            <div class="chip-info">
+                                                <span class="chip-name">Cinza Muted</span>
+                                                <span class="chip-hex">#A8A8A8</span>
+                                            </div>
+
+                                            <!-- ProfileCard: card 3D com tilt + glow ao hover -->
+
+                                            <div class="profile-card scroll-reveal delay-s1" id="profile-card">
+
+                                                <div class="profile-card-glow" aria-hidden="true"></div>
+
+                                                WhatsApp
+
+                                                </a>
+
+                                                <a href="mailto:contato@aldeiadesign.com.br" id="email-btn"
+                                                    class="btn btn-ghost">
+
+                                                    E-mail
+
+                                                </a>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+
+                                    <div class="social-links scroll-reveal delay-s2">
+
+                                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+                                            id="instagram-link" class="social-link">Instagram</a>
+
+                                        <span class="social-sep">Â·</span>
+
+                                        <a href="https://behance.net" target="_blank" rel="noopener noreferrer"
+                                            id="behance-link" class="social-link">Behance</a>
+
+                                        <span class="social-sep">Â·</span>
+
+                                        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"
+                                            id="linkedin-link" class="social-link">LinkedIn</a>
+
+                                    </div>
+
+
+
+                                </div>
+
+                        </section>
+
+
+
+                        </main>
+
+
+
+                        <!-- ===== RODAPÃ‰ ===== -->
+
+                        <footer class="footer">
+
+                            <div class="footer-inner">
+
+                                <div class="footer-logo">
+
+                                    <img src="assets/logo-tp.svg" alt="ALDEIA" class="footer-logo-img">
+
+                                </div>
+
+                                <p class="footer-copy">Â© 2025 Aldeia Agência. Todos os direitos reservados.</p>
+
+                                <p class="footer-tagline">Feito com intenção. Entregue com excelência.</p>
+
+                            </div>
+
+                        </footer>
+
+
+
+                        <script src="app.js"></script>
+
+                        <script>
+
+                            // Fail-safe de segurança: Se por qualquer motivo o preloader não sumir em 3.2s, força a abertura suave do site
+
+                            setTimeout(function () {
+
+                                <section id="faq" class="faq-section">
+                                    <div class="section-container">
+                                        <div class="faq-header">
+                                            <div class="reveal-up">
+                                                <div class="section-label">
+                                                    <span class="label-num">/04</span>
+                                                    <span class="label-text">FAQ</span>
+                                                </div>
+                                                <h2 class="mega-title">DÚVIDAS</h2>
+                                            </div>
+                                            <div class="faq-desc reveal-up" data-delay="0.2">
+                                            </body>
+
+                                        </html>
+
+
+
+
+                                        <script>
+
+        // Fail-safe de segurança: Se por qualquer motivo o preloader não sumir em 3.2s, força a abertura suave do site
+
+                                            setTimeout(function() {
+
+            var pre = document.getElementById('preloader');
+
+                                            if (pre && pre.style.display !== 'none' && !pre.classList.contains('fade-out')) {
+
+                                                console.warn('Fail-safe preloader triggered: revelando site automaticamente...');
+
+                                            pre.classList.add('fade-out');
+
+                                            document.body.classList.add('loaded');
+
+                                            if (window.lenis) window.lenis.start();
+
+                                            var vw = document.getElementById('hero-video-wrap');
+
+                                            if (vw) vw.classList.add('focal-revealed');
+
+                                            setTimeout(function() {pre.style.display = 'none'; }, 1500);
+
+            }
+
+        }, 3200);
+
+                        </script>
+
+</body>
+
+</html>
+
+
+
+
+
+<!-- MISSING LINE 360 -->
+<!-- MISSING LINE 361 -->
+<!-- MISSING LINE 362 -->
+<!-- MISSING LINE 363 -->
+<!-- MISSING LINE 364 -->
+<!-- MISSING LINE 365 -->
+<!-- MISSING LINE 366 -->
+<!-- MISSING LINE 367 -->
+<!-- MISSING LINE 368 -->
+<!-- MISSING LINE 369 -->
+<!-- MISSING LINE 370 -->
+<!-- MISSING LINE 371 -->
+<!-- MISSING LINE 372 -->
+<!-- MISSING LINE 373 -->
+<!-- MISSING LINE 374 -->
+<!-- MISSING LINE 375 -->
+<!-- MISSING LINE 376 -->
+<!-- MISSING LINE 377 -->
+<!-- MISSING LINE 378 -->
+<!-- MISSING LINE 379 -->
+<!-- MISSING LINE 380 -->
+<!-- MISSING LINE 381 -->
+<!-- MISSING LINE 382 -->
+<!-- MISSING LINE 383 -->
+<!-- MISSING LINE 384 -->
+<!-- MISSING LINE 385 -->
+<!-- MISSING LINE 386 -->
+<!-- MISSING LINE 387 -->
+<!-- MISSING LINE 388 -->
+<!-- MISSING LINE 389 -->
+<!-- MISSING LINE 390 -->
+<!-- MISSING LINE 391 -->
+<!-- MISSING LINE 392 -->
+<!-- MISSING LINE 393 -->
+<!-- MISSING LINE 394 -->
+<!-- MISSING LINE 395 -->
+<!-- MISSING LINE 396 -->
+<!-- MISSING LINE 397 -->
+<!-- MISSING LINE 398 -->
+<!-- MISSING LINE 399 -->
+<!-- MISSING LINE 400 -->
+<!-- MISSING LINE 401 -->
+<!-- MISSING LINE 402 -->
+<!-- MISSING LINE 403 -->
+<!-- MISSING LINE 404 -->
+<!-- MISSING LINE 405 -->
+<!-- MISSING LINE 406 -->
+<!-- MISSING LINE 407 -->
+<!-- MISSING LINE 408 -->
+<!-- MISSING LINE 409 -->
+<!-- MISSING LINE 410 -->
+<!-- MISSING LINE 411 -->
+<!-- MISSING LINE 412 -->
+<!-- MISSING LINE 413 -->
+<!-- MISSING LINE 414 -->
+<!-- MISSING LINE 415 -->
+<!-- MISSING LINE 416 -->
+<div class="footer-col">
+    <h4>Navegação</h4>
+    <nav>
+        <a href="#inicio">/01 Início</a>
+        <a href="#portfolio">/02 Portfólio</a>
+        <a href="#faq">/03 Dúvidas</a>
+        <a href="#servicos">/04 Soluções</a>
+    </nav>
+</div>
+<div class="footer-col">
+    <h4>Redes</h4>
+    <div class="section-container">
+        <div class="faq-header">
+            <div class="reveal-up">
+                <div class="section-label">
+                    <span class="label-num">/05</span>
+                    <span class="label-text">FAQ</span>
+                </div>
+                <h2 class="mega-title">DÚVIDAS</h2>
+            </div>
+            <div class="faq-desc reveal-up" data-delay="0.2">
+                <p>Algumas respostas importantes antes de começarmos.</p>
+                <p class="dim">Clareza faz parte de qualquer projeto bem executado.</p>
+            </div>
+        </div>
+
+        <div class="faq-list reveal-up">
+            <div class="faq-item">
+                <button class="faq-btn"><span class="faq-num">/01</span><span class="faq-q">O pagamento precisa ser
+                        feito à vista?</span><span class="faq-icon"><span></span><span></span></span></button>
+                <div class="faq-answer">
+                    <p>Não. Os projetos são divididos em 50% no início e 50% na entrega final. Também é possível
+                        parcelar no cartão de crédito (os jurados da operadora podem ser aplicados).</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-btn"><span class="faq-num">/02</span><span class="faq-q">Quando o projeto
+                        começa?</span><span class="faq-icon"><span></span><span></span></span></button>
+                <div class="faq-answer">
+                    <p>Após aprovação do orçamento e pagamento do sinal de 50%, o projeto entra na fila de produção.</p>
+                </div>
+                </body>
+
+                </html>
+
+                <!-- MISSING LINE 454 -->
+                <!-- MISSING LINE 455 -->
+                <!-- MISSING LINE 456 -->
+                <!-- MISSING LINE 457 -->
+                <!-- MISSING LINE 458 -->
+                <!-- MISSING LINE 459 -->
+                <!-- MISSING LINE 460 -->
+                <!-- MISSING LINE 461 -->
+                <!-- MISSING LINE 462 -->
+                <!-- MISSING LINE 463 -->
+                <!-- MISSING LINE 464 -->
+                <!-- MISSING LINE 465 -->
+                <!-- MISSING LINE 466 -->
+                <!-- MISSING LINE 467 -->
+                <!-- MISSING LINE 468 -->
+                <!-- MISSING LINE 469 -->
+                <!-- MISSING LINE 470 -->
+                <!-- MISSING LINE 471 -->
+                <!-- MISSING LINE 472 -->
+                <!-- MISSING LINE 473 -->
+                <!-- MISSING LINE 474 -->
+                <!-- MISSING LINE 475 -->
+                <!-- MISSING LINE 476 -->
+                <!-- MISSING LINE 477 -->
+                <!-- MISSING LINE 478 -->
+                <!-- MISSING LINE 479 -->
+                <!-- MISSING LINE 480 -->
+                <!-- MISSING LINE 481 -->
+                <!-- MISSING LINE 482 -->
+                <!-- MISSING LINE 483 -->
+                <!-- MISSING LINE 484 -->
+                <!-- MISSING LINE 485 -->
+                <!-- MISSING LINE 486 -->
+                <!-- MISSING LINE 487 -->
+                <!-- MISSING LINE 488 -->
+                <!-- MISSING LINE 489 -->
+                <!-- MISSING LINE 490 -->
+                <!-- MISSING LINE 491 -->
+                <!-- MISSING LINE 492 -->
+                <!-- MISSING LINE 493 -->
+            </div>
+        </div>
+        </section>
+
+        </main>
+
+        <div class="future-text">
+            <p>Se você quer algo <strong>acima do padrão,</strong> estou pronto para construir.</p>
+        </div>
+    </div>
+</div>
+</section>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-col footer-brand">
+            <div class="footer-logo-wrap">
+                <img src="assets/logo-tp.svg" class="logo-footer" alt="ALDEIA Logo">
+            </div>
+            <p>Buscando algo <strong>fora do padrão?</strong><br>Vamos conversar.</p>
+            <a href="https://wa.me/5500000000000" target="_blank" rel="noopener noreferrer"
+                class="btn-cta btn-cta-sm">Faça um orçamento<span class="btn-arrow-icon">↗</span></a>
+        </div>
+        <div class="footer-col">
+            <h4>Navegação</h4>
+            <nav>
+                <a href="#inicio">/01 Início</a>
+                <a href="#identidade">/02 Identidade</a>
+                <a href="#portfolio">/03 Portfólio</a>
+                <a href="#servicos">/04 Soluções</a>
+                <a href="#faq">/05 Dúvidas</a>
+            </nav>
+        </div>
+        <div class="footer-col">
+            <h4>Redes</h4>
+            <nav>
+                <a href="https://instagram.com" target="_blank" rel="noopener">Instagram <span class="ext">↗</span></a>
+                <a href="https://facebook.com" target="_blank" rel="noopener">Facebook <span class="ext">↗</span></a>
+                <a href="https://tiktok.com" target="_blank" rel="noopener">TikTok <span class="ext">↗</span></a>
+                <a href="https://behance.net" target="_blank" rel="noopener">Behance <span class="ext">↗</span></a>
+            </nav>
+        </div>
+        <div class="footer-col">
+            <h4>Contato</h4>
+            <nav>
+                <a href="tel:+5500000000000">+55 (00) 00000-0000</a>
+                <a href="mailto:contato@aldeiadesign.com.br">contato@aldeiadesign.com.br</a>
+            </nav>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>Aldeia Studio © <strong>2026.</strong> Todos os direitos reservados.</span>
+    </div>
+</footer>
+
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="app.js"></script>
+<script>setTimeout(function(){var p=document.getElementById('preloader');if(p&&!p.classList.contains('loaded')){p.classList.add('loaded');setTimeout(function(){p.style.display = 'none';if(window.lenis)window.lenis.start()},1200)}},6000);</script>
+</body>
+
+</html>
+
+<!-- MISSING LINE 556 -->
+<!-- MISSING LINE 557 -->
+<!-- MISSING LINE 558 -->
+<!-- MISSING LINE 559 -->
+<!-- MISSING LINE 560 -->
+<!-- MISSING LINE 561 -->
+<!-- MISSING LINE 562 -->
+<!-- MISSING LINE 563 -->
+<!-- MISSING LINE 564 -->
+<!-- MISSING LINE 565 -->
+<!-- MISSING LINE 566 -->
+<!-- MISSING LINE 567 -->
+<!-- MISSING LINE 568 -->
+<!-- MISSING LINE 569 -->
+<!-- MISSING LINE 570 -->
+<!-- MISSING LINE 571 -->
+<!-- MISSING LINE 572 -->
+<!-- MISSING LINE 573 -->
+<!-- MISSING LINE 574 -->
+<!-- MISSING LINE 575 -->
+<!-- MISSING LINE 576 -->
+<!-- MISSING LINE 577 -->
+<!-- MISSING LINE 578 -->
+<!-- MISSING LINE 579 -->
+<!-- MISSING LINE 580 -->
+<!-- MISSING LINE 581 -->
+<!-- MISSING LINE 582 -->
+<!-- MISSING LINE 583 -->
+<!-- MISSING LINE 584 -->
+<!-- MISSING LINE 585 -->
+<!-- MISSING LINE 586 -->
+<!-- MISSING LINE 587 -->
+<!-- MISSING LINE 588 -->
+<!-- MISSING LINE 589 -->
+<!-- MISSING LINE 590 -->
+<!-- MISSING LINE 591 -->
+<!-- MISSING LINE 592 -->
+<!-- MISSING LINE 593 -->
+</< /svg>
+</button>
+<div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out faq-content">
+    <p class="py-2 text-neutral-500 text-sm font-light leading-relaxed">
+        Sim. Nosso método de trabalho inclui rodadas de feedback estruturadas a cada entrega conceitual. Alinhamos tudo
+        minuciosamente na etapa de briefing para garantir que as propostas cheguem prontas para aprovação rápida.
+    </p>
+</div>
+</div>
+
+<!-- Accordion Item 4 -->
+<div class="border-b border-black/10 pb-4 faq-item group">
+    <button
+        class="w-full flex items-center justify-between py-4 text-left font-heading text-base sm:text-lg font-bold text-[#0A0A0A] hover:text-[#FF462E] transition-colors duration-300 faq-btn">
+        <span>Com quais ferramentas vocês desenvolvem os sites?</span>
+        <svg class="w-5 h-5 transform transition-transform duration-300 text-neutral-400 group-hover:text-[#FF462E] faq-icon"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </< /svg>
+    </button>
+
+    <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out faq-content">
+
+        <p class="py-2 text-neutral-500 text-sm font-light leading-relaxed">
+
+            Focamos em performance, estabilidade e designs autorais. Desenvolvemos com HTML5/CSS3 nativo, JavaScript
+            puro e Tailwind CSS. Não utilizamos construtores pesados e genéricos que prejudicam o carregamento rápido do
+            seu site.
+
+        </p>
+
+    </div>
+
+</div>
+
+
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- ===== CONTATO SECTION (Bento / Tilt Card Layout) ===== -->
+
+<section id="contato"
+    class="py-24 px-6 md:px-24 bg-[#0A0A0A] text-white border-t border-white/5 relative overflow-hidden">
+
+    <div
+        class="contact-blob absolute -top-40 -left-40 w-96 h-96 bg-[#FF462E]/10 rounded-full blur-[120px] pointer-events-none">
+    </div>
+
+
+
+    <div class="max-w-7xl mx-auto relative z-10">
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+
+
+            <!-- Text Info -->
+
+            <div class="lg:col-span-6 flex flex-col justify-center">
+
+                <span class="font-mono text-xs text-neutral-500 tracking-widest uppercase mb-4 block">[ 06 // CONTA...
+
+                    <h2 <!-- MISSING LINE 633 -->
+                        <!-- MISSING LINE 634 -->
+                        <!-- MISSING LINE 635 -->
+                        <!-- MISSING LINE 636 -->
+                        <!-- MISSING LINE 637 -->
+                        <!-- MISSING LINE 638 -->
+                        <!-- MISSING LINE 639 -->
+                        <!-- MISSING LINE 640 -->
+                        <!-- MISSING LINE 641 -->
+                        <!-- MISSING LINE 642 -->
+                        <!-- MISSING LINE 643 -->
+                        <!-- MISSING LINE 644 -->
+                        <!-- MISSING LINE 645 -->
+                        <!-- MISSING LINE 646 -->
+                        <!-- MISSING LINE 647 -->
+                        <!-- MISSING LINE 648 -->
+                        <!-- MISSING LINE 649 -->
+                        <!-- MISSING LINE 650 -->
+                        <!-- MISSING LINE 651 -->
+                        <!-- MISSING LINE 652 -->
+                        <!-- MISSING LINE 653 -->
+                        <!-- MISSING LINE 654 -->
+                        <!-- MISSING LINE 655 -->
+                        <!-- MISSING LINE 656 -->
+                        <!-- MISSING LINE 657 -->
+                        <!-- MISSING LINE 658 -->
+                        <!-- MISSING LINE 659 -->
+                        <!-- MISSING LINE 660 -->
+                        <!-- MISSING LINE 661 -->
+                        <!-- MISSING LINE 662 -->
+                        <!-- MISSING LINE 663 -->
+                        <!-- MISSING LINE 664 -->
+                        <!-- MISSING LINE 665 -->
+                        <!-- MISSING LINE 666 -->
+                        <!-- MISSING LINE 667 -->
+                        <!-- MISSING LINE 668 -->
+                        <!-- MISSING LINE 669 -->
+                        <!-- MISSING LINE 670 -->
+                        <!-- MISSING LINE 671 -->
+                        <!-- MISSING LINE 672 -->
+                        <!-- MISSING LINE 673 -->
+                        <!-- MISSING LINE 674 -->
+                        <!-- MISSING LINE 675 -->
+                        <!-- MISSING LINE 676 -->
+                        <!-- MISSING LINE 677 -->
+                        <!-- MISSING LINE 678 -->
+                        <!-- MISSING LINE 679 -->
+                        <!-- MISSING LINE 680 -->
+                        <!-- MISSING LINE 681 -->
+                        <!-- MISSING LINE 682 -->
+                        <!-- MISSING LINE 683 -->
+                        <!-- MISSING LINE 684 -->
+                        <!-- MISSING LINE 685 -->
+                        <!-- MISSING LINE 686 -->
+                        <!-- MISSING LINE 687 -->
+                        <!-- MISSING LINE 688 -->
+</section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="bg-[#080808] text-white py-12 px-6 md:px-24 border-t border-white/5">
+    <div
+        class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-xs font-mono text-neutral-600 space-y-4 md:space-y-0">
+        <div class="flex items-center space-x-3">
+            <img src="assets/logo-tp.svg" class="h-5 w-auto logo-footer" alt="ALDEIA Logo">
+            <span>© 2026. Todos os direitos reservados.</span>
+        </div>
+        <div class="flex space-x-6">
+            <a href="#" class="hover:text-white transition-colors">PRIVACIDADE</a>
+            <a href="#" class="hover:text-white transition-colors">TERMOS</a>
+        </div>
+        <div>
+            <span>FEITO COM INTENÇÃO. ENTREGUE COM EXCELÊNCIA.</span>
+        </div>
+    </div>
+</footer>
+
+<!-- Lenis Smooth Scroll -->
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="app.js"></script>
+<script>
+                    // Fail-safe de segurança do Preloader
+                    setTimeout(function() {
+            var pre = document.getElementById('preloader');
+                    if (pre && pre.style.display !== 'none' && !pre.classList.contains('loaded')) {
+                        console.warn('Fail-safe preloader triggered.');
+                    pre.classList.add('loaded');
+                    setTimeout(function() {
+                        pre.style.display = 'none';
+                    if (window.lenis) window.lenis.start();
+                }, 1000);
+            }
+        }, 4000);
+</script>
+</body>
+
+</html>

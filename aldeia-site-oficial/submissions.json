@@ -1,0 +1,279 @@
+[
+    {
+        "nome":  "Bruno Farias Teste",
+        "email":  "bruno.teste@example.com",
+        "telefone":  "11988887777",
+        "projeto":  "Preciso de uma identidade visual completa e um site de e-sports de alta performance.",
+        "id":  "61694d0e-03ef-40df-a998-0389e0aa7cd7",
+        "timestamp":  "2026-07-05 07:10:16"
+    },
+    {
+        "nome":  "Bruno Farias Teste",
+        "email":  "bruno.teste@example.com",
+        "telefone":  "11988887777",
+        "projeto":  "Preciso de uma identidade visual completa e um site de e-sports de alta performance.",
+        "id":  "5fd7d097-8fa2-4cfb-b39e-68c54c498660",
+        "timestamp":  "2026-07-05 07:19:18"
+    },
+    {
+        "nome":  "Arthur Ramos Teste",
+        "email":  "arthur.teste@example.com",
+        "telefone":  "(21) 97777-6666",
+        "projeto":  "Criar logotipo profissional.",
+        "id":  "154cc80c-269c-4731-988c-51c06094578d",
+        "timestamp":  "2026-07-05 07:20:02"
+    },
+    {
+        "nome":  "Joao Silva Teste",
+        "email":  "joao.teste@example.com",
+        "telefone":  "21980638271",
+        "projeto":  "Desenvolver o site oficial de e-sports.",
+        "cidade":  "Rio de Janeiro",
+        "regiao":  "Rio de Janeiro",
+        "id":  "3e0427c8-d42c-45be-b764-8e63219a467d",
+        "timestamp":  "2026-07-05 07:37:45"
+    },
+    {
+        "nome":  "marco",
+        "email":  "marcoantoniosouzadeoliveira06@gmail.com",
+        "telefone":  "21980638271",
+        "projeto":  "rfrfrf",
+        "cidade":  "Rio de Janeiro",
+        "regiao":  "Rio de Janeiro",
+        "id":  "e49d639f-59cd-460e-808f-182ff03f8f31",
+        "timestamp":  "2026-07-05 07:41:19"
+    },
+    {
+        "nome":  "maRCO",
+        "email":  "joao.teste@example.com",
+        "telefone":  "21980638271",
+        "projeto":  "DFSFDFF",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "2d489fc1-9707-4800-b70e-9869eb62e29c",
+        "timestamp":  "2026-07-05 10:26:10"
+    },
+    {
+        "nome":  "marco",
+        "email":  "marcoantoniosouzadeoliveira06@gmail.com",
+        "telefone":  "21980638271",
+        "projeto":  "line up",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "b67b5ffb-10af-4a4d-8ae3-3d27c21cfe7b",
+        "timestamp":  "2026-07-06 19:20:04"
+    },
+    {
+        "nome":  "marco",
+        "email":  "marcoantoniosouzadeoliveira06@gmail.com",
+        "telefone":  "21980638271",
+        "projeto":  "line up",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "2a85f942-4ed0-4d69-bae4-1fd9fdb1719f",
+        "timestamp":  "2026-07-06 19:20:07"
+    },
+    {
+        "nome":  "marco",
+        "email":  "marcoantoniosouzadeoliveira06@gmail.com",
+        "telefone":  "21980638271",
+        "projeto":  "line up",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "bbc1d96d-bc3a-420e-a439-a3458c992e99",
+        "timestamp":  "2026-07-06 19:20:18"
+    },
+    {
+        "nome":  "marco",
+        "email":  "marcoantoniosouzadeoliveira06@gmail.com",
+        "telefone":  "21980638271",
+        "projeto":  "line up",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "2abfc200-8e24-48d4-b74e-780214eeea27",
+        "timestamp":  "2026-07-06 19:21:09"
+    },
+    {
+        "nome":  "marco",
+        "email":  "marcoantoniosouzadeoliveira06@gmail.com",
+        "telefone":  "21980638271",
+        "projeto":  "jmhghjfgfghghf",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "8e69c8f0-ff66-4a90-bceb-f8400d05ffd8",
+        "timestamp":  "2026-07-06 19:23:09"
+    },
+    {
+        "nome":  "marco",
+        "email":  "marcoantoniosouzadeoliveira06@gmail.com",
+        "telefone":  "21980638271",
+        "projeto":  "jmhghjfgfghghf",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "07721a09-9a51-498f-a2ff-27dc8d17f1a8",
+        "timestamp":  "2026-07-06 19:23:23"
+    },
+    {
+        "nome":  "marco",
+        "email":  "marcoantoniosouzadeoliveira06@gmail.com",
+        "telefone":  "21980638271",
+        "projeto":  "jmhghjfgfghghf",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "46fa2278-f2d6-48c2-9d30-79ab0eddbbba",
+        "timestamp":  "2026-07-06 19:23:28"
+    },
+    {
+        "nome":  "marco",
+        "email":  "marcoantoniosouzadeoliveira06@gmail.com",
+        "telefone":  "21980638271",
+        "projeto":  "jmhghjfgfghghf",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "f9442bd6-34e5-429b-bb65-01f1667bce7e",
+        "timestamp":  "2026-07-06 19:23:33"
+    },
+    {
+        "nome":  "marco",
+        "email":  "marcoantoniosouzadeoliveira06@gmail.com",
+        "telefone":  "21980638271",
+        "projeto":  "jmhghjfgfghghf",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "bb98efb2-e49f-49b5-8230-f2e0332298f0",
+        "timestamp":  "2026-07-06 19:27:46"
+    },
+    {
+        "nome":  "marcohhhhhhhh",
+        "email":  "marcoantoniosouzadeoliveira06@gmail.com",
+        "telefone":  "21980638271",
+        "projeto":  "jmhghjfgfghghf",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "63f3547c-4603-4e7f-9136-7883d09efc6e",
+        "timestamp":  "2026-07-06 19:27:52"
+    },
+    {
+        "nome":  "Joao Silva Teste",
+        "email":  "joao.teste@example.com",
+        "telefone":  "21980638271",
+        "projeto":  "LINE UP",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "b44de747-8626-4119-b6d7-800f910f062d",
+        "timestamp":  "2026-07-06 19:48:16"
+    },
+    {
+        "nome":  "Joao Silva Teste",
+        "email":  "joao.teste@example.com",
+        "telefone":  "21980638271",
+        "projeto":  "LINE UP",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "1c6c303f-d26f-4da5-96f9-083aa53af821",
+        "timestamp":  "2026-07-06 19:48:17"
+    },
+    {
+        "nome":  "Joao Silva Teste",
+        "email":  "joao.teste@example.com",
+        "telefone":  "21980638271",
+        "projeto":  "LINE UP",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "599609fb-3ca6-423b-a9b6-9c8bd72ee779",
+        "timestamp":  "2026-07-06 19:48:18"
+    },
+    {
+        "nome":  "Joao Silva Teste",
+        "email":  "joao.teste@example.com",
+        "telefone":  "21980638271",
+        "projeto":  "LINE UP",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "b10e9c42-89c4-4ca7-9b3a-1037fd41bd41",
+        "timestamp":  "2026-07-06 19:48:18"
+    },
+    {
+        "nome":  "Joao Silva Teste",
+        "email":  "joao.teste@example.com",
+        "telefone":  "21980638271",
+        "projeto":  "LINE UP",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "3ab3f0f7-042e-4861-bbd1-cfdfc067e738",
+        "timestamp":  "2026-07-06 19:48:18"
+    },
+    {
+        "nome":  "Joao Silva Teste",
+        "email":  "joao.teste@example.com",
+        "telefone":  "21980638271",
+        "projeto":  "LINE UP",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "2ddb6230-3d5f-42a3-966e-640fe6a58c60",
+        "timestamp":  "2026-07-06 19:48:18"
+    },
+    {
+        "nome":  "Joao Silva Teste",
+        "email":  "joao.teste@example.com",
+        "telefone":  "21980638271",
+        "projeto":  "LINE UP",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "51804906-bb3b-4337-9768-308f04194d48",
+        "timestamp":  "2026-07-06 19:48:19"
+    },
+    {
+        "nome":  "Tester WA Link",
+        "email":  "tester@wa.com",
+        "telefone":  "21980638271",
+        "projeto":  "Test WhatsApp Link Tracking",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "3e5a4b30-fd60-44bc-8774-63e6222b3586",
+        "timestamp":  "2026-07-06 20:18:34",
+        "whatsappClicked":  "Não"
+    },
+    {
+        "nome":  "Tester WA Link",
+        "email":  "tester@wa.com",
+        "telefone":  "21980638271",
+        "projeto":  "Test WhatsApp Link Tracking",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "e8d2a35a-829b-418d-8713-e2ef70734464",
+        "timestamp":  "2026-07-06 20:21:04",
+        "whatsappClicked":  "Sim"
+    },
+    {
+        "nome":  "neymar",
+        "email":  "jose@pinto.com",
+        "telefone":  "21980638271",
+        "projeto":  "um line up ",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "9dce9735-7874-4609-8870-c3c69e158eca",
+        "timestamp":  "2026-07-06 20:26:33",
+        "whatsappClicked":  "Sim"
+    },
+    {
+        "nome":  "Auditor Rich Lead",
+        "email":  "rich@aldeia.com",
+        "telefone":  "(21) 98063-8271",
+        "instagram":  "@aldeia.boutique",
+        "projeto":  "Testing IP and DDD enrichment",
+        "cidade":  "Desconhecida",
+        "regiao":  "",
+        "id":  "a5d49732-bf30-4c27-8d37-477d77a86620",
+        "timestamp":  "2026-07-06 20:37:15",
+        "whatsappClicked":  "Não",
+        "ipCountry":  "Brasil",
+        "ipRegion":  "Rio de Janeiro",
+        "ipCity":  "Rio de Janeiro",
+        "ipISP":  "ALDEIA Localhost Dev Server",
+        "ipCoords":  "-22.9068, -43.1729",
+        "phoneState":  "Rio de Janeiro",
+        "phoneRegion":  "Região Metropolitana",
+        "phoneType":  "Celular (Móvel)"
+    }
+]
