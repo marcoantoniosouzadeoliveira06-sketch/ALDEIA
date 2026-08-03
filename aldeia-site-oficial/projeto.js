@@ -51,6 +51,33 @@ document.addEventListener('DOMContentLoaded', () => {
             catEl.style.color = accentColor;
         }
 
+        // Render member credits
+        if (project.member && (project.member.name || project.member.photo)) {
+            const heroContainer = document.querySelector('.project-hero .section-container');
+            if (heroContainer) {
+                // Remove existing if any (useful for fast reloads)
+                const existing = heroContainer.querySelector('.project-member-credit');
+                if (existing) existing.remove();
+
+                const memberDiv = document.createElement('div');
+                memberDiv.className = 'project-member-credit reveal-up';
+                memberDiv.style.cssText = 'display: flex; align-items: center; gap: 14px; margin-top: 30px; animation-delay: 0.3s;';
+                
+                const photoSrc = project.member.photo || 'https://i.pravatar.cc/150?img=11';
+                const name = project.member.name || 'Membro da Equipe';
+                const role = project.member.role ? `<span style="color: ${accentColor}; font-weight: 400; font-size: 0.9rem; margin-left: 6px;">(${project.member.role})</span>` : '';
+                
+                memberDiv.innerHTML = `
+                    <img src="${photoSrc}" alt="${name}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid ${accentColor}; box-shadow: 0 0 15px ${accentColor}44;">
+                    <div>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;">Feito por</p>
+                        <p style="color: #fff; font-size: 1.15rem; font-weight: 600; margin: 0; font-family: var(--font-h); letter-spacing: 0.02em;">${name}${role}</p>
+                    </div>
+                `;
+                heroContainer.appendChild(memberDiv);
+            }
+        }
+
         const bodyContainer = document.getElementById('project-page-body');
         if (bodyContainer) {
             bodyContainer.innerHTML = '';

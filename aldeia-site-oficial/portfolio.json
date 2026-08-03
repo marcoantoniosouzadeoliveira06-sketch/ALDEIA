@@ -9,7 +9,12 @@
       { "type": "image", "src": "assets/portfolio/1.webp" },
       { "type": "image", "src": "assets/portfolio/5.webp" },
       { "type": "image", "src": "assets/portfolio/3.webp" }
-    ]
+    ],
+    "member": {
+      "name": "Designer Japex",
+      "role": "Fundador",
+      "photo": "https://i.pravatar.cc/150?img=11"
+    }
   },
   {
     "id": "p2",
@@ -20,7 +25,12 @@
     "assets": [
       { "type": "video", "src": "assets/hero-bg.mp4" },
       { "type": "image", "src": "assets/portfolio/6.webp" }
-    ]
+    ],
+    "member": {
+      "name": "Designer Temari",
+      "role": "Fundadora",
+      "photo": "https://i.pravatar.cc/150?img=5"
+    }
   },
   {
     "id": "p3",

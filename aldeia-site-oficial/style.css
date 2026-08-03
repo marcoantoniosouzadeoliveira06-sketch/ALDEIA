@@ -453,12 +453,51 @@ body.preloader-done #main-nav.hide-nav {
 }
 
 @media (max-width: 768px) {
+    #main-nav {
+        background: rgba(8, 8, 8, 0.95) !important;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
     .nav-center {
         display: none;
     }
 
     .nav-inner {
-        padding: 0 20px;
+        padding: 0 15px;
+        position: relative;
+    }
+
+    .nav-logo {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .nav-logo:hover {
+        opacity: 1;
+    }
+
+    .nav-actions .lang-selector,
+    .nav-actions .theme-toggle,
+    .nav-actions .btn-vamos {
+        display: none !important;
+    }
+
+    .nav-hamburger {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+        width: 44px;
+        height: 44px;
+        align-items: center;
+        margin-left: auto;
+    }
+    
+    .nav-hamburger span {
+        width: 20px;
+        height: 2px;
+        background: #fff;
     }
 }
 
@@ -3408,33 +3447,26 @@ body {
     right: 30px;
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, #e2e8f0 0%, #ffffff 40%, #94a3b8 70%, #cbd5e1 100%);
-    background-size: 200% 200%;
-    color: #0f172a;
+    background: transparent;
+    color: #cbd5e1;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.25), 0 0 20px rgba(255, 255, 255, 0.15);
+    box-shadow: none;
     z-index: 9999;
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s, border-color 0.3s;
+    border: none;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .floating-cta::before {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(255, 255, 255, 0.4);
-    opacity: 0.6;
-    animation: none;
+    display: none;
 }
 
 .floating-cta:hover {
     transform: scale(1.1) translateY(-4px);
-    box-shadow: 0 15px 40px rgba(255, 255, 255, 0.4), 0 0 30px rgba(255, 255, 255, 0.3);
-    border-color: #ffffff;
+    box-shadow: none;
+    border-color: transparent;
 }
 
 /* Scroll To Top Button */

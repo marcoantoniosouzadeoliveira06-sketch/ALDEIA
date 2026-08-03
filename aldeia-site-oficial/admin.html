@@ -781,6 +781,22 @@
                                 </div>
                             </div>
 
+                            <!-- Créditos do Autor (Opcional) -->
+                            <div class="input-group" style="background: rgba(255,255,255,0.01); padding: 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                                <label class="input-label" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px; display: block;">Créditos do Autor / Equipe (Opcional)</label>
+                                
+                                <input type="text" id="port-member-name" placeholder="Nome (Ex: Designer Japex)" style="width: 100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 6px; color:#fff; margin-bottom: 10px;">
+                                
+                                <input type="text" id="port-member-role" placeholder="Cargo (Ex: Fundador)" style="width: 100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 6px; color:#fff; margin-bottom: 10px;">
+                                
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <img src="" id="port-member-photo-preview" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; background: #222; display: none;">
+                                    <input type="text" id="port-member-photo" placeholder="Foto do Autor (Upload ou URL)" style="flex: 1; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 6px; color:#fff;">
+                                    <button type="button" class="btn-action" onclick="document.getElementById('port-member-photo-file').click()" style="padding: 12px 18px; border-radius: 6px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.08);">Upload</button>
+                                    <input type="file" id="port-member-photo-file" accept="image/*" style="display: none;" onchange="handlePortMemberPhotoUpload(this)">
+                                </div>
+                            </div>
+
                             <!-- Galeria -->
                             <div class="input-group" style="background: rgba(255,255,255,0.01); padding: 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -2806,6 +2822,18 @@
             } else {
                 preview.style.display = 'none';
             }
+            
+            // Member info
+            document.getElementById('port-member-name').value = project.member?.name || '';
+            document.getElementById('port-member-role').value = project.member?.role || '';
+            document.getElementById('port-member-photo').value = project.member?.photo || '';
+            const memberPreview = document.getElementById('port-member-photo-preview');
+            if (project.member?.photo) {
+                memberPreview.src = project.member.photo;
+                memberPreview.style.display = 'block';
+            } else {
+                memberPreview.style.display = 'none';
+            }
 
             portGalleryAssets = Array.isArray(project.assets) ? JSON.parse(JSON.stringify(project.assets)) : [];
             renderPortGalleryBuilder();
@@ -2824,6 +2852,11 @@
             document.getElementById('port-accent-color').value = '#a855f7';
             document.getElementById('port-color-hex').textContent = '#a855f7';
             document.getElementById('port-format').value = 'post';
+            
+            document.getElementById('port-member-name').value = '';
+            document.getElementById('port-member-role').value = '';
+            document.getElementById('port-member-photo').value = '';
+            document.getElementById('port-member-photo-preview').style.display = 'none';
             portGalleryAssets = [];
             renderPortGalleryBuilder();
             document.getElementById('port-submit-btn').textContent = 'Salvar Projeto';
@@ -2856,6 +2889,19 @@
             uploadFileBinary(file, (url) => {
                 document.getElementById('port-cover').value = url;
                 const preview = document.getElementById('port-cover-preview');
+                preview.src = url;
+                preview.style.display = 'block';
+            });
+        }
+
+        // Upload Foto do Membro do Portfólio
+        function handlePortMemberPhotoUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            uploadFileBinary(file, (url) => {
+                document.getElementById('port-member-photo').value = url;
+                const preview = document.getElementById('port-member-photo-preview');
                 preview.src = url;
                 preview.style.display = 'block';
             });
@@ -2953,6 +2999,16 @@
                     const accentColor = document.getElementById('port-accent-color').value || '#a855f7';
                     const cover = document.getElementById('port-cover').value;
                     
+                    const memberName = document.getElementById('port-member-name').value.trim();
+                    const memberRole = document.getElementById('port-member-role').value.trim();
+                    const memberPhoto = document.getElementById('port-member-photo').value.trim();
+                    
+                    const member = (memberName || memberRole || memberPhoto) ? {
+                        name: memberName,
+                        role: memberRole,
+                        photo: memberPhoto
+                    } : null;
+                    
                     const assets = portGalleryAssets.filter(a => a.src.trim() !== '');
 
                     if (!cover) {
@@ -2961,6 +3017,7 @@
                     }
 
                     const payload = { title, category, categoryLabel, format, aspectRatio, accentColor, cover, assets };
+                    if (member) payload.member = member;
                     const isEdit = !!editId;
                     const url = isEdit ? `/api/portfolio/${editId}` : '/api/portfolio';
                     const method = isEdit ? 'PUT' : 'POST';
