@@ -658,6 +658,8 @@ body.preloader-done #main-nav.hide-nav {
     object-fit: cover;
     filter: contrast(1.05) brightness(0.45);
     /* Normal colors cinematic */
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .hero-video-overlay {

@@ -49,13 +49,26 @@ setInterval(() => {
 }, 30 * 60 * 1000);
 
 // ===== UTILITÁRIOS SEGUROS DE PERSISTÊNCIA (I/O ATÔMICO) =====
+const memoryCache = new Map();
+
 function safeReadJSON(filename, defaultVal = []) {
+    if (memoryCache.has(filename)) {
+        return JSON.parse(JSON.stringify(memoryCache.get(filename)));
+    }
     const filePath = path.join(ROOT_DIR, filename);
     try {
-        if (!fs.existsSync(filePath)) return defaultVal;
+        if (!fs.existsSync(filePath)) {
+            memoryCache.set(filename, defaultVal);
+            return defaultVal;
+        }
         const raw = fs.readFileSync(filePath, 'utf8');
-        if (!raw.trim()) return defaultVal;
-        return JSON.parse(raw);
+        if (!raw.trim()) {
+            memoryCache.set(filename, defaultVal);
+            return defaultVal;
+        }
+        const data = JSON.parse(raw);
+        memoryCache.set(filename, data);
+        return JSON.parse(JSON.stringify(data));
     } catch (err) {
         console.error(`[PERSISTENCE] Erro ao ler ${filename}:`, err.message);
         return defaultVal;
@@ -63,20 +76,19 @@ function safeReadJSON(filename, defaultVal = []) {
 }
 
 function safeWriteJSON(filename, data) {
+    memoryCache.set(filename, JSON.parse(JSON.stringify(data)));
     const filePath = path.join(ROOT_DIR, filename);
     const tmpPath = `${filePath}.tmp_${Date.now()}`;
-    try {
-        const jsonStr = JSON.stringify(data, null, 2);
-        fs.writeFileSync(tmpPath, jsonStr, 'utf8');
-        fs.renameSync(tmpPath, filePath);
-        return true;
-    } catch (err) {
-        console.error(`[PERSISTENCE] Erro ao salvar ${filename}:`, err.message);
-        if (fs.existsSync(tmpPath)) {
-            try { fs.unlinkSync(tmpPath); } catch (_) {}
-        }
-        return false;
-    }
+    const jsonStr = JSON.stringify(data, null, 2);
+    
+    fs.promises.writeFile(tmpPath, jsonStr, 'utf8')
+        .then(() => fs.promises.rename(tmpPath, filePath))
+        .catch(err => {
+            console.error(`[PERSISTENCE] Erro async ao salvar ${filename}:`, err.message);
+            fs.promises.unlink(tmpPath).catch(() => {});
+        });
+        
+    return true;
 }
 
 // ===== UPLOAD DE ARQUIVOS (Cloudinary) =====
@@ -389,18 +401,52 @@ app.post('/api/upload', requireAuth, (req, res) => {
 
 // ===== ROTAS DE LEADS / SUBMISSIONS =====
 
-app.post('/api/cadastro', (req, res) => {
+app.post('/api/cadastro', async (req, res) => {
     let submissions = safeReadJSON('submissions.json', []);
+    
+    let clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+    if (clientIP.includes(',')) clientIP = clientIP.split(',')[0].trim();
+    
+    let geo = { city: 'Desconhecida', region: 'Desconhecida', country: 'Desconhecido', org: 'Desconhecido', lat: 0, lon: 0 };
+    try {
+        if (clientIP !== '127.0.0.1' && clientIP !== '::1' && typeof fetch !== 'undefined') {
+            const geoRes = await fetch(`https://ipapi.co/${clientIP}/json/`);
+            if (geoRes.ok) {
+                const geoData = await geoRes.json();
+                if (!geoData.error) {
+                    geo.city = geoData.city || geo.city;
+                    geo.region = geoData.region || geo.region;
+                    geo.country = geoData.country_name || geo.country;
+                    geo.org = geoData.org || geoData.asn || geo.org;
+                    geo.lat = geoData.latitude || geo.lat;
+                    geo.lon = geoData.longitude || geo.lon;
+                }
+            }
+        }
+    } catch (err) {
+        console.error('[GEO] Erro:', err.message);
+    }
+
+    const {
+        nome, email, telefone, instagram, projeto,
+        utmSource, utmMedium, utmCampaign, visits, firstVisit
+    } = req.body;
+
     const newSubmission = {
-        ...req.body,
         id: crypto.randomUUID(),
         timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        nome, email, telefone, instagram, projeto,
         whatsappClicked: "Não",
-        ipCountry: "Brasil",
-        ipRegion: "Rio de Janeiro",
-        ipCity: "Rio de Janeiro",
-        ipISP: "ALDEIA Cloud Server",
-        ipCoords: "-22.9068, -43.1729"
+        utmSource: utmSource || 'Direto',
+        utmMedium: utmMedium || '',
+        utmCampaign: utmCampaign || '',
+        visits: visits || 1,
+        firstVisit: firstVisit || '',
+        ipCountry: geo.country,
+        ipRegion: geo.region,
+        ipCity: geo.city,
+        ipISP: geo.org,
+        ipCoords: `${geo.lat}, ${geo.lon}`
     };
 
     submissions.push(newSubmission);

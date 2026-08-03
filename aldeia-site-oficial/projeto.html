@@ -282,8 +282,9 @@
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="app.js?v=2"></script>
-    <script src="projeto.js?v=2"></script>
+    <script src="assets/tracker.js"></script>
+    <script src="app.js"></script>
+    <script src="projeto.js"></script>
     <!-- Preloader Removido -->
 
     <!-- MODAL ORÇAMENTO -->
@@ -451,17 +452,14 @@
            ALDEIA TELEMETRY MODULE — Zero-CLS Tracker
            AES-256-CBC | sendBeacon | performance.now
            ============================================ */
-        (function () {
-            const host = window.location.hostname || 'localhost';
-            const TELEMETRY_URL = `http://${host}:3001/api/telemetry`;
-            const KEY_URL = `http://${host}:3001/api/telemetry/encryption-key`;
+        (function() {
+            const TELEMETRY_URL = `/api/telemetry`;
 
             // Session state
             window.__aldeiaTelemetry = {
                 sessionId: null,
                 modalOpenTime: null,
                 converted: false,
-                encryptionKey: null,
                 initialized: false
             };
 
@@ -472,45 +470,8 @@
                 return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
             }
 
-            // Fetch encryption key from server (async, non-blocking)
-            async function fetchEncryptionKey() {
-                try {
-                    const res = await fetch(KEY_URL);
-                    if (res.ok) {
-                        const data = await res.json();
-                        window.__aldeiaTelemetry.encryptionKey = data.key;
-                    }
-                } catch (e) {
-                    console.warn('[Telemetry] Chave de criptografia indisponível, usando fallback.');
-                }
-            }
-
-            // AES-256-CBC encrypt using Web Crypto API
-            async function encryptPayload(payload) {
-                const keyHex = window.__aldeiaTelemetry.encryptionKey;
-                if (!keyHex || !window.crypto || !window.crypto.subtle) return null;
-
-                try {
-                    const keyBytes = new Uint8Array(keyHex.match(/.{2}/g).map(b => parseInt(b, 16)));
-                    const iv = crypto.getRandomValues(new Uint8Array(16));
-                    const cryptoKey = await crypto.subtle.importKey(
-                        'raw', keyBytes, { name: 'AES-CBC' }, false, ['encrypt']
-                    );
-                    const encoded = new TextEncoder().encode(JSON.stringify(payload));
-                    const encrypted = await crypto.subtle.encrypt(
-                        { name: 'AES-CBC', iv: iv }, cryptoKey, encoded
-                    );
-                    return {
-                        iv: Array.from(iv, b => b.toString(16).padStart(2, '0')).join(''),
-                        data: Array.from(new Uint8Array(encrypted), b => b.toString(16).padStart(2, '0')).join('')
-                    };
-                } catch (e) {
-                    return null;
-                }
-            }
-
             // Send telemetry (non-blocking)
-            async function sendTelemetry(eventType, converted) {
+            function sendTelemetry(eventType, converted) {
                 const t = window.__aldeiaTelemetry;
                 if (!t.modalOpenTime) return;
 
@@ -523,54 +484,25 @@
                     page_url: window.location.pathname
                 };
 
-                // Try encrypted send
-                const encrypted = await encryptPayload(payload);
-                if (encrypted) {
-                    const blob = new Blob([JSON.stringify(encrypted)], { type: 'application/json' });
-                    if (navigator.sendBeacon) {
-                        // sendBeacon doesn't support custom headers, use fetch with keepalive
-                        fetch(TELEMETRY_URL, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Telemetry-Encrypted': 'true'
-                            },
-                            body: JSON.stringify(encrypted),
-                            keepalive: true
-                        }).catch(() => { });
-                    } else {
-                        fetch(TELEMETRY_URL, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Telemetry-Encrypted': 'true'
-                            },
-                            body: JSON.stringify(encrypted)
-                        }).catch(() => { });
-                    }
+                const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(TELEMETRY_URL, blob);
                 } else {
-                    // Fallback: send unencrypted via sendBeacon
-                    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-                    if (navigator.sendBeacon) {
-                        navigator.sendBeacon(TELEMETRY_URL, blob);
-                    } else {
-                        fetch(TELEMETRY_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload),
-                            keepalive: true
-                        }).catch(() => { });
-                    }
+                    fetch(TELEMETRY_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                        keepalive: true
+                    }).catch(() => {});
                 }
             }
 
             // Initialize on page load
             window.__aldeiaTelemetry.sessionId = generateSessionId();
-            fetchEncryptionKey();
             window.__aldeiaTelemetry.initialized = true;
 
-            // Abandonment on page unload (if modal was open and not converted)
-            window.addEventListener('beforeunload', function () {
+            // Abandonment on page unload
+            window.addEventListener('beforeunload', function() {
                 const t = window.__aldeiaTelemetry;
                 if (t.modalOpenTime && !t.converted) {
                     const dwellTime = parseFloat(((performance.now() - t.modalOpenTime) / 1000).toFixed(2));
@@ -643,16 +575,9 @@
             const instagram = document.getElementById('m-instagram') ? document.getElementById('m-instagram').value : '';
             const projeto = document.getElementById('m-projeto').value;
 
-            let userGeo = { city: 'Desconhecida', region: '' };
-            try {
-                const geoRes = await fetch('https://ipapi.co/json/');
-                if (geoRes.ok) {
-                    const geoData = await geoRes.json();
-                    userGeo.city = geoData.city || 'Desconhecida';
-                    userGeo.region = geoData.region || geoData.region_code || '';
-                }
-            } catch (err) {
-                console.warn('Geolocation lookup failed:', err);
+            let trackingData = {};
+            if (window.__aldeiaTracker) {
+                trackingData = window.__aldeiaTracker.getTrackingData();
             }
 
             const data = {
@@ -661,8 +586,7 @@
                 telefone: telefone,
                 instagram: instagram,
                 projeto: projeto,
-                cidade: userGeo.city,
-                regiao: userGeo.region
+                ...trackingData
             };
 
             try {

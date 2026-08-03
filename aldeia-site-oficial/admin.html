@@ -1522,7 +1522,7 @@
 
                     reversedData.forEach(sub => {
                         const cleanPhone = getCleanPhone(sub.telefone);
-                        const displayLoc = (sub.cidade && sub.cidade !== 'Desconhecida') ? `${sub.cidade}, ${sub.regiao || ''}` : '';
+                        const displayLoc = (sub.ipCity && sub.ipCity !== 'Desconhecida') ? `${sub.ipCity}, ${sub.ipRegion || ''} - ${sub.ipCountry || ''}` : ((sub.cidade && sub.cidade !== 'Desconhecida') ? `${sub.cidade}, ${sub.regiao || ''}` : '');
 
                         // Prefilled WhatsApp link with Project description
                         const waMsg = `Olá%20${encodeURIComponent(sub.nome)}!%20Vi%20que%20você%20tem%20interesse%20em%20fazer%20o%20projeto%20"${encodeURIComponent(sub.projeto)}"%20com%20a%20ALDEIA.%20Gostaria%20de%20alinhar%20os%20detalhes?`;
@@ -1539,9 +1539,12 @@
                                 ${sub.instagram ? `<div class="user-info" style="color: #c084fc; font-weight: 500; margin-top: 2px;"><a href="https://instagram.com/${sub.instagram.replace('@','')}" target="_blank" style="color: inherit; text-decoration: underline;">Instagram: ${escapeHTML(sub.instagram)}</a></div>` : ''}
                                 
                                 <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;">
-                                    ${displayLoc ? `<div class="badge-geo" style="margin: 0;">IP: ${escapeHTML(displayLoc)}</div>` : ''}
-                                    ${sub.ipISP ? `<div class="badge-geo" style="background: rgba(168, 85, 247, 0.1); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.2); margin: 0;">Provedor: ${escapeHTML(sub.ipISP)}</div>` : ''}
-                                    ${sub.phoneState && sub.phoneState !== 'Desconhecido' ? `<div class="badge-geo" style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); margin: 0; width: 100%; max-width: fit-content;">${escapeHTML(sub.phoneState)} (${escapeHTML(sub.phoneRegion)}) - ${escapeHTML(sub.phoneType)}</div>` : ''}
+                                    ${displayLoc ? `<div class="badge-geo" style="margin: 0;" title="Localização">IP: ${escapeHTML(displayLoc)}</div>` : ''}
+                                    ${sub.ipISP && sub.ipISP !== 'Desconhecido' ? `<div class="badge-geo" style="background: rgba(168, 85, 247, 0.1); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.2); margin: 0;" title="Provedor de Internet">ISP: ${escapeHTML(sub.ipISP)}</div>` : ''}
+                                    ${sub.ipCoords && sub.ipCoords !== '0, 0' ? `<div class="badge-geo" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); margin: 0;" title="Coordenadas">Geo: ${escapeHTML(sub.ipCoords)}</div>` : ''}
+                                    ${sub.utmSource ? `<div class="badge-geo" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); margin: 0;" title="Origem do Tráfego">Origem: ${escapeHTML(sub.utmSource)} ${sub.utmCampaign ? '('+escapeHTML(sub.utmCampaign)+')' : ''}</div>` : ''}
+                                    ${sub.visits ? `<div class="badge-geo" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); margin: 0;" title="Acessos antes da conversão">Visitas: ${escapeHTML(sub.visits)}</div>` : ''}
+                                    ${sub.firstVisit ? `<div class="badge-geo" style="background: rgba(236, 72, 153, 0.1); color: #ec4899; border: 1px solid rgba(236, 72, 153, 0.2); margin: 0; width: 100%; max-width: fit-content;" title="Data do 1º Acesso no site">1º Acesso: ${escapeHTML(new Date(sub.firstVisit).toLocaleString('pt-BR'))}</div>` : ''}
                                 </div>
                             </td>
                             <td>
