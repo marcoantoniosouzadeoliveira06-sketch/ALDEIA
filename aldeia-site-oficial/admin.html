@@ -817,7 +817,6 @@
                             </div>
                         </form>
                     </div>
-                </div>
 
                 <div class="submissions-box">
                     <div class="box-header">
@@ -2769,7 +2768,7 @@
             listEl.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Carregando portfólio...</td></tr>';
             
             try {
-                const res = await fetch('/api/portfolio');
+                const res = await fetch('/api/portfolio?t=' + Date.now());
                 if (res.ok) {
                     rawPortfolioProjects = await res.json();
                     listEl.innerHTML = '';

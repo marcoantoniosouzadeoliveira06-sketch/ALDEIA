@@ -32,10 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Busca os dados da API
     async function loadPortfolio() {
         try {
-            const res = await fetch('/api/portfolio');
+            let res = await fetch('/api/portfolio?t=' + Date.now());
+            if (!res.ok) {
+                res = await fetch('portfolio.json?t=' + Date.now());
+            }
             if (res.ok) {
                 const data = await res.json();
-                if (Array.isArray(data) && data.length > 0) {
+                if (Array.isArray(data)) {
                     projects = data;
                 } else {
                     projects = getFallbackProjects();
@@ -44,8 +47,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 projects = getFallbackProjects();
             }
         } catch (e) {
-            console.warn('Servidor offline ou rota indisponível, carregando portfólio local:', e);
-            projects = getFallbackProjects();
+            console.warn('Servidor offline ou rota indisponível, tentando portfolio.json local:', e);
+            try {
+                const resLocal = await fetch('portfolio.json?t=' + Date.now());
+                if (resLocal.ok) {
+                    const dataLocal = await resLocal.json();
+                    if (Array.isArray(dataLocal)) {
+                        projects = dataLocal;
+                    } else {
+                        projects = getFallbackProjects();
+                    }
+                } else {
+                    projects = getFallbackProjects();
+                }
+            } catch (err) {
+                projects = getFallbackProjects();
+            }
         }
         renderGrid('all');
     }

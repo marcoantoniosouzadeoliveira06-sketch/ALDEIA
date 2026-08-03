@@ -22,10 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadProject() {
         let project = null;
         try {
-            const res = await fetch('/api/portfolio');
+            let res = await fetch('/api/portfolio?t=' + Date.now());
+            if (!res.ok) {
+                res = await fetch('portfolio.json?t=' + Date.now());
+            }
             if (res.ok) {
                 const projects = await res.json();
-                if (Array.isArray(projects) && projects.length > 0) {
+                if (Array.isArray(projects)) {
                     project = projects.find(p => p.id === projectId);
                 }
             }
