@@ -20,10 +20,10 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "express-rate-limit": "^7.1.5",
-    "helmet": "^7.1.0",
     "gsap": "^3.15.0",
+    "helmet": "^7.1.0",
     "motion": "^12.40.0",
     "multer": "^1.4.5-lts.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^6.0.1"
   }
 }

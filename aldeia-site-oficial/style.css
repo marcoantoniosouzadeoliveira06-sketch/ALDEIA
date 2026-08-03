@@ -329,6 +329,7 @@ body.preloader-done #main-nav.hide-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative;
 }
 
 .nav-logo {
@@ -336,6 +337,9 @@ body.preloader-done #main-nav.hide-nav {
     align-items: center;
     gap: 8px;
     transition: opacity 0.3s;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .nav-logo:hover {
@@ -465,13 +469,10 @@ body.preloader-done #main-nav.hide-nav {
 
     .nav-inner {
         padding: 0 15px;
-        position: relative;
     }
 
     .nav-logo {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+        /* herda posicionamento absoluto global */
     }
     
     .nav-logo:hover {
