@@ -744,6 +744,16 @@
                                 <option value="videos" style="background: #111;">Vídeos</option>
                             </select>
 
+                            <!-- Seletor de Formato da Mídia (Story 9:16 / Post 1:1 / Vídeo 16:9) -->
+                            <div class="input-group" style="background: rgba(255,255,255,0.01); padding: 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+                                <label class="input-label" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px; display: block;">Formato da Mídia / Proporção da Arte</label>
+                                <select id="port-format" style="width: 100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 6px; color:#fff;" required>
+                                    <option value="post" style="background: #111;">🔳 Feed / Post Quadrado (1:1 - 1080x1080)</option>
+                                    <option value="story" style="background: #111;">📱 Story / Reels / TikTok Vertical (9:16 - 1080x1920)</option>
+                                    <option value="video" style="background: #111;">📺 Widescreen / Vídeo Horizontal (16:9 - 1920x1080)</option>
+                                </select>
+                            </div>
+
                             <!-- Seletor de Cor de Destaque da Equipe -->
                             <div class="input-group" style="background: rgba(255,255,255,0.01); padding: 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
                                 <label class="input-label" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 8px; display: block;">Cor de Destaque / Iluminação da Equipe</label>
@@ -2700,6 +2710,7 @@
             document.getElementById('port-edit-id').value = project.id;
             document.getElementById('port-title').value = project.title || '';
             document.getElementById('port-category').value = project.category || 'artes';
+            document.getElementById('port-format').value = project.format || 'post';
             
             const accent = project.accentColor || project.color || '#a855f7';
             document.getElementById('port-accent-color').value = accent;
@@ -2730,6 +2741,7 @@
             document.getElementById('port-cover-preview').style.display = 'none';
             document.getElementById('port-accent-color').value = '#a855f7';
             document.getElementById('port-color-hex').textContent = '#a855f7';
+            document.getElementById('port-format').value = 'post';
             portGalleryAssets = [];
             renderPortGalleryBuilder();
             document.getElementById('port-submit-btn').textContent = 'Salvar Projeto';
@@ -2854,6 +2866,8 @@
                     const categoryEl = document.getElementById('port-category');
                     const category = categoryEl.value;
                     const categoryLabel = categoryEl.options[categoryEl.selectedIndex].text;
+                    const format = document.getElementById('port-format').value || 'post';
+                    const aspectRatio = format === 'story' ? '9:16' : (format === 'video' ? '16:9' : '1:1');
                     const accentColor = document.getElementById('port-accent-color').value || '#a855f7';
                     const cover = document.getElementById('port-cover').value;
                     
@@ -2864,7 +2878,7 @@
                         return;
                     }
 
-                    const payload = { title, category, categoryLabel, accentColor, cover, assets };
+                    const payload = { title, category, categoryLabel, format, aspectRatio, accentColor, cover, assets };
                     const isEdit = !!editId;
                     const url = isEdit ? `/api/portfolio/${editId}` : '/api/portfolio';
                     const method = isEdit ? 'PUT' : 'POST';

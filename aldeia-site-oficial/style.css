@@ -4222,3 +4222,35 @@ body.light-theme .scroll-to-top:hover {
         gap: 60px;
     }
 }
+
+/* ===== FORMATOS ADAPTATIVOS DE MÍDIA (STORIES 9:16 / POSTS 1:1 / VÍDEOS 16:9) ===== */
+.aldeia-image-container {
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.aldeia-image-container.format-story {
+    aspect-ratio: 9 / 16;
+    max-width: 420px;
+}
+
+.aldeia-image-container.format-post {
+    aspect-ratio: 1 / 1;
+    max-width: 600px;
+}
+
+.aldeia-image-container.format-video {
+    aspect-ratio: 16 / 9;
+    max-width: 1000px;
+}
+
+.aldeia-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}

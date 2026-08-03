@@ -57,18 +57,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
             (project.assets || []).forEach((asset, index) => {
                 const delay = index * 0.1;
+                const assetWrap = document.createElement('div');
+                assetWrap.className = 'project-asset-wrap reveal-up';
+                assetWrap.style.animationDelay = `${delay}s`;
+
+                const format = project.format || 'post';
+
                 if (asset.type === 'video') {
-                    bodyContainer.innerHTML += `
-                        <div class="project-asset-wrap reveal-up" style="animation-delay: ${delay}s">
-                            <video src="${asset.src}" autoplay loop muted playsinline></video>
-                        </div>
-                    `;
+                    bodyContainer.appendChild(assetWrap);
+                    if (window.createAldeiaVideoPlayer) {
+                        window.createAldeiaVideoPlayer(assetWrap, {
+                            src: asset.src,
+                            format: format,
+                            poster: project.cover,
+                            autoplay: true
+                        });
+                    } else {
+                        assetWrap.innerHTML = `<video src="${asset.src}" autoplay loop muted playsinline style="width:100%; border-radius:12px;"></video>`;
+                    }
                 } else {
-                    bodyContainer.innerHTML += `
-                        <div class="project-asset-wrap reveal-up" style="animation-delay: ${delay}s">
+                    assetWrap.innerHTML = `
+                        <div class="aldeia-image-container format-${format}">
                             <img src="${asset.src}" alt="Detalhe de ${project.title}" loading="lazy">
                         </div>
                     `;
+                    bodyContainer.appendChild(assetWrap);
                 }
             });
 

@@ -1,0 +1,267 @@
+/* ============================================================
+   ALDEIA — PLAYER DE VÍDEO CUSTOMIZADO (ZERO LAG & CONTROLES PRO)
+   ============================================================ */
+
+.aldeia-video-container {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-glow, rgba(168, 85, 247, 0.15));
+    user-select: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Proporções Adaptativas */
+.aldeia-video-container.format-story {
+    aspect-ratio: 9 / 16;
+    max-width: 420px;
+}
+
+.aldeia-video-container.format-post {
+    aspect-ratio: 1 / 1;
+    max-width: 600px;
+}
+
+.aldeia-video-container.format-video {
+    aspect-ratio: 16 / 9;
+    max-width: 1000px;
+}
+
+.aldeia-video-element {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    cursor: pointer;
+    background: #000;
+}
+
+/* Overlay Botão Play Central */
+.aldeia-video-overlay-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 64px;
+    height: 64px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+    z-index: 5;
+}
+
+.aldeia-video-container:hover .aldeia-video-overlay-play.is-paused,
+.aldeia-video-container.user-active .aldeia-video-overlay-play.is-paused {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.aldeia-video-overlay-play svg {
+    width: 28px;
+    height: 28px;
+    fill: currentColor;
+    margin-left: 3px;
+}
+
+/* Barra de Controles Inferior */
+.aldeia-video-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.5) 70%, transparent 100%);
+    padding: 20px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s var(--ease);
+    z-index: 10;
+}
+
+.aldeia-video-container:hover .aldeia-video-controls,
+.aldeia-video-container.user-active .aldeia-video-controls,
+.aldeia-video-container.is-paused .aldeia-video-controls {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Linha do Tempo / Scrubber */
+.aldeia-video-timeline-wrap {
+    width: 100%;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.aldeia-video-timeline-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    position: relative;
+    overflow: visible;
+    transition: height 0.15s ease;
+}
+
+.aldeia-video-timeline-wrap:hover .aldeia-video-timeline-track {
+    height: 6px;
+}
+
+.aldeia-video-timeline-buffered {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 2px;
+    width: 0%;
+}
+
+.aldeia-video-timeline-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: var(--accent, #a855f7);
+    border-radius: 2px;
+    width: 0%;
+    box-shadow: 0 0 10px var(--accent, #a855f7);
+}
+
+.aldeia-video-timeline-handle {
+    position: absolute;
+    top: 50%;
+    right: -6px;
+    transform: translateY(-50%) scale(0);
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+    transition: transform 0.15s ease;
+}
+
+.aldeia-video-timeline-wrap:hover .aldeia-video-timeline-handle {
+    transform: translateY(-50%) scale(1);
+}
+
+/* Linha de botões da barra de ferramentas */
+.aldeia-video-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.aldeia-video-left-controls,
+.aldeia-video-right-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.aldeia-video-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-family: inherit;
+    transition: color 0.2s, background 0.2s;
+}
+
+.aldeia-video-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.aldeia-video-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+/* Tempo (00:15 / 01:30) */
+.aldeia-video-time {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.78rem;
+    font-family: monospace;
+    letter-spacing: 0.05em;
+}
+
+/* Dropdowns (Velocidade e Qualidade) */
+.aldeia-video-menu-wrap {
+    position: relative;
+}
+
+.aldeia-video-menu-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.aldeia-video-menu {
+    position: absolute;
+    bottom: 35px;
+    right: 0;
+    background: rgba(15, 15, 15, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 6px 0;
+    display: none;
+    flex-direction: column;
+    min-width: 100px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.9);
+    z-index: 20;
+}
+
+.aldeia-video-menu.active {
+    display: flex;
+}
+
+.aldeia-video-menu-item {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 6px 12px;
+    text-align: left;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.aldeia-video-menu-item:hover,
+.aldeia-video-menu-item.active {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--accent, #c084fc);
+}

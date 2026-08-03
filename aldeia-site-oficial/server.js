@@ -282,11 +282,16 @@ app.get('/api/portfolio', (req, res) => {
 
 app.post('/api/portfolio', requireAuth, (req, res) => {
     let data = safeReadJSON('portfolio.json', []);
+    const format = req.body.format || 'post';
+    const aspectRatio = req.body.aspectRatio || (format === 'story' ? '9:16' : format === 'video' ? '16:9' : '1:1');
+    
     const newProject = {
         id: 'p' + Date.now(),
         title: req.body.title || 'Sem Título',
         category: req.body.category || 'artes',
         categoryLabel: req.body.categoryLabel || 'Artes Avulsas',
+        format: format,
+        aspectRatio: aspectRatio,
         accentColor: req.body.accentColor || req.body.color || '#a855f7',
         cover: req.body.cover || '',
         assets: req.body.assets || []
@@ -324,6 +329,40 @@ app.delete('/api/portfolio/:id', requireAuth, (req, res) => {
     }
     safeWriteJSON('portfolio.json', data);
     res.json({ status: 'success' });
+});
+
+// ===== STREAMING DE VÍDEO COM SUPORTE A RANGE REQUESTS (HTTP 206 - SEEK SEM LAG) =====
+app.get('/assets/uploads/:filename', (req, res, next) => {
+    const filePath = path.join(ROOT_DIR, 'assets', 'uploads', req.params.filename);
+    if (!fs.existsSync(filePath)) return next();
+
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    if (range) {
+        const parts = range.replace(/bytes=/, "").split("-");
+        const start = parseInt(parts[0], 10);
+        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+        const chunksize = (end - start) + 1;
+        const file = fs.createReadStream(filePath, { start, end });
+        const ext = path.extname(filePath).toLowerCase();
+        let mimeType = 'video/mp4';
+        if (ext === '.webm') mimeType = 'video/webm';
+        if (ext === '.mov') mimeType = 'video/quicktime';
+        if (ext === '.webp') mimeType = 'image/webp';
+
+        const head = {
+            'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+            'Accept-Ranges': 'bytes',
+            'Content-Length': chunksize,
+            'Content-Type': mimeType,
+        };
+        res.writeHead(206, head);
+        file.pipe(res);
+    } else {
+        next();
+    }
 });
 
 // ===== UPLOAD =====
