@@ -12,9 +12,10 @@ const crypto = require('crypto');
 const multer = require('multer');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 const ROOT_DIR = __dirname;
 
 // ===== CONFIGURAÇÃO DE SEGURANÇA E ADMIN =====
@@ -78,11 +79,16 @@ function safeWriteJSON(filename, data) {
     }
 }
 
-// ===== UPLOAD DE ARQUIVOS SEGURO (Multer) =====
-const uploadDir = path.join(ROOT_DIR, 'assets', 'uploads');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
+// ===== UPLOAD DE ARQUIVOS (Cloudinary) =====
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+// Configuração do Cloudinary com credenciais do .env
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 // Tipos permitidos (Imagens e Vídeos)
 const ALLOWED_MIME_TYPES = new Set([
@@ -94,12 +100,12 @@ const ALLOWED_EXTENSIONS = new Set([
     '.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg', '.mp4', '.webm', '.mov'
 ]);
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir),
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname).toLowerCase() || '.png';
-        const uniqueName = `upload_${crypto.randomUUID()}${ext}`;
-        cb(null, uniqueName);
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'aldeia_uploads',
+        resource_type: 'auto', // Permite imagem e vídeo automaticamente
+        allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'gif', 'svg', 'mp4', 'webm', 'mov']
     }
 });
 
@@ -375,8 +381,9 @@ app.post('/api/upload', requireAuth, (req, res) => {
         if (!req.file) {
             return res.status(400).json({ status: 'error', message: 'Nenhum arquivo enviado' });
         }
-        const relativeUrl = `assets/uploads/${req.file.filename}`;
-        res.json({ status: 'success', url: relativeUrl });
+        // O Cloudinary envia a URL completa e segura no req.file.path
+        const cloudUrl = req.file.path;
+        res.json({ status: 'success', url: cloudUrl });
     });
 });
 

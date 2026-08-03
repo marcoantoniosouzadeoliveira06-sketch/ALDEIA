@@ -16,14 +16,17 @@
   },
   "dependencies": {
     "@use-gesture/react": "^10.3.1",
+    "cloudinary": "^1.41.3",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
     "express": "^4.19.2",
     "express-rate-limit": "^7.1.5",
     "gsap": "^3.15.0",
     "helmet": "^7.1.0",
     "motion": "^12.40.0",
     "multer": "^1.4.5-lts.1",
+    "multer-storage-cloudinary": "^4.0.0",
     "sqlite3": "^6.0.1"
   }
 }
