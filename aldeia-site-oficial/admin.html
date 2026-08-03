@@ -38,6 +38,8 @@
         }
 
         /* ----- LOGIN SCREEN ----- */
+        .hidden-login { display: none !important; }
+        .show-dashboard { display: block !important; }
         .login-container {
             display: flex;
             align-items: center;
@@ -2113,8 +2115,14 @@
             }
             const loginElem = document.getElementById('admin-login');
             const dashElem = document.getElementById('admin-dashboard');
-            if (loginElem) loginElem.style.display = 'none';
-            if (dashElem) dashElem.style.display = 'block';
+            if (loginElem) {
+                loginElem.style.display = 'none';
+                loginElem.classList.add('hidden-login');
+            }
+            if (dashElem) {
+                dashElem.style.display = 'block';
+                dashElem.classList.add('show-dashboard');
+            }
             
             try { loadSubmissions(); } catch (e) { console.error(e); }
             try { loadClients(); } catch (e) { console.error(e); }
@@ -2730,6 +2738,18 @@
         async function login(e) {
             if (e && e.preventDefault) e.preventDefault();
 
+            // Transição instantânea de tela sem esperar pela rede
+            const loginElem = document.getElementById('admin-login');
+            const dashElem = document.getElementById('admin-dashboard');
+            if (loginElem) {
+                loginElem.style.display = 'none';
+                loginElem.classList.add('hidden-login');
+            }
+            if (dashElem) {
+                dashElem.style.display = 'block';
+                dashElem.classList.add('show-dashboard');
+            }
+
             const usernameElem = document.getElementById('admin-username');
             const passwordElem = document.getElementById('admin-password');
             const btnSubmit = document.getElementById('btn-login-submit');
@@ -2810,8 +2830,14 @@
             // Exibir tela de login se não houver token válido
             const loginElem = document.getElementById('admin-login');
             const dashElem = document.getElementById('admin-dashboard');
-            if (loginElem) loginElem.style.display = 'flex';
-            if (dashElem) dashElem.style.display = 'none';
+            if (loginElem) {
+                loginElem.style.display = 'flex';
+                loginElem.classList.remove('hidden-login');
+            }
+            if (dashElem) {
+                dashElem.style.display = 'none';
+                dashElem.classList.remove('show-dashboard');
+            }
         }
 
         checkAutoLogin();
