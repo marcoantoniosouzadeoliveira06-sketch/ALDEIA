@@ -81,14 +81,15 @@ function safeWriteJSON(filename, data) {
     const tmpPath = `${filePath}.tmp_${Date.now()}`;
     const jsonStr = JSON.stringify(data, null, 2);
     
-    fs.promises.writeFile(tmpPath, jsonStr, 'utf8')
-        .then(() => fs.promises.rename(tmpPath, filePath))
-        .catch(err => {
-            console.error(`[PERSISTENCE] Erro async ao salvar ${filename}:`, err.message);
-            fs.promises.unlink(tmpPath).catch(() => {});
-        });
-        
-    return true;
+    try {
+        fs.writeFileSync(tmpPath, jsonStr, 'utf8');
+        fs.renameSync(tmpPath, filePath);
+        return true;
+    } catch (err) {
+        console.error(`[PERSISTENCE] Erro ao salvar ${filename}:`, err.message);
+        try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch (_) {}
+        return false;
+    }
 }
 
 // ===== UPLOAD DE ARQUIVOS (Cloudinary) =====
@@ -369,6 +370,71 @@ app.delete('/api/portfolio/:id', requireAuth, (req, res) => {
     res.json({ status: 'success' });
 });
 
+// ===== ROTAS DE CLIENTES / CRM =====
+
+app.get('/api/clients', requireAuth, (req, res) => {
+    const clients = safeReadJSON('clients.json', []);
+    res.json(clients);
+});
+
+app.post('/api/clients', requireAuth, (req, res) => {
+    let clients = safeReadJSON('clients.json', []);
+    const body = req.body;
+    
+    if (Array.isArray(body)) {
+        clients = body;
+    } else {
+        const leadId = body.leadId || null;
+        if (leadId && clients.some(c => c.leadId === leadId)) {
+            return res.status(400).json({ status: 'error', message: 'Este lead já foi convertido em cliente.' });
+        }
+        const newClient = {
+            id: body.id || ('c_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7)),
+            leadId: leadId,
+            nome: body.nome || 'Cliente Sem Nome',
+            email: body.email || '',
+            telefone: body.telefone || '',
+            projeto: body.projeto || 'Projeto Padrão',
+            status: body.status || 'Ativo',
+            createdAt: new Date().toISOString()
+        };
+        clients.push(newClient);
+    }
+    
+    const success = safeWriteJSON('clients.json', clients);
+    if (success) {
+        res.json({ status: 'success', clients: clients });
+    } else {
+        res.status(500).json({ status: 'error', message: 'Erro ao salvar clientes' });
+    }
+});
+
+app.put('/api/clients/:id', requireAuth, (req, res) => {
+    let clients = safeReadJSON('clients.json', []);
+    const index = clients.findIndex(c => c.id === req.params.id);
+    if (index === -1) {
+        return res.status(404).json({ status: 'error', message: 'Cliente não encontrado' });
+    }
+    clients[index] = {
+        ...clients[index],
+        ...req.body,
+        id: req.params.id
+    };
+    safeWriteJSON('clients.json', clients);
+    res.json({ status: 'success', client: clients[index] });
+});
+
+app.delete('/api/clients/:id', requireAuth, (req, res) => {
+    let clients = safeReadJSON('clients.json', []);
+    const initialLen = clients.length;
+    clients = clients.filter(c => c.id !== req.params.id);
+    if (clients.length === initialLen) {
+        return res.status(404).json({ status: 'error', message: 'Cliente não encontrado' });
+    }
+    safeWriteJSON('clients.json', clients);
+    res.json({ status: 'success' });
+});
+
 // ===== STREAMING DE VÍDEO COM SUPORTE A RANGE REQUESTS (HTTP 206 - SEEK SEM LAG) =====
 app.get('/assets/uploads/:filename', (req, res, next) => {
     const filePath = path.join(ROOT_DIR, 'assets', 'uploads', req.params.filename);
@@ -528,6 +594,30 @@ app.get('/api/admin/export/sql', requireAuth, (req, res) => {
         sql += `INSERT INTO submissions (id, timestamp, nome, email, telefone, projeto, whatsapp_clicked) VALUES ('${id}', '${ts}', '${nome}', '${email}', '${tel}', '${proj}', '${wa}');\n`;
     });
 
+    sql += `\nCREATE TABLE IF NOT EXISTS clients (\n`;
+    sql += `    id VARCHAR(50) PRIMARY KEY,\n`;
+    sql += `    lead_id VARCHAR(50),\n`;
+    sql += `    nome VARCHAR(255),\n`;
+    sql += `    email VARCHAR(255),\n`;
+    sql += `    telefone VARCHAR(100),\n`;
+    sql += `    projeto TEXT,\n`;
+    sql += `    status VARCHAR(50),\n`;
+    sql += `    created_at DATETIME\n`;
+    sql += `);\n\n`;
+
+    const clients = safeReadJSON('clients.json', []);
+    clients.forEach(c => {
+        const id = (c.id || '').replace(/'/g, "''");
+        const leadId = (c.leadId || '').replace(/'/g, "''");
+        const nome = (c.nome || '').replace(/'/g, "''");
+        const email = (c.email || '').replace(/'/g, "''");
+        const tel = (c.telefone || '').replace(/'/g, "''");
+        const proj = (c.projeto || '').replace(/'/g, "''");
+        const status = (c.status || 'Ativo').replace(/'/g, "''");
+        const ca = (c.createdAt || '').replace(/'/g, "''");
+        sql += `INSERT INTO clients (id, lead_id, nome, email, telefone, projeto, status, created_at) VALUES ('${id}', '${leadId}', '${nome}', '${email}', '${tel}', '${proj}', '${status}', '${ca}');\n`;
+    });
+
     res.setHeader('Content-Type', 'application/sql; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename=aldeia_database_dump.sql');
     res.send(sql);
@@ -614,14 +704,65 @@ app.get('/api/analytics/dashboard', requireAuth, (req, res) => {
         .sort((a, b) => b.clicks - a.clicks)
         .slice(0, 5); // Top 5
 
-    // Heatmap data via Leads
-    const heatmap = leads
-        .filter(l => l.ipCoords && l.ipCoords !== '0, 0' && l.ipCoords !== '0,0')
-        .map(l => {
+    // Map de coordenadas conhecidas para fallbacks por cidade/região
+    const CITY_COORDS_MAP = {
+        'rio de janeiro': [-22.9068, -43.1729],
+        'são paulo': [-23.5505, -46.6333],
+        'sao paulo': [-23.5505, -46.6333],
+        'brasília': [-15.7801, -47.9292],
+        'brasilia': [-15.7801, -47.9292],
+        'belo horizonte': [-19.9167, -43.9345],
+        'curitiba': [-25.4284, -49.2733],
+        'porto alegre': [-30.0346, -51.2177],
+        'salvador': [-12.9777, -38.5016],
+        'recife': [-8.0476, -34.8770],
+        'fortaleza': [-3.7319, -38.5267],
+        'florianópolis': [-27.5954, -48.5480],
+        'goiânia': [-16.6869, -49.2648],
+        'manaus': [-3.1190, -60.0217],
+        'belém': [-1.4558, -48.4902],
+        'vitória': [-20.3155, -40.3128],
+        'campinas': [-22.9056, -47.0608],
+        'niterói': [-22.8833, -43.1036],
+        'lisboa': [38.7223, -9.1393],
+        'miami': [25.7617, -80.1918],
+        'nova york': [40.7128, -74.0060],
+        'londres': [51.5074, -0.1278],
+        'tóquio': [35.6762, 139.6503]
+    };
+
+    // Heatmap data via Leads & Telemetry (latitude, longitude, intensidade)
+    const heatmapPoints = [];
+
+    leads.forEach(l => {
+        let lat = null, lon = null;
+        if (l.ipCoords && l.ipCoords !== '0, 0' && l.ipCoords !== '0,0') {
             const parts = l.ipCoords.split(',');
-            return [parseFloat(parts[0]), parseFloat(parts[1])];
-        })
-        .filter(c => !isNaN(c[0]) && !isNaN(c[1]));
+            lat = parseFloat(parts[0]);
+            lon = parseFloat(parts[1]);
+        }
+        if ((!lat || isNaN(lat)) && (l.ipCity || l.cidade || l.ipRegion || l.regiao)) {
+            const cityName = (l.ipCity || l.cidade || l.ipRegion || l.regiao || '').toLowerCase().trim();
+            if (CITY_COORDS_MAP[cityName]) {
+                [lat, lon] = CITY_COORDS_MAP[cityName];
+            }
+        }
+        if (lat !== null && !isNaN(lat) && lon !== null && !isNaN(lon)) {
+            heatmapPoints.push([lat, lon, 0.9]); // Lead convertida tem intensidade alta (0.9)
+        }
+    });
+
+    // Processar telemetria para pontos de acesso adicionais
+    events.forEach(e => {
+        if (e.ipCoords && e.ipCoords !== '0, 0' && e.ipCoords !== '0,0') {
+            const parts = e.ipCoords.split(',');
+            const lat = parseFloat(parts[0]);
+            const lon = parseFloat(parts[1]);
+            if (!isNaN(lat) && !isNaN(lon)) {
+                heatmapPoints.push([lat, lon, 0.4]); // Visita simples tem intensidade moderada (0.4)
+            }
+        }
+    });
 
     res.json({
         leadsTotal: leads.length,
@@ -632,10 +773,8 @@ app.get('/api/analytics/dashboard', requireAuth, (req, res) => {
             total: viewsTotal
         },
         portfolioRank,
-        heatmap,
+        heatmap: heatmapPoints,
         chartData: {
-            // Últimos 7 dias de acessos mock/real
-            // Para simplificar vamos apenas passar os totais para o front montar
             recent: events.slice(-100)
         }
     });
@@ -670,6 +809,15 @@ app.use((err, req, res, next) => {
     res.status(500).json({ status: 'error', message: 'Erro interno no servidor' });
 });
 
+// ===== ROTA DE PING / HEALTHCHECK (ANTI-HIBERNAÇÃO) =====
+app.get('/ping', (req, res) => {
+    res.status(200).json({ status: 'active', uptime: process.uptime(), timestamp: new Date().toISOString() });
+});
+
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
 // ===== INICIAR SERVIDOR =====
 const server = app.listen(PORT, () => {
     console.log(`\n======================================================`);
@@ -678,6 +826,23 @@ const server = app.listen(PORT, () => {
     console.log(`  Segurança: Rate Limiter + Anti-DDoS + Token TTL`);
     console.log(`  Persistência: Utilitários de I/O Atômico em JSON`);
     console.log(`======================================================\n`);
+
+    // Self-Ping Keep-Alive automático para Render (Impede Hibernação no Plano Grátis)
+    const renderUrl = process.env.RENDER_EXTERNAL_URL;
+    if (renderUrl) {
+        const pingEndpoint = `${renderUrl.replace(/\/$/, '')}/ping`;
+        const https = require('https');
+        const http = require('http');
+        const client = pingEndpoint.startsWith('https') ? https : http;
+
+        setInterval(() => {
+            client.get(pingEndpoint, (res) => {
+                console.log(`[KEEP-ALIVE] Anti-hibernação ativo: ${pingEndpoint} (${res.statusCode})`);
+            }).on('error', (err) => {
+                console.warn(`[KEEP-ALIVE] Erro no ping: ${err.message}`);
+            });
+        }, 10 * 60 * 1000); // Executa a cada 10 minutos
+    }
 });
 
 // Graceful Shutdown Handler

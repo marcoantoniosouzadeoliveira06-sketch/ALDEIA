@@ -142,6 +142,128 @@ try {
                 $response.Close()
                 continue
             }
+            elseif ($urlPath -eq "api/clients" -and $request.HttpMethod -eq "GET") {
+                if (-not (&$verifyToken $request)) { &$send401 $response; continue }
+                $clientsFile = Join-Path $rootFolder "clients.json"
+                $jsonText = "[]"
+                if (Test-Path $clientsFile) {
+                    $jsonText = [System.IO.File]::ReadAllText($clientsFile)
+                }
+                $buffer = [System.Text.Encoding]::UTF8.GetBytes($jsonText)
+                $response.ContentType = "application/json"
+                $response.ContentLength64 = $buffer.Length
+                $response.OutputStream.Write($buffer, 0, $buffer.Length)
+                $response.Close()
+                continue
+            }
+            elseif ($urlPath -eq "api/clients" -and $request.HttpMethod -eq "POST") {
+                if (-not (&$verifyToken $request)) { &$send401 $response; continue }
+                $reader = New-Object System.IO.StreamReader($request.InputStream)
+                $body = $reader.ReadToEnd()
+                $reader.Close()
+
+                $clientsFile = Join-Path $rootFolder "clients.json"
+                $clients = [System.Collections.Generic.List[Object]]@()
+                if (Test-Path $clientsFile) {
+                    $jsonText = [System.IO.File]::ReadAllText($clientsFile)
+                    if ($jsonText -ne "") {
+                        $parsed = ConvertFrom-Json $jsonText
+                        if ($parsed -is [Array]) {
+                            foreach ($c in $parsed) { $clients.Add($c) }
+                        } elseif ($parsed -ne $null) {
+                            $clients.Add($parsed)
+                        }
+                    }
+                }
+
+                try {
+                    $newObj = ConvertFrom-Json $body
+                    if ($newObj -is [Array]) {
+                        $updatedJson = ConvertTo-Json -InputObject $newObj -Depth 10
+                        [System.IO.File]::WriteAllText($clientsFile, $updatedJson)
+                    } else {
+                        if (-not $newObj.id) {
+                            $newObj | Add-Member -MemberType NoteProperty -Name "id" -Value ("c_" + [guid]::NewGuid().Guid.ToString().Substring(0, 8))
+                        }
+                        if (-not $newObj.createdAt) {
+                            $newObj | Add-Member -MemberType NoteProperty -Name "createdAt" -Value (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+                        }
+                        $clients.Add($newObj)
+                        $updatedJson = ConvertTo-Json -InputObject $clients -Depth 10
+                        [System.IO.File]::WriteAllText($clientsFile, $updatedJson)
+                    }
+                    $responseJson = '{"status":"success"}'
+                    $buffer = [System.Text.Encoding]::UTF8.GetBytes($responseJson)
+                    $response.ContentType = "application/json"
+                    $response.ContentLength64 = $buffer.Length
+                    $response.OutputStream.Write($buffer, 0, $buffer.Length)
+                } catch {
+                    $response.StatusCode = 400
+                    $responseJson = '{"status":"error","message":"Invalid JSON"}'
+                    $buffer = [System.Text.Encoding]::UTF8.GetBytes($responseJson)
+                    $response.ContentType = "application/json"
+                    $response.ContentLength64 = $buffer.Length
+                    $response.OutputStream.Write($buffer, 0, $buffer.Length)
+                }
+                $response.Close()
+                continue
+            }
+            elseif ($urlPath.StartsWith("api/clients/") -and $request.HttpMethod -eq "DELETE") {
+                if (-not (&$verifyToken $request)) { &$send401 $response; continue }
+                $clientId = $urlPath.Substring(12)
+                $clientsFile = Join-Path $rootFolder "clients.json"
+                $clients = [System.Collections.Generic.List[Object]]@()
+                if (Test-Path $clientsFile) {
+                    $jsonText = [System.IO.File]::ReadAllText($clientsFile)
+                    if ($jsonText -ne "") {
+                        $parsed = ConvertFrom-Json $jsonText
+                        if ($parsed -is [Array]) {
+                            foreach ($c in $parsed) {
+                                if ($c.id -ne $clientId) { $clients.Add($c) }
+                            }
+                        }
+                    }
+                }
+                $updatedJson = ConvertTo-Json -InputObject $clients -Depth 10
+                [System.IO.File]::WriteAllText($clientsFile, $updatedJson)
+                $responseJson = '{"status":"success"}'
+                $buffer = [System.Text.Encoding]::UTF8.GetBytes($responseJson)
+                $response.ContentType = "application/json"
+                $response.ContentLength64 = $buffer.Length
+                $response.OutputStream.Write($buffer, 0, $buffer.Length)
+                $response.Close()
+                continue
+            }
+            elseif ($urlPath -eq "api/portfolio" -and $request.HttpMethod -eq "GET") {
+                $portFile = Join-Path $rootFolder "portfolio.json"
+                $jsonText = "[]"
+                if (Test-Path $portFile) {
+                    $jsonText = [System.IO.File]::ReadAllText($portFile)
+                }
+                $buffer = [System.Text.Encoding]::UTF8.GetBytes($jsonText)
+                $response.ContentType = "application/json"
+                $response.ContentLength64 = $buffer.Length
+                $response.OutputStream.Write($buffer, 0, $buffer.Length)
+                $response.Close()
+                continue
+            }
+            elseif ($urlPath -eq "api/portfolio" -and $request.HttpMethod -eq "POST") {
+                if (-not (&$verifyToken $request)) { &$send401 $response; continue }
+                $reader = New-Object System.IO.StreamReader($request.InputStream)
+                $body = $reader.ReadToEnd()
+                $reader.Close()
+
+                $portFile = Join-Path $rootFolder "portfolio.json"
+                [System.IO.File]::WriteAllText($portFile, $body)
+
+                $responseJson = '{"status":"success"}'
+                $buffer = [System.Text.Encoding]::UTF8.GetBytes($responseJson)
+                $response.ContentType = "application/json"
+                $response.ContentLength64 = $buffer.Length
+                $response.OutputStream.Write($buffer, 0, $buffer.Length)
+                $response.Close()
+                continue
+            }
             elseif ($urlPath -eq "api/upload" -and $request.HttpMethod -eq "POST") {
                 if (-not (&$verifyToken $request)) { &$send401 $response; continue }
                 $fileNameHeader = $request.Headers.Get("X-File-Name")
