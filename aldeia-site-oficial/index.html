@@ -984,11 +984,15 @@
             });
         }
 
+        let lastContentHash = '';
         async function loadContent() {
             try {
                 const res = await fetch('/api/content?t=' + Date.now());
                 if (res.ok) {
-                    const content = await res.json();
+                    const contentStr = await res.text();
+                    if (contentStr === lastContentHash) return;
+                    lastContentHash = contentStr;
+                    const content = JSON.parse(contentStr);
                     
                     // Hero texts
                     if (content.heroTitleLine1) {
@@ -1175,6 +1179,7 @@
             }
         }
         loadContent();
+        setInterval(loadContent, 5000);
 
         // --- DECRYPT TEXT EFFECT ---
         function decryptText(element, duration = 800) {

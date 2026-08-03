@@ -23,6 +23,7 @@ assets/uploads/
 Thumbs.db
 
 # Temporary Python / Backup Scripts & Reconstructed Files
+*.backup.html
 *.py
 reconstructed_*
 original_*
