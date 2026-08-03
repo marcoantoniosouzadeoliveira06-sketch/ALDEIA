@@ -378,11 +378,11 @@
 
     <!-- TELA DE LOGIN -->
     <div id="admin-login" class="login-container">
-        <form class="login-box" onsubmit="login(event);">
+        <form class="login-box" onsubmit="event.preventDefault(); login(event); return false;">
             <h2>HELIOS CRM</h2>
-            <input type="text" id="admin-username" class="login-input" placeholder="Usuário (Japex / Temari / Admin)" autocomplete="username">
-            <input type="password" id="admin-password" class="login-input" placeholder="Senha" autocomplete="current-password">
-            <button type="submit" id="btn-login-submit" class="btn-login" onclick="login(event)">Entrar no Sistema</button>
+            <input type="text" id="admin-username" class="login-input" placeholder="Usuário (Japex / Temari / Admin)" autocomplete="username" onkeydown="if(event.key==='Enter'){ event.preventDefault(); login(event); }">
+            <input type="password" id="admin-password" class="login-input" placeholder="Senha" autocomplete="current-password" onkeydown="if(event.key==='Enter'){ event.preventDefault(); login(event); }">
+            <button type="button" id="btn-login-submit" class="btn-login" onclick="login(event)">Entrar no Sistema</button>
             <div id="login-error-msg" style="color: #ef4444; font-size: 0.85rem; margin-top: 12px; display: none;"></div>
         </form>
     </div>
