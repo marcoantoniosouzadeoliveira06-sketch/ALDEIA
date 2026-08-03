@@ -3447,15 +3447,17 @@ body {
     right: 30px;
     width: 60px;
     height: 60px;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     color: #cbd5e1;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: none;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     z-index: 9999;
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.15);
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -3465,8 +3467,9 @@ body {
 
 .floating-cta:hover {
     transform: scale(1.1) translateY(-4px);
-    box-shadow: none;
-    border-color: transparent;
+    box-shadow: 0 10px 40px rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 /* Scroll To Top Button */
