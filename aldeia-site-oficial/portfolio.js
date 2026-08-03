@@ -69,6 +69,20 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const accentColor = p.accentColor || p.color || '#a855f7';
             el.style.setProperty('--card-accent', accentColor);
+
+            // Mapeamento de formatos de imagem
+            let ratio = '4 / 5'; // default
+            if (p.format === 'post') ratio = '1 / 1';
+            else if (p.format === 'portrait') ratio = '4 / 5';
+            else if (p.format === 'story') ratio = '9 / 16';
+            else if (p.format === 'video') ratio = '16 / 9';
+            
+            if (p.format === 'auto') {
+                el.classList.add('format-auto');
+                el.style.aspectRatio = 'auto';
+            } else {
+                el.style.aspectRatio = ratio;
+            }
             
             const catLabel = p.categoryLabel || CATEGORY_MAP[p.category] || 'Arte Avulsa';
             const badgeStyle = `background: ${accentColor}22; border: 1px solid ${accentColor}66; color: ${accentColor === '#ffffff' ? '#fff' : accentColor};`;

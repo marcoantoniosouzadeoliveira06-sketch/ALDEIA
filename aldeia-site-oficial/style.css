@@ -2565,7 +2565,9 @@ footer {
 /* Logos & Filters */
 .logo-nav {
     height: 1.5rem;
+    min-height: 24px;
     width: auto;
+    flex-shrink: 0;
     filter: invert(1) brightness(100);
 }
 
@@ -3822,6 +3824,23 @@ body.light-theme .scroll-to-top:hover {
 .portfolio-card-img {
     position: absolute;
     inset: 0;
+}
+
+.portfolio-card.format-auto {
+    height: auto;
+    aspect-ratio: auto;
+}
+
+.portfolio-card.format-auto .portfolio-card-img {
+    position: relative;
+    padding: 0;
+    height: auto;
+}
+
+.portfolio-card.format-auto .portfolio-card-img img {
+    position: relative;
+    height: auto;
+    display: block;
 }
 
 .portfolio-card-img img {
