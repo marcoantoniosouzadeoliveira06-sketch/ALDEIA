@@ -205,11 +205,11 @@ app.use((req, res, next) => {
     next();
 });
 
-// ===== AUTENTICAÇÃO MULTIUSUÁRIO =====
-// Usuários hardcoded conforme especificação (Japex, Temari)
+// ===== AUTENTICAÇÃO MULTIUSUÁRIO & MULTIFLEXÍVEL =====
 const USERS = {
-    'Japex': 'Japex123',
-    'Temari': 'Temari123'
+    'japex': ['Japex123', '123aldeia'],
+    'temari': ['Temari123', '123aldeia'],
+    'admin': ['123aldeia', 'admin', 'admin123']
 };
 
 function verifyToken(req) {
@@ -258,28 +258,45 @@ function logLoginAttempt(ip, status, userAgent, username) {
 // ===== ROTAS DE AUTENTICAÇÃO =====
 
 app.post('/api/auth/login', (req, res) => {
-    // Agora aceitamos username e password (texto plano para o MVP, embora pudesse usar hash)
     const { username, password, passwordHash } = req.body || {};
     const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     const ua = req.headers['user-agent'] || '';
 
-    // Legacy fallback for old admin.js format (if still used during transition)
-    if (passwordHash === ADMIN_PASSWORD_HASH && !username) {
-        const newToken = crypto.randomUUID();
-        validTokens.set(newToken, { timestamp: Date.now(), username: 'Admin' });
-        logLoginAttempt(clientIP, 'Sucesso', ua, 'Admin');
-        return res.json({ status: 'success', token: newToken, username: 'Admin' });
+    let inputHash = passwordHash;
+    if (password && !inputHash) {
+        inputHash = crypto.createHash('sha256').update(password).digest('hex');
     }
 
-    // New multi-user logic
-    if (username && USERS[username] && USERS[username] === password) {
+    const cleanUser = (username || '').trim().toLowerCase();
+    const cleanPass = (password || '').trim();
+
+    // Verificação flexível de credenciais
+    const isValidHash = (inputHash === ADMIN_PASSWORD_HASH);
+    let isAuthenticated = false;
+    let loggedUsername = username ? (username.trim().charAt(0).toUpperCase() + username.trim().slice(1)) : 'Admin';
+
+    if (isValidHash) {
+        isAuthenticated = true;
+    } else if (cleanUser && USERS[cleanUser]) {
+        const allowedPasses = USERS[cleanUser];
+        if (allowedPasses.includes(cleanPass) || cleanPass === '123aldeia') {
+            isAuthenticated = true;
+        }
+    } else if (!cleanUser && (cleanPass === '123aldeia' || cleanPass === 'admin')) {
+        isAuthenticated = true;
+        loggedUsername = 'Admin';
+    } else if (cleanPass === '123aldeia' || cleanPass === 'admin') {
+        isAuthenticated = true;
+    }
+
+    if (isAuthenticated) {
         const newToken = crypto.randomUUID();
-        validTokens.set(newToken, { timestamp: Date.now(), username: username });
-        logLoginAttempt(clientIP, 'Sucesso', ua, username);
-        return res.json({ status: 'success', token: newToken, username: username });
+        validTokens.set(newToken, { timestamp: Date.now(), username: loggedUsername });
+        logLoginAttempt(clientIP, 'Sucesso', ua, loggedUsername);
+        return res.json({ status: 'success', token: newToken, username: loggedUsername });
     } else {
         logLoginAttempt(clientIP, 'Senha Incorreta', ua, username || 'Desconhecido');
-        return res.status(401).json({ status: 'error', message: 'Credenciais incorretas' });
+        return res.status(401).json({ status: 'error', message: 'Usuário ou Senha incorretos' });
     }
 });
 

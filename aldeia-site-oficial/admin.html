@@ -378,12 +378,13 @@
 
     <!-- TELA DE LOGIN -->
     <div id="admin-login" class="login-container">
-        <div class="login-box">
+        <form class="login-box" onsubmit="event.preventDefault(); login();">
             <h2>HELIOS CRM</h2>
-            <input type="text" id="admin-username" class="login-input" placeholder="Usuário (Japex / Temari)" required>
-            <input type="password" id="admin-password" class="login-input" placeholder="Senha" required>
-            <button class="btn-login" onclick="login()">Entrar no Sistema</button>
-        </div>
+            <input type="text" id="admin-username" class="login-input" placeholder="Usuário (Japex / Temari / Admin)" autocomplete="username" required>
+            <input type="password" id="admin-password" class="login-input" placeholder="Senha" autocomplete="current-password" required>
+            <button type="submit" id="btn-login-submit" class="btn-login">Entrar no Sistema</button>
+            <div id="login-error-msg" style="color: #ef4444; font-size: 0.85rem; margin-top: 12px; display: none;"></div>
+        </form>
     </div>
 
     <!-- PAINEL CRM -->
@@ -2106,17 +2107,22 @@
 
         function startAdminDashboard(token) {
             sessionToken = token;
-            sessionStorage.setItem('aldeia_admin_token', token);
-            document.getElementById('admin-login').style.display = 'none';
-            document.getElementById('admin-dashboard').style.display = 'block';
+            if (token) {
+                sessionStorage.setItem('aldeia_admin_token', token);
+                localStorage.setItem('aldeia_admin_token', token);
+            }
+            const loginElem = document.getElementById('admin-login');
+            const dashElem = document.getElementById('admin-dashboard');
+            if (loginElem) loginElem.style.display = 'none';
+            if (dashElem) dashElem.style.display = 'block';
             
-            loadSubmissions();
-            loadClients();
-            loadPortfolio();
-            loadLoginLogs();
-            loadSiteContentForEditor();
+            try { loadSubmissions(); } catch (e) { console.error(e); }
+            try { loadClients(); } catch (e) { console.error(e); }
+            try { loadPortfolio(); } catch (e) { console.error(e); }
+            try { loadLoginLogs(); } catch (e) { console.error(e); }
+            try { loadSiteContentForEditor(); } catch (e) { console.error(e); }
             if (typeof loadTelemetryData === 'function') {
-                loadTelemetryData();
+                try { loadTelemetryData(); } catch (e) { console.error(e); }
             }
         }
 
@@ -2706,11 +2712,6 @@
         });
 
         // ===== AUTHENTICATION EVENTS & INITIAL CHECK =====
-        const adminLogin = document.getElementById('admin-login');
-        const adminDashboard = document.getElementById('admin-dashboard');
-        const adminUsername = document.getElementById('admin-username');
-        const adminPassword = document.getElementById('admin-password');
-
         async function verifyToken(token) {
             try {
                 const res = await fetch('/api/auth/verify', {
@@ -2718,7 +2719,7 @@
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    return data.username || 'User';
+                    return data.username || 'Admin';
                 }
                 return false;
             } catch (err) {
@@ -2727,37 +2728,77 @@
         }
 
         async function login() {
-            const username = adminUsername.value.trim();
-            const password = adminPassword.value;
-            
+            const usernameElem = document.getElementById('admin-username');
+            const passwordElem = document.getElementById('admin-password');
+            const btnSubmit = document.getElementById('btn-login-submit');
+            const errorMsg = document.getElementById('login-error-msg');
+
+            const username = usernameElem ? usernameElem.value.trim() : '';
+            const password = passwordElem ? passwordElem.value : '';
+
+            if (errorMsg) errorMsg.style.display = 'none';
+
+            if (!username && !password) {
+                if (errorMsg) {
+                    errorMsg.textContent = 'Por favor, informe o Usuário e a Senha.';
+                    errorMsg.style.display = 'block';
+                }
+                return;
+            }
+
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.textContent = 'Entrando...';
+            }
+
             try {
                 const res = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
-                
+
                 if (res.ok) {
                     const data = await res.json();
-                    document.getElementById('auth-username').textContent = data.username;
-                    
-                    // Set Avatar
+
+                    const userElem = document.getElementById('auth-username');
+                    if (userElem) userElem.textContent = data.username || 'Admin';
+
                     const avatar = document.getElementById('auth-avatar');
-                    if (data.username === 'Japex') avatar.src = 'https://ui-avatars.com/api/?name=Japex&background=111&color=fff&bold=true';
-                    else if (data.username === 'Temari') avatar.src = 'https://ui-avatars.com/api/?name=Temari&background=111&color=fff&bold=true';
-                    else avatar.src = 'assets/favicon.png';
+                    if (avatar) {
+                        if (data.username === 'Japex') avatar.src = 'https://ui-avatars.com/api/?name=Japex&background=111&color=fff&bold=true';
+                        else if (data.username === 'Temari') avatar.src = 'https://ui-avatars.com/api/?name=Temari&background=111&color=fff&bold=true';
+                        else avatar.src = 'assets/favicon.png';
+                    }
 
                     startAdminDashboard(data.token);
                 } else {
-                    alert('Usuário ou Senha incorretos!');
-                    document.querySelector('.login-box').classList.add('shake-error');
-                    setTimeout(() => {
-                        document.querySelector('.login-box').classList.remove('shake-error');
-                    }, 400);
+                    const errData = await res.json().catch(() => ({ message: 'Usuário ou Senha incorretos!' }));
+                    if (errorMsg) {
+                        errorMsg.textContent = errData.message || 'Usuário ou Senha incorretos!';
+                        errorMsg.style.display = 'block';
+                    } else {
+                        alert('Usuário ou Senha incorretos!');
+                    }
+                    const loginBox = document.querySelector('.login-box');
+                    if (loginBox) {
+                        loginBox.classList.add('shake-error');
+                        setTimeout(() => loginBox.classList.remove('shake-error'), 400);
+                    }
                 }
             } catch (err) {
-                console.error(err);
-                alert('Erro ao conectar com o servidor: ' + err.message);
+                console.error('[LOGIN ERROR]', err);
+                if (errorMsg) {
+                    errorMsg.textContent = 'Erro de conexão com o servidor. Tente novamente.';
+                    errorMsg.style.display = 'block';
+                } else {
+                    alert('Erro de conexão com o servidor.');
+                }
+            } finally {
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.textContent = 'Entrar no Sistema';
+                }
             }
         }
 
@@ -2768,29 +2809,34 @@
             window.location.reload();
         }
 
-        // Allow Enter key to login
-        adminPassword.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') login();
-        });
-
         // Auto-login check on load
         async function checkAutoLogin() {
             const savedToken = sessionStorage.getItem('aldeia_admin_token') || localStorage.getItem('aldeia_admin_token');
             if (savedToken) {
                 const username = await verifyToken(savedToken);
                 if (username) {
-                    document.getElementById('auth-username').textContent = username;
+                    const userElem = document.getElementById('auth-username');
+                    if (userElem) userElem.textContent = username;
+                    
                     const avatar = document.getElementById('auth-avatar');
-                    if (username === 'Japex') avatar.src = 'https://ui-avatars.com/api/?name=Japex&background=111&color=fff&bold=true';
-                    else if (username === 'Temari') avatar.src = 'https://ui-avatars.com/api/?name=Temari&background=111&color=fff&bold=true';
+                    if (avatar) {
+                        if (username === 'Japex') avatar.src = 'https://ui-avatars.com/api/?name=Japex&background=111&color=fff&bold=true';
+                        else if (username === 'Temari') avatar.src = 'https://ui-avatars.com/api/?name=Temari&background=111&color=fff&bold=true';
+                    }
                     
                     startAdminDashboard(savedToken);
                     return;
+                } else {
+                    // Token expirado - limpa storages para permitir novo login sem travamento
+                    sessionStorage.removeItem('aldeia_admin_token');
+                    localStorage.removeItem('aldeia_admin_token');
                 }
             }
-            // If no token or invalid, show login form
-            adminLogin.style.display = 'flex';
-            adminDashboard.style.display = 'none';
+            // Exibir tela de login se não houver token válido
+            const loginElem = document.getElementById('admin-login');
+            const dashElem = document.getElementById('admin-dashboard');
+            if (loginElem) loginElem.style.display = 'flex';
+            if (dashElem) dashElem.style.display = 'none';
         }
 
         checkAutoLogin();
