@@ -104,6 +104,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const catLabel = p.categoryLabel || CATEGORY_MAP[p.category] || 'Arte Avulsa';
             const badgeStyle = `background: ${accentColor}22; border: 1px solid ${accentColor}66; color: ${accentColor === '#ffffff' ? '#fff' : accentColor};`;
             
+            let creatorHtml = '';
+            if (p.member && p.member.name) {
+                const photoSrc = p.member.photo || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.member.name) + '&background=random';
+                creatorHtml = `
+                    <div class="portfolio-card-creator" style="display: flex; align-items: center; gap: 8px; margin-top: 12px; transform: translateY(10px); opacity: 0.8; transition: opacity 0.3s;">
+                        <img src="${photoSrc}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid ${accentColor}88;" alt="${p.member.name}">
+                        <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                            <span style="font-size: 0.75rem; color: #aaa;">Criador</span>
+                            <span style="font-size: 0.85rem; color: #fff; font-weight: 600;">${p.member.name}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
             el.innerHTML = `
                 <div class="portfolio-card-img">
                     <img src="${p.cover}" alt="${p.title}" loading="lazy" onerror="this.onerror=null;this.src='assets/portfolio/${(index % 21) + 1}.webp';">
@@ -112,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="portfolio-card-overlay">
                     <span class="portfolio-card-cat" style="color:${accentColor}">${catLabel}</span>
                     <h3 class="portfolio-card-title">${p.title}</h3>
+                    ${creatorHtml}
                 </div>
             `;
             
