@@ -819,14 +819,16 @@
                     </div>
 
                 <div class="submissions-box">
-                    <div class="box-header">
+                    <div class="box-header" style="flex-wrap: wrap; gap: 10px;">
                         <h2 class="box-title">Projetos Cadastrados</h2>
+                        <button onclick="deleteSelectedPortfolios()" class="btn-action" style="background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); margin-left: auto; display: none;" id="btn-delete-selected-port">Excluir Selecionados (0)</button>
                     </div>
                     <div class="table-responsive">
                         <table class="submissions-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 30%">Título</th>
+                                    <th style="width: 5%; text-align: center;"><input type="checkbox" id="port-select-all" onclick="toggleAllPortfolios(this.checked)" style="cursor: pointer;"></th>
+                                    <th style="width: 25%">Título</th>
                                     <th style="width: 30%">Categoria</th>
                                     <th style="width: 20%">Ações</th>
                                 </tr>
@@ -2882,6 +2884,50 @@
                 alert('Erro de conexão ao excluir.');
             }
         }
+
+        // --- Múltipla exclusão de Portfólio ---
+        function toggleAllPortfolios(checked) {
+            const checkboxes = document.querySelectorAll('.port-checkbox');
+            checkboxes.forEach(cb => cb.checked = checked);
+            updatePortDeleteBtn();
+        }
+
+        function updatePortDeleteBtn() {
+            const checkboxes = document.querySelectorAll('.port-checkbox:checked');
+            const btn = document.getElementById('btn-delete-selected-port');
+            if (checkboxes.length > 0) {
+                btn.style.display = 'block';
+                btn.textContent = 'Excluir Selecionados (' + checkboxes.length + ')';
+            } else {
+                btn.style.display = 'none';
+                document.getElementById('port-select-all').checked = false;
+            }
+        }
+
+        async function deleteSelectedPortfolios() {
+            const checkboxes = document.querySelectorAll('.port-checkbox:checked');
+            if (checkboxes.length === 0) return;
+            if (!confirm(`Tem certeza que deseja excluir os ${checkboxes.length} projetos selecionados?`)) return;
+
+            const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
+            
+            try {
+                for (const id of idsToDelete) {
+                    await fetch(`/api/portfolio/${id}`, {
+                        method: 'DELETE',
+                        headers: getAuthHeaders()
+                    });
+                }
+                document.getElementById('port-select-all').checked = false;
+                updatePortDeleteBtn();
+                loadPortfolio();
+                alert('Projetos selecionados excluídos com sucesso.');
+            } catch (err) {
+                console.error(err);
+                alert('Erro de conexão durante exclusão em massa.');
+            }
+        }
+        // ------------------------------------
 
         // Upload Capa do Portfólio
         function handlePortCoverUpload(input) {

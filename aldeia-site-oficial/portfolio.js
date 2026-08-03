@@ -106,10 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             let creatorHtml = '';
             if (p.member && p.member.name) {
-                const photoSrc = p.member.photo || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.member.name) + '&background=random';
+                const rawPhoto = p.member.photo ? p.member.photo.trim() : '';
+                const fallbackAvatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.member.name) + '&background=random';
+                const photoSrc = rawPhoto || fallbackAvatar;
                 creatorHtml = `
                     <div class="portfolio-card-creator" style="display: flex; align-items: center; gap: 8px; margin-top: 12px; transform: translateY(10px); opacity: 0.8; transition: opacity 0.3s;">
-                        <img src="${photoSrc}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid ${accentColor}88;" alt="${p.member.name}">
+                        <img src="${photoSrc}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid ${accentColor}88;" alt="${p.member.name}" onerror="this.onerror=null;this.src='${fallbackAvatar}';">
                         <div style="display: flex; flex-direction: column; line-height: 1.2;">
                             <span style="font-size: 0.75rem; color: #aaa;">Criador</span>
                             <span style="font-size: 0.85rem; color: #fff; font-weight: 600;">${p.member.name}</span>
