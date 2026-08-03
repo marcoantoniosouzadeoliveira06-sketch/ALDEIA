@@ -1271,16 +1271,54 @@
                             </div>
                         </div>
 
-                        <!-- SECTION 7: PORTFOLIO -->
+                        <!-- SECTION 7: PORTFÓLIO NA HOME -->
                         <div class="cms-accordion-item">
-                            <button type="button" class="cms-accordion-header" onclick="toggleCmsSection('cms-portfolio')">7. Galeria do Portfólio (3D) <span>▼</span></button>
+                            <button type="button" class="cms-accordion-header" onclick="toggleCmsSection('cms-portfolio')">7. Portfólio na Página Inicial (Capa & Botão) <span>▼</span></button>
                             <div id="cms-portfolio" class="cms-accordion-body">
+                                <div style="background: rgba(255,255,255,0.01); padding: 20px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.04); margin-bottom: 25px;">
+                                    <h4 style="color: #c084fc; font-size: 0.95rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.05em;">Capa do Portfólio na Home</h4>
+                                    <div class="input-group" style="margin-bottom: 15px;">
+                                        <label class="input-label" for="ed-home-port-title">Título da Seção (ex: GALERIA DE CASOS)</label>
+                                        <input class="input-control" type="text" id="ed-home-port-title" style="width: 100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 12px 16px; border-radius: 6px; color:#fff;" oninput="updateCmsLivePreview()">
+                                    </div>
+                                    <div class="input-group" style="margin-bottom: 15px;">
+                                        <label class="input-label" for="ed-home-port-subtitle">Subtítulo Explicativo</label>
+                                        <textarea class="input-control" id="ed-home-port-subtitle" style="width: 100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 12px 16px; border-radius: 6px; color:#fff; min-height: 70px;" oninput="updateCmsLivePreview()"></textarea>
+                                    </div>
+                                    <div class="input-group" style="margin-bottom: 15px;">
+                                        <label class="input-label" for="ed-home-port-btn">Texto do Botão (ex: VEJA O PORTFÓLIO COMPLETO)</label>
+                                        <input class="input-control" type="text" id="ed-home-port-btn" style="width: 100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 12px 16px; border-radius: 6px; color:#fff;" oninput="updateCmsLivePreview()">
+                                    </div>
+                                    <div class="input-group">
+                                        <label class="input-label">Imagem da Capa na Home</label>
+                                        <div style="display: flex; align-items: center; gap: 15px;">
+                                            <img id="ed-home-port-cover-preview" src="assets/portfolio/1.webp" style="width: 60px; height: 60px; border-radius: 6px; object-fit: cover; background: #222; border: 1px solid rgba(255,255,255,0.1);">
+                                            <input type="text" id="ed-home-port-cover" readonly style="flex: 1; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); padding: 10px; border-radius: 4px; color: #aaa; font-size: 0.8rem;">
+                                            <button type="button" class="btn-action btn-email" onclick="document.getElementById('ed-home-port-file').click()">Upload Capa</button>
+                                            <input type="file" id="ed-home-port-file" accept="image/*" style="display: none;" onchange="handleHomePortCoverUpload(this)">
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                    <span style="font-size: 0.9rem; color: #fff; font-weight: 600;">Esfera de Imagens do Portfólio</span>
+                                    <span style="font-size: 0.9rem; color: #fff; font-weight: 600;">Esfera / Lista de Projetos em Destaque</span>
                                     <button type="button" class="btn-action btn-convert" onclick="addPortfolioItemRow()" style="padding: 6px 12px; font-size: 0.75rem;">+ Novo Projeto</button>
                                 </div>
                                 <div id="portfolio-editor-list" style="display: flex; flex-direction: column; gap: 15px;">
                                     <!-- Populated dynamically by javascript -->
+                                </div>
+
+                                <!-- PREVIEW AO VIVO DA CAPA DO PORTFÓLIO NA HOME -->
+                                <div style="margin-top: 30px; background: rgba(0,0,0,0.6); padding: 25px; border-radius: 12px; border: 1px solid rgba(168, 85, 247, 0.3);">
+                                    <h4 style="font-size: 0.8rem; color: #a855f7; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 15px;">👁️ Live Preview na Página Inicial:</h4>
+                                    <div style="background: #090909; padding: 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; align-items: center; text-align: center;">
+                                        <h3 id="prev-home-port-title" style="font-family: var(--font-h); font-size: 1.5rem; font-weight: 600; color: #fff; text-transform: uppercase; margin-bottom: 8px;">GALERIA DE CASOS</h3>
+                                        <p id="prev-home-port-subtitle" style="color: #aaa; font-size: 0.85rem; max-width: 400px; margin-bottom: 20px;">Confira nossos principais trabalhos desenvolvidos.</p>
+                                        <div style="width: 100%; max-width: 320px; height: 180px; border-radius: 8px; overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1);">
+                                            <img id="prev-home-port-cover" src="assets/portfolio/1.webp" style="width: 100%; height: 100%; object-fit: cover;">
+                                        </div>
+                                        <button id="prev-home-port-btn" style="background: linear-gradient(135deg, #a855f7, #6b21a8); color: #fff; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; cursor: pointer;">VEJA O PORTFÓLIO COMPLETO →</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1996,6 +2034,17 @@
                         }
                     }
 
+                    // Home Portfolio Preview
+                    if (content.homePortfolio) {
+                        const hp = content.homePortfolio;
+                        document.getElementById('ed-home-port-title').value = hp.title || 'GALERIA DE CASOS';
+                        document.getElementById('ed-home-port-subtitle').value = hp.subtitle || 'Confira nossos principais trabalhos desenvolvidos com alto padrão estético.';
+                        document.getElementById('ed-home-port-btn').value = hp.buttonText || 'VEJA O PORTFÓLIO COMPLETO →';
+                        document.getElementById('ed-home-port-cover').value = hp.cover || 'assets/portfolio/1.webp';
+                        document.getElementById('ed-home-port-cover-preview').src = hp.cover || 'assets/portfolio/1.webp';
+                        updateCmsLivePreview();
+                    }
+
                     // Portfolio items
                     portfolioItems = content.portfolio || [];
                     renderPortfolioEditor();
@@ -2264,6 +2313,33 @@
             renderPortfolioEditor();
         }
 
+        function handleHomePortCoverUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            uploadFileBinary(file, (url) => {
+                document.getElementById('ed-home-port-cover').value = url;
+                document.getElementById('ed-home-port-cover-preview').src = url;
+                updateCmsLivePreview();
+            });
+        }
+
+        function updateCmsLivePreview() {
+            const title = document.getElementById('ed-home-port-title')?.value || 'GALERIA DE CASOS';
+            const subtitle = document.getElementById('ed-home-port-subtitle')?.value || 'Confira nossos principais trabalhos desenvolvidos.';
+            const btn = document.getElementById('ed-home-port-btn')?.value || 'VEJA O PORTFÓLIO COMPLETO →';
+            const cover = document.getElementById('ed-home-port-cover')?.value || 'assets/portfolio/1.webp';
+
+            const pTitle = document.getElementById('prev-home-port-title');
+            const pSubtitle = document.getElementById('prev-home-port-subtitle');
+            const pBtn = document.getElementById('prev-home-port-btn');
+            const pCover = document.getElementById('prev-home-port-cover');
+
+            if (pTitle) pTitle.textContent = title;
+            if (pSubtitle) pSubtitle.textContent = subtitle;
+            if (pBtn) pBtn.textContent = btn;
+            if (pCover && cover) pCover.src = cover;
+        }
+
         function addPortfolioItemRow() {
             portfolioItems.push({
                 src: 'assets/portfolio/1.webp',
@@ -2329,6 +2405,12 @@
                         bio: document.getElementById('ed-j-bio').value,
                         image: document.getElementById('ed-j-image').value
                     }
+                },
+                homePortfolio: {
+                    title: document.getElementById('ed-home-port-title') ? document.getElementById('ed-home-port-title').value : 'GALERIA DE CASOS',
+                    subtitle: document.getElementById('ed-home-port-subtitle') ? document.getElementById('ed-home-port-subtitle').value : 'Confira nossos principais trabalhos.',
+                    buttonText: document.getElementById('ed-home-port-btn') ? document.getElementById('ed-home-port-btn').value : 'VEJA O PORTFÓLIO COMPLETO →',
+                    cover: document.getElementById('ed-home-port-cover') ? document.getElementById('ed-home-port-cover').value : 'assets/portfolio/1.webp'
                 },
                 portfolio: portfolioItems,
                 footer: {

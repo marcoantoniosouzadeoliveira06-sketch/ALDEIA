@@ -1603,6 +1603,19 @@
                     initFaqAccordion();
                 }
             }
+
+            if (data.homePortfolio) {
+                const hp = data.homePortfolio;
+                const titleEl = document.getElementById('home-portfolio-title') || document.querySelector('.portfolio-section .mega-title');
+                const subEl = document.getElementById('home-portfolio-subtitle') || document.querySelector('.portfolio-section .section-desc');
+                const btnEl = document.getElementById('home-portfolio-btn') || document.querySelector('.portfolio-section .btn-cta');
+                const coverEl = document.getElementById('home-portfolio-cover') || document.querySelector('.portfolio-section img');
+
+                if (titleEl && hp.title) titleEl.textContent = hp.title;
+                if (subEl && hp.subtitle) subEl.textContent = hp.subtitle;
+                if (btnEl && hp.buttonText) btnEl.innerHTML = `${hp.buttonText}<span class="btn-arrow-icon">→</span>`;
+                if (coverEl && hp.cover) coverEl.src = hp.cover;
+            }
         } catch (e) {
             console.warn('[CMS] Erro ao carregar conteúdo dinâmico:', e);
         }

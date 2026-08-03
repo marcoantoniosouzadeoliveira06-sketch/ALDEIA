@@ -70,10 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             src: asset.src,
                             format: format,
                             poster: project.cover,
-                            autoplay: true
+                            autoplay: false // Reprodução manual a pedido do usuário (sem lag)
                         });
                     } else {
-                        assetWrap.innerHTML = `<video src="${asset.src}" autoplay loop muted playsinline style="width:100%; border-radius:12px;"></video>`;
+                        assetWrap.innerHTML = `<video src="${asset.src}" controls playsinline style="width:100%; border-radius:12px;"></video>`;
                     }
                 } else {
                     assetWrap.innerHTML = `
