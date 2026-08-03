@@ -133,6 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             
             el.addEventListener('click', () => {
+                if (window.__aldeiaTracker && window.__aldeiaTracker.trackPortfolioClick) {
+                    window.__aldeiaTracker.trackPortfolioClick(p.title);
+                }
                 window.location.href = 'projeto.html?id=' + p.id;
             });
             grid.appendChild(el);

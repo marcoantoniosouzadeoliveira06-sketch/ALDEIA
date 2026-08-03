@@ -204,36 +204,45 @@ app.use((req, res, next) => {
     next();
 });
 
-// ===== AUTENTICAÇÃO =====
+// ===== AUTENTICAÇÃO MULTIUSUÁRIO =====
+// Usuários hardcoded conforme especificação (Japex, Temari)
+const USERS = {
+    'Japex': 'Japex123',
+    'Temari': 'Temari123'
+};
+
 function verifyToken(req) {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7).trim();
         if (validTokens.has(token)) {
-            const timestamp = validTokens.get(token);
-            if (Date.now() - timestamp < TOKEN_TTL) {
-                return true;
+            const data = validTokens.get(token);
+            if (Date.now() - data.timestamp < TOKEN_TTL) {
+                return data; // Retorna o payload { timestamp, username }
             } else {
                 validTokens.delete(token); // Token expirado
             }
         }
     }
-    return false;
+    return null;
 }
 
 function requireAuth(req, res, next) {
-    if (!verifyToken(req)) {
+    const userData = verifyToken(req);
+    if (!userData) {
         return res.status(401).json({ status: 'error', message: 'Não autorizado. Token inválido ou expirado.' });
     }
+    req.user = userData;
     next();
 }
 
-function logLoginAttempt(ip, status, userAgent) {
+function logLoginAttempt(ip, status, userAgent, username) {
     try {
         let logs = safeReadJSON('login_audit.json', []);
         logs.push({
             id: crypto.randomUUID(),
             timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+            username: username || 'Desconhecido',
             ip: ip || '127.0.0.1',
             status: status,
             userAgent: userAgent || 'Desconhecido'
@@ -248,24 +257,35 @@ function logLoginAttempt(ip, status, userAgent) {
 // ===== ROTAS DE AUTENTICAÇÃO =====
 
 app.post('/api/auth/login', (req, res) => {
-    const { passwordHash } = req.body || {};
+    // Agora aceitamos username e password (texto plano para o MVP, embora pudesse usar hash)
+    const { username, password, passwordHash } = req.body || {};
     const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     const ua = req.headers['user-agent'] || '';
 
-    if (passwordHash === ADMIN_PASSWORD_HASH) {
+    // Legacy fallback for old admin.js format (if still used during transition)
+    if (passwordHash === ADMIN_PASSWORD_HASH && !username) {
         const newToken = crypto.randomUUID();
-        validTokens.set(newToken, Date.now());
-        logLoginAttempt(clientIP, 'Sucesso', ua);
-        return res.json({ status: 'success', token: newToken });
+        validTokens.set(newToken, { timestamp: Date.now(), username: 'Admin' });
+        logLoginAttempt(clientIP, 'Sucesso', ua, 'Admin');
+        return res.json({ status: 'success', token: newToken, username: 'Admin' });
+    }
+
+    // New multi-user logic
+    if (username && USERS[username] && USERS[username] === password) {
+        const newToken = crypto.randomUUID();
+        validTokens.set(newToken, { timestamp: Date.now(), username: username });
+        logLoginAttempt(clientIP, 'Sucesso', ua, username);
+        return res.json({ status: 'success', token: newToken, username: username });
     } else {
-        logLoginAttempt(clientIP, 'Senha Incorreta', ua);
-        return res.status(401).json({ status: 'error', message: 'Senha incorreta' });
+        logLoginAttempt(clientIP, 'Senha Incorreta', ua, username || 'Desconhecido');
+        return res.status(401).json({ status: 'error', message: 'Credenciais incorretas' });
     }
 });
 
 app.get('/api/auth/verify', (req, res) => {
-    if (verifyToken(req)) {
-        return res.json({ status: 'success' });
+    const userData = verifyToken(req);
+    if (userData) {
+        return res.json({ status: 'success', username: userData.username });
     }
     return res.status(401).json({ status: 'error', message: 'Token inválido' });
 });
@@ -540,7 +560,7 @@ app.get('/api/security/stats', requireAuth, (req, res) => {
     res.json({ totalIPs: ipRequests.size, ips: statsList });
 });
 
-// ===== TELEMETRIA E ANALYTICS =====
+// ===== TELEMETRIA E ANALYTICS (NOVO CRM) =====
 
 app.post('/api/telemetry', (req, res) => {
     let payload = req.body;
@@ -554,22 +574,70 @@ app.post('/api/telemetry', (req, res) => {
             timestamp: new Date().toISOString(),
             ...payload
         });
-        if (events.length > 5000) events = events.slice(-5000);
+        if (events.length > 5000) events = events.slice(-5000); // Manter últimos 5000
         safeWriteJSON('telemetry_log.json', events);
     }
     res.json({ status: 'ok' });
 });
 
-app.get('/api/telemetry/stats', (req, res) => {
+app.get('/api/analytics/dashboard', requireAuth, (req, res) => {
     const events = safeReadJSON('telemetry_log.json', []);
-    const totalEvents = events.length;
-    const conversions = events.filter(e => e.eventType === 'conversion' || e.event === 'conversion').length;
-    const abandonments = events.filter(e => e.eventType === 'abandonment' || e.event === 'form_abandonment').length;
+    const leads = safeReadJSON('submissions.json', []);
     
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const weekAgo = now.getTime() - (7 * 24 * 60 * 60 * 1000);
+    const monthAgo = now.getTime() - (30 * 24 * 60 * 60 * 1000);
+
+    let viewsToday = 0, viewsWeek = 0, viewsMonth = 0, viewsTotal = 0;
+    const portfolioClicks = {};
+
+    events.forEach(e => {
+        const t = new Date(e.timestamp).getTime();
+        const type = e.event_type || e.eventType;
+
+        if (type === 'page_view') {
+            viewsTotal++;
+            if (t >= today) viewsToday++;
+            if (t >= weekAgo) viewsWeek++;
+            if (t >= monthAgo) viewsMonth++;
+        }
+
+        if (type === 'portfolio_click') {
+            const item = e.portfolio_id || e.item || 'Desconhecido';
+            portfolioClicks[item] = (portfolioClicks[item] || 0) + 1;
+        }
+    });
+
+    const portfolioRank = Object.entries(portfolioClicks)
+        .map(([name, clicks]) => ({ name, clicks }))
+        .sort((a, b) => b.clicks - a.clicks)
+        .slice(0, 5); // Top 5
+
+    // Heatmap data via Leads
+    const heatmap = leads
+        .filter(l => l.ipCoords && l.ipCoords !== '0, 0' && l.ipCoords !== '0,0')
+        .map(l => {
+            const parts = l.ipCoords.split(',');
+            return [parseFloat(parts[0]), parseFloat(parts[1])];
+        })
+        .filter(c => !isNaN(c[0]) && !isNaN(c[1]));
+
     res.json({
-        total: { total: totalEvents },
-        conversions: { total: conversions },
-        abandonments: { total: abandonments }
+        leadsTotal: leads.length,
+        visitors: {
+            today: viewsToday,
+            week: viewsWeek,
+            month: viewsMonth,
+            total: viewsTotal
+        },
+        portfolioRank,
+        heatmap,
+        chartData: {
+            // Últimos 7 dias de acessos mock/real
+            // Para simplificar vamos apenas passar os totais para o front montar
+            recent: events.slice(-100)
+        }
     });
 });
 

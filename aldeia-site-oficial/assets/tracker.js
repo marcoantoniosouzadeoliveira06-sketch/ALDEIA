@@ -21,6 +21,12 @@
         return null;
     }
 
+    function generateSessionId() {
+        const arr = new Uint8Array(16);
+        crypto.getRandomValues(arr);
+        return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     // Inicializa tracking
     const today = new Date().toISOString();
     
@@ -30,6 +36,7 @@
         visits++;
         setCookie('aldeia_visits', visits, 365);
         sessionStorage.setItem('aldeia_session_started', 'true');
+        sessionStorage.setItem('aldeia_session_id', generateSessionId());
     }
 
     // Primeiro acesso
@@ -66,7 +73,26 @@
     if (utmMedium) setCookie('aldeia_utm_medium', utmMedium, 30);
     if (utmCampaign) setCookie('aldeia_utm_campaign', utmCampaign, 30);
 
-    // Expor API para formulários
+    const TELEMETRY_URL = '/api/telemetry';
+    const sessionId = sessionStorage.getItem('aldeia_session_id') || 'unknown';
+
+    // Dispara Evento de Page View Analytics
+    if (!sessionStorage.getItem('aldeia_pv_' + window.location.pathname)) {
+        sessionStorage.setItem('aldeia_pv_' + window.location.pathname, 'true');
+        const pvPayload = {
+            session_id: sessionId,
+            event_type: 'page_view',
+            page_url: window.location.pathname
+        };
+        const pvBlob = new Blob([JSON.stringify(pvPayload)], { type: 'application/json' });
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon(TELEMETRY_URL, pvBlob);
+        } else {
+            fetch(TELEMETRY_URL, { method: 'POST', body: pvBlob });
+        }
+    }
+
+    // Expor API para formulários e para o grid de portfólio
     window.__aldeiaTracker = {
         getTrackingData: function() {
             return {
@@ -76,6 +102,19 @@
                 utmMedium: getCookie('aldeia_utm_medium') || '',
                 utmCampaign: getCookie('aldeia_utm_campaign') || ''
             };
+        },
+        trackPortfolioClick: function(portfolioItemName) {
+            const payload = {
+                session_id: sessionId,
+                event_type: 'portfolio_click',
+                portfolio_id: portfolioItemName
+            };
+            const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(TELEMETRY_URL, blob);
+            } else {
+                fetch(TELEMETRY_URL, { method: 'POST', body: blob });
+            }
         }
     };
 })();

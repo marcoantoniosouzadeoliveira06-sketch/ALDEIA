@@ -888,17 +888,26 @@
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
-            document.querySelectorAll('.sidebar-nav .nav-item').forEach(button => {
+            document.querySelectorAll('.tab-nav .tab-btn').forEach(button => {
                 button.classList.remove('active');
             });
             
             document.getElementById(tabId).classList.add('active');
-            if (btn) btn.classList.add('active');
+            btn.classList.add('active');
 
-            if (tabId === 'dashboard-tab') {
+            if (tabId === 'analytics-tab') {
+                renderCharts();
+            }
+            if (tabId === 'leads-tab') {
                 setTimeout(() => {
-                    if (mapInstance) mapInstance.invalidateSize();
+                    if (leadsMap) leadsMap.invalidateSize();
                 }, 200);
+            }
+            if (tabId === 'telemetry-tab') {
+                loadSecurityStats();
+            }
+            if (tabId === 'logins-tab') {
+                loadLoginLogs();
             }
         }
 
@@ -1935,90 +1944,214 @@
 
         // ===== TELEMETRY DASHBOARD =====
         const host = window.location.hostname || 'localhost';
-        const TELEMETRY_API = `http://${host}:3001/api`;
+        const TELEMETRY_API = `http://${host}:3001/api/telemetry`;
+        let teleConvChart = null;
+        let teleDailyChart = null;
 
         async function loadTelemetryData() {
             try {
-                const res = await fetch(TELEMETRY_API + '/analytics/dashboard', { headers: getAuthHeaders() });
-                if (res.ok) {
-                    const data = await res.json();
-                    
-                    document.getElementById('dash-total-leads').textContent = data.leadsTotal || 0;
-                    document.getElementById('dash-visits-today').textContent = data.visitors.today || 0;
-                    document.getElementById('dash-visits-week').textContent = data.visitors.week || 0;
-                    document.getElementById('dash-visits-total').textContent = data.visitors.total || 0;
+                const [statsRes, eventsRes] = await Promise.all([
+                    fetch(TELEMETRY_API + '/stats'),
+                    fetch(TELEMETRY_API + '/events?limit=50')
+                ]);
 
-                    // Render Portfolio Ranking
-                    const portList = document.getElementById('portfolio-ranking-list');
-                    portList.innerHTML = '';
-                    if (data.portfolioRank && data.portfolioRank.length > 0) {
-                        data.portfolioRank.forEach((item, index) => {
-                            portList.innerHTML += `
-                                <div style="display:flex; justify-content:space-between; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px;">
-                                    <span>${index + 1}. ${item.name}</span>
-                                    <span style="color:#fff; font-weight:bold;">${item.clicks} cliques</span>
-                                </div>
-                            `;
-                        });
-                    } else {
-                        portList.innerHTML = '<span style="color:var(--text-muted);">Nenhum clique registrado ainda.</span>';
-                    }
-
-                    // Render Heatmap using Leads Coords
-                    if (data.heatmap && window.L) {
-                        renderHeatmap(data.heatmap);
-                    }
+                if (statsRes.ok) {
+                    const stats = await statsRes.json();
+                    renderTelemetryStats(stats);
+                    renderTelemetryCharts(stats);
                 }
 
-                // Carregar logs de eventos na aba Telemetria
-                const evRes = await fetch(TELEMETRY_API + '/telemetry/events', { headers: getAuthHeaders() });
-                if (evRes.ok) {
-                    const events = await evRes.json();
-                    const tbody = document.getElementById('telemetry-logs-body');
-                    tbody.innerHTML = '';
-                    if (events.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Nenhum evento registrado</td></tr>';
-                    } else {
-                        events.slice(0, 50).forEach(ev => {
-                            const date = new Date(ev.timestamp).toLocaleString('pt-BR');
-                            const detail = ev.portfolio_id || ev.page_url || '—';
-                            tbody.innerHTML += `
-                                <tr>
-                                    <td>${date}</td>
-                                    <td><span style="font-family:monospace; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 4px;">${ev.session_id.substring(0,8)}</span></td>
-                                    <td>${ev.event_type || ev.eventType}</td>
-                                    <td>${detail}</td>
-                                </tr>
-                            `;
-                        });
-                    }
+                if (eventsRes.ok) {
+                    const events = await eventsRes.json();
+                    renderTelemetryEvents(events);
                 }
             } catch (err) {
-                console.warn('[Telemetria] Servidor indisponível:', err.message);
+                console.warn('[Telemetria] Servidor de telemetria indisponível:', err.message);
+                document.getElementById('tele-conversion-rate').textContent = '—';
+                document.getElementById('tele-total-sessions').textContent = '—';
             }
         }
 
-        let mapInstance = null;
-        function renderHeatmap(coordsList) {
-            if (!document.getElementById('leads-map')) return;
-            if (mapInstance) {
-                mapInstance.remove();
-            }
-            mapInstance = L.map('leads-map').setView([-15.7801, -47.9292], 4);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap & CartoDB'
-            }).addTo(mapInstance);
+        function renderTelemetryStats(stats) {
+            const total = stats.total ? stats.total.total : 0;
+            const conversions = stats.conversions ? stats.conversions.total : 0;
+            const rate = total > 0 ? ((conversions / total) * 100).toFixed(1) : 0;
+            const avgConvTime = stats.avg_conversion_time && stats.avg_conversion_time.avg_time
+                ? stats.avg_conversion_time.avg_time.toFixed(1) : '0';
+            const avgAbandonTime = stats.avg_abandon_time && stats.avg_abandon_time.avg_time
+                ? stats.avg_abandon_time.avg_time.toFixed(1) : '0';
 
-            coordsList.forEach(coord => {
-                L.circleMarker(coord, {
-                    radius: 6,
-                    fillColor: "#ff4444",
-                    color: "#000",
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                }).addTo(mapInstance);
+            document.getElementById('tele-conversion-rate').textContent = rate + '%';
+            document.getElementById('tele-conv-detail').textContent = `${conversions} de ${total} sessões`;
+            document.getElementById('tele-avg-conv-time').textContent = avgConvTime + 's';
+            document.getElementById('tele-avg-abandon-time').textContent = avgAbandonTime + 's';
+            document.getElementById('tele-total-sessions').textContent = total;
+        }
+
+        function renderTelemetryCharts(stats) {
+            const conversions = stats.conversions ? stats.conversions.total : 0;
+            const abandonments = stats.abandonments ? stats.abandonments.total : 0;
+
+            // Doughnut chart
+            const convCtx = document.getElementById('teleConversionChart').getContext('2d');
+            if (teleConvChart) teleConvChart.destroy();
+            teleConvChart = new Chart(convCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Convertidos', 'Abandonos'],
+                    datasets: [{
+                        data: [conversions, abandonments],
+                        backgroundColor: ['rgba(34, 197, 94, 0.7)', 'rgba(239, 68, 68, 0.5)'],
+                        borderColor: ['#22c55e', '#ef4444'],
+                        borderWidth: 2,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#888',
+                                font: { size: 12 },
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyleWidth: 10
+                            }
+                        }
+                    }
+                }
             });
+
+            // Daily volume line chart
+            const dailyCtx = document.getElementById('teleDailyChart').getContext('2d');
+            if (teleDailyChart) teleDailyChart.destroy();
+
+            const dailyData = stats.daily_volume || [];
+            const labels = dailyData.map(d => {
+                const date = new Date(d.day + 'T00:00:00');
+                return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            });
+
+            teleDailyChart = new Chart(dailyCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Conversões',
+                            data: dailyData.map(d => d.conversions),
+                            borderColor: '#22c55e',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#22c55e'
+                        },
+                        {
+                            label: 'Abandonos',
+                            data: dailyData.map(d => d.abandonments),
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#ef4444'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: { color: '#666', font: { size: 11 } },
+                            grid: { color: 'rgba(255,255,255,0.03)' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#666',
+                                font: { size: 11 },
+                                stepSize: 1
+                            },
+                            grid: { color: 'rgba(255,255,255,0.03)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#888',
+                                font: { size: 12 },
+                                usePointStyle: true,
+                                pointStyleWidth: 10
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTelemetryEvents(events) {
+            const listEl = document.getElementById('telemetry-events-list');
+            const emptyEl = document.getElementById('telemetry-empty-state');
+            listEl.innerHTML = '';
+
+            if (!events || events.length === 0) {
+                emptyEl.style.display = 'block';
+                return;
+            }
+            emptyEl.style.display = 'none';
+
+            events.forEach(ev => {
+                const tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
+                tr.addEventListener('click', () => showTelemetryDetails(ev));
+
+                const badge = ev.converted
+                    ? '<span class="tele-badge badge-converted">● Convertido</span>'
+                    : '<span class="tele-badge badge-abandoned">● Abandonou</span>';
+                const dwellFormatted = ev.dwell_time < 60
+                    ? ev.dwell_time.toFixed(1) + 's'
+                    : Math.floor(ev.dwell_time / 60) + 'm ' + (ev.dwell_time % 60).toFixed(0) + 's';
+
+                tr.innerHTML = `
+                    <td><span style="font-family: var(--font-m); font-size: 0.8rem; color: #aaa;">${ev.session_id.substring(0, 12)}...</span></td>
+                    <td>${badge}</td>
+                    <td><span class="tele-dwell">${dwellFormatted}</span></td>
+                    <td><span style="font-size: 0.8rem; color: var(--text-muted);">${ev.page_url || '/'}</span></td>
+                    <td><span class="timestamp-text">${ev.created_at || '—'}</span></td>
+                `;
+                listEl.appendChild(tr);
+            });
+        }
+
+        // Show Telemetry Session Details Modal
+        function showTelemetryDetails(ev) {
+            const modal = document.getElementById('telemetry-detail-modal');
+            const body = document.getElementById('telemetry-detail-body');
+            if (!modal || !body) return;
+            
+            body.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap: 8px;">
+                    <div><strong>ID da Sessão:</strong> <span style="font-family: var(--font-m); font-size: 0.85rem; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; color: #fff;">${ev.session_id}</span></div>
+                    <div><strong>Status:</strong> ${ev.converted ? '<span class="tele-badge badge-converted">● Convertido</span>' : '<span class="tele-badge badge-abandoned">● Abandonou</span>'}</div>
+                    <div><strong>Tempo de Permanência:</strong> ${ev.dwell_time.toFixed(1)} segundos</div>
+                    <div><strong>Página de Origem:</strong> ${escapeHTML(ev.page_url || '/')}</div>
+                    <div><strong>IP do Visitante:</strong> ${escapeHTML(ev.masked_ip || '—')}</div>
+                    <div><strong>User Agent (Navegador):</strong> <span style="font-size: 0.85rem; color: var(--text-muted);">${escapeHTML(ev.user_agent || '—')}</span></div>
+                    <div><strong>Criado em:</strong> ${escapeHTML(ev.created_at || '—')}</div>
+                </div>
+            `;
+            modal.style.display = 'flex';
+        }
+        
+        function closeTelemetryDetailModal() {
+            const modal = document.getElementById('telemetry-detail-modal');
+            if (modal) modal.style.display = 'none';
         }
 
         // Fetch and load security stats (Rate Limiter)
@@ -2426,48 +2559,47 @@
         // ===== AUTHENTICATION EVENTS & INITIAL CHECK =====
         const adminLogin = document.getElementById('admin-login');
         const adminDashboard = document.getElementById('admin-dashboard');
-        const adminUsername = document.getElementById('admin-username');
+        const loginForm = document.getElementById('login-form');
+        const loginErrorMsg = document.getElementById('login-error-msg');
         const adminPassword = document.getElementById('admin-password');
+
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            return Array.from(new Uint8Array(hashBuffer))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+        }
 
         async function verifyToken(token) {
             try {
                 const res = await fetch('/api/auth/verify', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (res.ok) {
-                    const data = await res.json();
-                    return data.username || 'User';
-                }
-                return false;
+                return res.ok;
             } catch (err) {
                 return false;
             }
         }
 
-        async function login() {
-            const username = adminUsername.value.trim();
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
             const password = adminPassword.value;
+            const passwordHash = await sha256(password);
             
             try {
                 const res = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ passwordHash })
                 });
                 
                 if (res.ok) {
                     const data = await res.json();
-                    document.getElementById('auth-username').textContent = data.username;
-                    
-                    // Set Avatar
-                    const avatar = document.getElementById('auth-avatar');
-                    if (data.username === 'Japex') avatar.src = 'https://ui-avatars.com/api/?name=Japex&background=111&color=fff&bold=true';
-                    else if (data.username === 'Temari') avatar.src = 'https://ui-avatars.com/api/?name=Temari&background=111&color=fff&bold=true';
-                    else avatar.src = 'assets/favicon.png';
-
+                    loginErrorMsg.style.display = 'none';
                     startAdminDashboard(data.token);
                 } else {
-                    alert('Usuário ou Senha incorretos!');
+                    loginErrorMsg.style.display = 'block';
                     document.querySelector('.login-box').classList.add('shake-error');
                     setTimeout(() => {
                         document.querySelector('.login-box').classList.remove('shake-error');
@@ -2477,31 +2609,14 @@
                 console.error(err);
                 alert('Erro ao conectar com o servidor.');
             }
-        }
-
-        function logout() {
-            sessionStorage.removeItem('aldeia_admin_token');
-            localStorage.removeItem('aldeia_admin_token');
-            sessionToken = null;
-            window.location.reload();
-        }
-
-        // Allow Enter key to login
-        adminPassword.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') login();
         });
 
         // Auto-login check on load
         async function checkAutoLogin() {
-            const savedToken = sessionStorage.getItem('aldeia_admin_token') || localStorage.getItem('aldeia_admin_token');
+            const savedToken = sessionStorage.getItem('aldeia_admin_token');
             if (savedToken) {
-                const username = await verifyToken(savedToken);
-                if (username) {
-                    document.getElementById('auth-username').textContent = username;
-                    const avatar = document.getElementById('auth-avatar');
-                    if (username === 'Japex') avatar.src = 'https://ui-avatars.com/api/?name=Japex&background=111&color=fff&bold=true';
-                    else if (username === 'Temari') avatar.src = 'https://ui-avatars.com/api/?name=Temari&background=111&color=fff&bold=true';
-                    
+                const isValid = await verifyToken(savedToken);
+                if (isValid) {
                     startAdminDashboard(savedToken);
                     return;
                 }
