@@ -158,11 +158,32 @@ const auditLogSchema = new mongoose.Schema({
     userAgent: { type: String, default: '' }
 }, { timestamps: true });
 
+const trelloTaskSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    title: { type: String, required: true },
+    description: { type: String, default: '' },
+    status: { type: String, default: 'backlog' }, // 'backlog', 'in_progress', 'review', 'done'
+    assignedTo: { type: String, default: 'Japex' },
+    priority: { type: String, default: 'média' }, // 'alta', 'média', 'baixa'
+    clientName: { type: String, default: '' },
+    dueDate: { type: String, default: '' }
+}, { timestamps: true });
+
+const userProfileSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true },
+    displayName: { type: String, default: '' },
+    avatar: { type: String, default: '' },
+    role: { type: String, default: 'Membro da Equipe' },
+    passwordHash: { type: String, default: '' }
+}, { timestamps: true });
+
 const ProjectModel = mongoose.model('Project', projectSchema);
 const ClientModel = mongoose.model('Client', clientSchema);
 const SubmissionModel = mongoose.model('Submission', submissionSchema);
 const SiteContentModel = mongoose.model('SiteContent', siteContentSchema);
 const AuditLogModel = mongoose.model('AuditLog', auditLogSchema);
+const TrelloTaskModel = mongoose.model('TrelloTask', trelloTaskSchema);
+const UserProfileModel = mongoose.model('UserProfile', userProfileSchema);
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -235,6 +256,32 @@ async function autoMigrateData() {
                 await AuditLogModel.insertMany(localAudit.slice(-200));
                 console.log('✅ [MIGRATION] Logs de audit migrados com sucesso!');
             }
+        }
+
+        // 6. Tarefas Trello (Equipe ALDEIA)
+        const trelloCount = await TrelloTaskModel.countDocuments();
+        if (trelloCount === 0) {
+            const defaultTasks = [
+                { id: 't1', title: 'Design do Portfólio LOUD', description: 'Criar capas 4:5 e feed promocional', status: 'in_progress', assignedTo: 'Japex', priority: 'alta', clientName: 'LOUD Esports', dueDate: '2026-08-10' },
+                { id: 't2', title: 'Revisão das Animações 3D', description: 'Ajustar parâmetros de refração e iluminação', status: 'review', assignedTo: 'Temari', priority: 'média', clientName: 'FURY Gaming', dueDate: '2026-08-08' },
+                { id: 't3', title: 'Identidade Visual MIBR', description: 'Desenvolver conceito de marca e paleta', status: 'backlog', assignedTo: 'Nesh', priority: 'alta', clientName: 'MIBR', dueDate: '2026-08-15' },
+                { id: 't4', title: 'Aprovação de Proposal de Cliente', description: 'Aguardando confirmação do contrato', status: 'done', assignedTo: 'Japex', priority: 'baixa', clientName: 'Red Canids', dueDate: '2026-08-01' }
+            ];
+            await TrelloTaskModel.insertMany(defaultTasks);
+            console.log('✅ [MIGRATION] Tarefas padrão do Trello adicionadas!');
+        }
+
+        // 7. Perfis de Usuários Padrão (Japex, Temari, Nesh, Admin)
+        const profilesCount = await UserProfileModel.countDocuments();
+        if (profilesCount === 0) {
+            const defaultProfiles = [
+                { username: 'japex', displayName: 'Japex', avatar: '/assets/japex.webp', role: 'Fundador & Creative Director' },
+                { username: 'temari', displayName: 'Temari', avatar: '/assets/temari.webp', role: 'Fundadora & Head Designer' },
+                { username: 'nesh', displayName: 'Nesh', avatar: '/assets/japex.webp', role: '3D & Motion Designer' },
+                { username: 'admin', displayName: 'Administrador ALDEIA', avatar: '/assets/japex.webp', role: 'Administrador Principal' }
+            ];
+            await UserProfileModel.insertMany(defaultProfiles);
+            console.log('✅ [MIGRATION] Perfis de usuários padrão inicializados!');
         }
     } catch (err) {
         console.error('[MIGRATION ERROR]', err.message);
@@ -705,6 +752,144 @@ app.delete('/api/clients/:id', requireAuth, async (req, res) => {
     } else {
         res.status(404).json({ status: 'error', message: 'Cliente não encontrado' });
     }
+});
+
+// ===== ROTAS DE TRELLO (KANBAN DA EQUIPE) =====
+app.get('/api/trello', async (req, res) => {
+    if (isMongoConnected) {
+        try {
+            const tasks = await TrelloTaskModel.find().sort({ createdAt: -1 }).lean();
+            return res.json(tasks);
+        } catch (e) { console.error('[TRELLO GET MONGO]', e.message); }
+    }
+    const tasks = safeReadJSON('trello_tasks.json', []);
+    res.json(tasks);
+});
+
+app.post('/api/trello', requireAuth, async (req, res) => {
+    const newTask = {
+        id: 't_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        title: req.body.title || 'Nova Tarefa',
+        description: req.body.description || '',
+        status: req.body.status || 'backlog',
+        assignedTo: req.body.assignedTo || 'Japex',
+        priority: req.body.priority || 'média',
+        clientName: req.body.clientName || '',
+        dueDate: req.body.dueDate || ''
+    };
+
+    if (isMongoConnected) {
+        try { await TrelloTaskModel.create(newTask); } catch (e) { console.error('[TRELLO POST MONGO]', e.message); }
+    }
+
+    let tasks = safeReadJSON('trello_tasks.json', []);
+    tasks.unshift(newTask);
+    safeWriteJSON('trello_tasks.json', tasks);
+    res.json({ status: 'success', task: newTask });
+});
+
+app.put('/api/trello/:id', requireAuth, async (req, res) => {
+    const taskId = req.params.id;
+    let updatedTask = null;
+
+    if (isMongoConnected) {
+        try {
+            updatedTask = await TrelloTaskModel.findOneAndUpdate(
+                { id: taskId },
+                { ...req.body, id: taskId },
+                { new: true }
+            ).lean();
+        } catch (e) { console.error('[TRELLO PUT MONGO]', e.message); }
+    }
+
+    let tasks = safeReadJSON('trello_tasks.json', []);
+    const index = tasks.findIndex(t => t.id === taskId);
+    if (index !== -1) {
+        tasks[index] = { ...tasks[index], ...req.body, id: taskId };
+        safeWriteJSON('trello_tasks.json', tasks);
+        if (!updatedTask) updatedTask = tasks[index];
+    }
+
+    if (updatedTask) {
+        res.json({ status: 'success', task: updatedTask });
+    } else {
+        res.status(404).json({ status: 'error', message: 'Tarefa não encontrada' });
+    }
+});
+
+app.delete('/api/trello/:id', requireAuth, async (req, res) => {
+    const taskId = req.params.id;
+    let deleted = false;
+
+    if (isMongoConnected) {
+        try {
+            const r = await TrelloTaskModel.deleteOne({ id: taskId });
+            if (r.deletedCount > 0) deleted = true;
+        } catch (e) { console.error('[TRELLO DELETE MONGO]', e.message); }
+    }
+
+    let tasks = safeReadJSON('trello_tasks.json', []);
+    const initialLen = tasks.length;
+    tasks = tasks.filter(t => t.id !== taskId);
+    if (tasks.length < initialLen) {
+        safeWriteJSON('trello_tasks.json', tasks);
+        deleted = true;
+    }
+
+    if (deleted) {
+        res.json({ status: 'success' });
+    } else {
+        res.status(404).json({ status: 'error', message: 'Tarefa não encontrada' });
+    }
+});
+
+// ===== ROTAS DE PERFIL DE USUÁRIO =====
+app.get('/api/profile', requireAuth, async (req, res) => {
+    const username = (req.user && req.user.username) ? req.user.username : 'Admin';
+    if (isMongoConnected) {
+        try {
+            const profile = await UserProfileModel.findOne({ username: new RegExp(`^${username}$`, 'i') }).lean();
+            if (profile) return res.json(profile);
+        } catch (e) { console.error('[PROFILE GET MONGO]', e.message); }
+    }
+    const profiles = safeReadJSON('user_profiles.json', {});
+    const prof = profiles[username.toLowerCase()] || {
+        username: username,
+        displayName: username,
+        avatar: '/assets/japex.webp',
+        role: 'Membro da Equipe'
+    };
+    res.json(prof);
+});
+
+app.put('/api/profile', requireAuth, async (req, res) => {
+    const username = (req.user && req.user.username) ? req.user.username : 'Admin';
+    const { displayName, avatar, password } = req.body || {};
+
+    const updateFields = {};
+    if (displayName) updateFields.displayName = displayName;
+    if (avatar) updateFields.avatar = avatar;
+    if (password) updateFields.passwordHash = password;
+
+    if (isMongoConnected) {
+        try {
+            await UserProfileModel.findOneAndUpdate(
+                { username: new RegExp(`^${username}$`, 'i') },
+                { username: username, ...updateFields },
+                { upsert: true, new: true }
+            );
+        } catch (e) { console.error('[PROFILE PUT MONGO]', e.message); }
+    }
+
+    let profiles = safeReadJSON('user_profiles.json', {});
+    const key = username.toLowerCase();
+    profiles[key] = {
+        ...(profiles[key] || { username, role: 'Membro da Equipe' }),
+        ...updateFields
+    };
+    safeWriteJSON('user_profiles.json', profiles);
+
+    res.json({ status: 'success', message: 'Perfil atualizado com sucesso', profile: profiles[key] });
 });
 
 // ===== UPLOAD DE MÍDIA =====

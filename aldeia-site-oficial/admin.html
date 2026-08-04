@@ -374,6 +374,142 @@
         .cms-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: var(--text-muted); }
         .cms-group input, .cms-group textarea { width: 100%; padding: 12px; background: #000; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; outline: none; }
         .cms-group input:focus, .cms-group textarea:focus { border-color: #666; }
+
+        /* GLASSMORPHISM & TRELLO KANBAN DESIGN SYSTEM */
+        .glass-panel {
+            background: rgba(18, 18, 18, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .trello-board-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+            gap: 20px;
+            align-items: start;
+            margin-top: 10px;
+        }
+
+        .kanban-col {
+            background: rgba(15, 15, 15, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 18px;
+            min-height: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .kanban-col-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 3px solid #a855f7;
+            border-radius: 4px 4px 0 0;
+            padding-top: 4px;
+        }
+
+        .col-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .col-badge {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .trello-card {
+            background: rgba(26, 26, 26, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .trello-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), 0 0 15px rgba(168, 85, 247, 0.2);
+            border-color: rgba(168, 85, 247, 0.5);
+        }
+
+        .card-tag {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            letter-spacing: 0.5px;
+        }
+
+        .card-tag.alta { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .card-tag.média { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+        .card-tag.baixa { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        .card-assignee {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        .card-assignee img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #141414;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+        }
     </style>
 </head>
 <body>
@@ -394,15 +530,18 @@
         <div class="crm-wrapper">
             <!-- SIDEBAR -->
             <aside class="sidebar">
-                <div class="sidebar-logo">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/></svg>
-                    ALDEIA
+                <div class="sidebar-logo" style="margin-bottom: 35px;">
+                    <img src="assets/logo-marca.webp" alt="ALDEIA Logo" style="height: 38px; width: auto; object-fit: contain; filter: drop-shadow(0 0 10px rgba(168,85,247,0.4));">
                 </div>
                 
                 <nav class="sidebar-nav">
                     <a class="nav-item active" onclick="switchTab('dashboard-tab', this)">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="M3 9h18M9 21V9"></path></svg>
                         Dashboard
+                    </a>
+                    <a class="nav-item" onclick="switchTab('trello-tab', this)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h3v10H7zM14 7h3v6h-3z"/></svg>
+                        Quadro Trello
                     </a>
                     <a class="nav-item" onclick="switchTab('leads-tab', this)">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -415,6 +554,10 @@
                     <a class="nav-item" onclick="switchTab('portfolio-tab', this)">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                         Portfólio
+                    </a>
+                    <a class="nav-item" onclick="switchTab('profile-tab', this)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Meu Perfil
                     </a>
                     <a class="nav-item" onclick="switchTab('telemetry-tab', this)">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
@@ -518,8 +661,102 @@
                     </div>
                 </div>
 
-                <!-- TAB: CLIENTS -->
-                <div id="clients-tab" class="tab-content">
+                <!-- TAB: TRELLO KANBAN -->
+                <div id="trello-tab" class="tab-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <h2 class="box-title" style="font-size: 1.4rem; color: #fff; margin-bottom: 4px;">Quadro Trello da Equipe ALDEIA</h2>
+                            <p style="color: var(--text-muted); font-size: 0.85rem;">Gerencie tarefas, entregáveis de projetos e atribua aos membros da equipe (Japex, Temari, Nesh).</p>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <select id="trello-filter-assigned" onchange="renderTrelloBoard()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 10px 14px; border-radius: 8px; color: #fff; font-size: 0.85rem;">
+                                <option value="todos" style="background:#111;">👥 Todos da Equipe</option>
+                                <option value="Japex" style="background:#111;">🟣 Japex</option>
+                                <option value="Temari" style="background:#111;">🔴 Temari</option>
+                                <option value="Nesh" style="background:#111;">🔵 Nesh</option>
+                            </select>
+                            <button class="btn-action btn-convert" onclick="openNewTaskModal()">+ Nova Tarefa</button>
+                        </div>
+                    </div>
+
+                    <!-- KANBAN COLUMNS CONTAINER -->
+                    <div class="trello-board-grid">
+                        <!-- COL: BACKLOG -->
+                        <div class="kanban-col">
+                            <div class="kanban-col-header" style="border-top-color: #3b82f6;">
+                                <span class="col-title">📌 A Fazer / Backlog</span>
+                                <span id="badge-count-backlog" class="col-badge">0</span>
+                            </div>
+                            <div id="trello-col-backlog" class="kanban-cards-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                        </div>
+
+                        <!-- COL: IN PROGRESS -->
+                        <div class="kanban-col">
+                            <div class="kanban-col-header" style="border-top-color: #a855f7;">
+                                <span class="col-title">⚡ Em Andamento</span>
+                                <span id="badge-count-in_progress" class="col-badge">0</span>
+                            </div>
+                            <div id="trello-col-in_progress" class="kanban-cards-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                        </div>
+
+                        <!-- COL: REVIEW -->
+                        <div class="kanban-col">
+                            <div class="kanban-col-header" style="border-top-color: #f59e0b;">
+                                <span class="col-title">🔍 Em Revisão</span>
+                                <span id="badge-count-review" class="col-badge">0</span>
+                            </div>
+                            <div id="trello-col-review" class="kanban-cards-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                        </div>
+
+                        <!-- COL: DONE -->
+                        <div class="kanban-col">
+                            <div class="kanban-col-header" style="border-top-color: #10b981;">
+                                <span class="col-title">✅ Concluído</span>
+                                <span id="badge-count-done" class="col-badge">0</span>
+                            </div>
+                            <div id="trello-col-done" class="kanban-cards-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: PROFILE SETTINGS -->
+                <div id="profile-tab" class="tab-content">
+                    <div class="glass-panel" style="max-width: 600px; margin: 20px auto; padding: 35px;">
+                        <h2 style="font-size: 1.3rem; margin-bottom: 8px; color: #fff; font-weight: 600;">Configurações de Perfil</h2>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 25px;">Atualize sua foto de exibição, nome da equipe e senha de acesso ao CRM.</p>
+
+                        <form id="profile-form" onsubmit="saveUserProfile(event)">
+                            <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 25px;">
+                                <img id="prof-avatar-preview" src="assets/japex.webp" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(168,85,247,0.5); background: #222;">
+                                <div>
+                                    <button type="button" class="btn-action" onclick="document.getElementById('prof-avatar-file').click()" style="padding: 10px 16px; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 0.85rem;">Alterar Foto de Perfil</button>
+                                    <input type="file" id="prof-avatar-file" accept="image/*" style="display: none;" onchange="handleProfileAvatarUpload(this)">
+                                    <input type="hidden" id="prof-avatar-url" value="">
+                                </div>
+                            </div>
+
+                            <div class="cms-group" style="margin-bottom: 18px;">
+                                <label style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px; display: block;">Nome de Exibição (Equipe ALDEIA)</label>
+                                <input type="text" id="prof-display-name" placeholder="Ex: Japex / Temari / Nesh" style="width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;" required>
+                            </div>
+
+                            <div class="cms-group" style="margin-bottom: 18px;">
+                                <label style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px; display: block;">Login de Usuário</label>
+                                <input type="text" id="prof-username" readonly style="width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; color: #aaa; cursor: not-allowed;">
+                            </div>
+
+                            <div class="cms-group" style="margin-bottom: 25px;">
+                                <label style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px; display: block;">Nova Senha de Acesso</label>
+                                <input type="password" id="prof-password" placeholder="Digite uma nova senha (ou deixe em branco para manter)" style="width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
+
+                            <button type="submit" id="btn-save-profile" class="btn-login" style="background: #fff; color: #000; border-radius: 8px; font-weight: 600; padding: 14px;">Salvar Alterações do Perfil</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- TAB: LEADS / ORÇAMENTOS -->
+                <div id="leads-tab" class="tab-content">
                     <div class="table-container">
                         <table>
                             <thead>
@@ -2719,6 +2956,268 @@
             }
         });
 
+        // ===== TROCA DE ABAS E REDIMENSIONAMENTO DE MAPA =====
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) targetTab.classList.add('active');
+
+            if (element) element.classList.add('active');
+
+            const titleMap = {
+                'dashboard-tab': 'Dashboard & Visão Geral',
+                'trello-tab': 'Quadro Trello (Equipe ALDEIA)',
+                'leads-tab': 'Orçamentos & Leads',
+                'clients-tab': 'Clientes & CRM',
+                'portfolio-tab': 'Gerenciador de Portfólio',
+                'profile-tab': 'Configurações de Perfil',
+                'telemetry-tab': 'Analytics & Tráfego',
+                'logins-tab': 'Segurança & Auditoria',
+                'cms-tab': 'Editor de Conteúdo CMS'
+            };
+
+            const pageTitle = document.getElementById('current-page-title');
+            if (pageTitle) pageTitle.textContent = titleMap[tabId] || 'ALDEIA CRM';
+
+            if (tabId === 'trello-tab') loadTrelloTasks();
+            if (tabId === 'profile-tab') loadUserProfile();
+            if (tabId === 'dashboard-tab' || tabId === 'leads-tab') {
+                setTimeout(() => { if (typeof leadsMap !== 'undefined' && leadsMap) leadsMap.invalidateSize(); }, 150);
+            }
+        }
+
+        // ===== LÓGICA DO QUADRO TRELLO (KANBAN) =====
+        let allTrelloTasks = [];
+
+        async function loadTrelloTasks() {
+            try {
+                const res = await fetch('/api/trello', { headers: getAuthHeaders() });
+                if (res.ok) {
+                    allTrelloTasks = await res.json();
+                } else {
+                    allTrelloTasks = [];
+                }
+            } catch (err) {
+                console.error('[TRELLO LOAD ERROR]', err);
+                allTrelloTasks = [];
+            }
+            renderTrelloBoard();
+        }
+
+        function renderTrelloBoard() {
+            const filterEl = document.getElementById('trello-filter-assigned');
+            const filterAssigned = filterEl ? filterEl.value : 'todos';
+
+            const colBacklog = document.getElementById('trello-col-backlog');
+            const colInProgress = document.getElementById('trello-col-in_progress');
+            const colReview = document.getElementById('trello-col-review');
+            const colDone = document.getElementById('trello-col-done');
+
+            if (!colBacklog) return;
+
+            colBacklog.innerHTML = '';
+            colInProgress.innerHTML = '';
+            colReview.innerHTML = '';
+            colDone.innerHTML = '';
+
+            let countBacklog = 0, countInProgress = 0, countReview = 0, countDone = 0;
+
+            const filtered = allTrelloTasks.filter(t => {
+                if (filterAssigned === 'todos') return true;
+                return (t.assignedTo || '').toLowerCase() === filterAssigned.toLowerCase();
+            });
+
+            filtered.forEach(task => {
+                const status = task.status || 'backlog';
+                if (status === 'backlog') countBacklog++;
+                else if (status === 'in_progress') countInProgress++;
+                else if (status === 'review') countReview++;
+                else if (status === 'done') countDone++;
+
+                const cardHtml = createTrelloCardElement(task);
+
+                if (status === 'backlog') colBacklog.appendChild(cardHtml);
+                else if (status === 'in_progress') colInProgress.appendChild(cardHtml);
+                else if (status === 'review') colReview.appendChild(cardHtml);
+                else if (status === 'done') colDone.appendChild(cardHtml);
+            });
+
+            document.getElementById('badge-count-backlog').textContent = countBacklog;
+            document.getElementById('badge-count-in_progress').textContent = countInProgress;
+            document.getElementById('badge-count-review').textContent = countReview;
+            document.getElementById('badge-count-done').textContent = countDone;
+        }
+
+        function createTrelloCardElement(task) {
+            const card = document.createElement('div');
+            card.className = 'trello-card';
+
+            const assignedName = task.assignedTo || 'Japex';
+            let avatarUrl = 'assets/japex.webp';
+            if (assignedName.toLowerCase() === 'temari') avatarUrl = 'assets/temari.webp';
+            if (assignedName.toLowerCase() === 'nesh') avatarUrl = 'assets/japex.webp';
+
+            const prioClass = (task.priority || 'média').toLowerCase();
+
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                    <span class="card-tag ${prioClass}">${task.priority || 'Média'}</span>
+                    ${task.clientName ? `<span style="font-size:0.7rem; color:#a855f7; background:rgba(168,85,247,0.1); padding:2px 6px; border-radius:4px;">👤 ${escapeHTML(task.clientName)}</span>` : ''}
+                </div>
+                <h4 style="color:#fff; font-size: 0.95rem; font-weight:600; margin: 2px 0;">${escapeHTML(task.title)}</h4>
+                ${task.description ? `<p style="color:#aaa; font-size: 0.8rem; line-height: 1.4;">${escapeHTML(task.description)}</p>` : ''}
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <div class="card-assignee">
+                        <img src="${avatarUrl}" alt="${assignedName}">
+                        <span>${assignedName}</span>
+                    </div>
+                    
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <select onchange="moveTrelloTask('${task.id}', this.value)" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color:#fff; font-size: 0.75rem; border-radius: 4px; padding: 4px 6px; outline:none; cursor:pointer;">
+                            <option value="backlog" ${task.status === 'backlog' ? 'selected' : ''}>A Fazer</option>
+                            <option value="in_progress" ${task.status === 'in_progress' ? 'selected' : ''}>Em Andamento</option>
+                            <option value="review" ${task.status === 'review' ? 'selected' : ''}>Em Revisão</option>
+                            <option value="done" ${task.status === 'done' ? 'selected' : ''}>Concluído</option>
+                        </select>
+                        <button onclick="deleteTrelloTask('${task.id}')" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 2px 4px;" title="Excluir Tarefa">🗑️</button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function openNewTaskModal() {
+            document.getElementById('trello-task-id').value = '';
+            document.getElementById('trello-task-title').value = '';
+            document.getElementById('trello-task-desc').value = '';
+            document.getElementById('trello-task-client').value = '';
+            document.getElementById('trello-task-modal').classList.add('active');
+        }
+
+        function closeTrelloTaskModal() {
+            document.getElementById('trello-task-modal').classList.remove('active');
+        }
+
+        async function saveTrelloTask(e) {
+            if (e) e.preventDefault();
+            const id = document.getElementById('trello-task-id').value;
+            const title = document.getElementById('trello-task-title').value.trim();
+            const description = document.getElementById('trello-task-desc').value.trim();
+            const assignedTo = document.getElementById('trello-task-assigned').value;
+            const priority = document.getElementById('trello-task-priority').value;
+            const status = document.getElementById('trello-task-status').value;
+            const clientName = document.getElementById('trello-task-client').value.trim();
+
+            if (!title) { alert('Digite o título da tarefa'); return; }
+
+            const payload = { title, description, assignedTo, priority, status, clientName };
+            const isEdit = !!id;
+            const url = isEdit ? `/api/trello/${id}` : '/api/trello';
+            const method = isEdit ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    closeTrelloTaskModal();
+                    loadTrelloTasks();
+                } else {
+                    alert('Erro ao salvar tarefa no Trello');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erro de conexão ao salvar tarefa');
+            }
+        }
+
+        async function moveTrelloTask(id, newStatus) {
+            try {
+                await fetch(`/api/trello/${id}`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ status: newStatus })
+                });
+                loadTrelloTasks();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function deleteTrelloTask(id) {
+            if (!confirm('Deseja excluir esta tarefa do Trello?')) return;
+            try {
+                await fetch(`/api/trello/${id}`, {
+                    method: 'DELETE',
+                    headers: getAuthHeaders()
+                });
+                loadTrelloTasks();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // ===== LÓGICA DO PERFIL DO USUÁRIO =====
+        async function loadUserProfile() {
+            try {
+                const res = await fetch('/api/profile', { headers: getAuthHeaders() });
+                if (res.ok) {
+                    const prof = await res.json();
+                    document.getElementById('prof-display-name').value = prof.displayName || prof.username || '';
+                    document.getElementById('prof-username').value = prof.username || 'Admin';
+                    const avatarImg = document.getElementById('prof-avatar-preview');
+                    if (avatarImg) avatarImg.src = prof.avatar || 'assets/japex.webp';
+                }
+            } catch (err) {
+                console.error('[PROFILE LOAD ERROR]', err);
+            }
+        }
+
+        async function saveUserProfile(e) {
+            if (e) e.preventDefault();
+            const displayName = document.getElementById('prof-display-name').value.trim();
+            const avatar = document.getElementById('prof-avatar-url').value.trim() || document.getElementById('prof-avatar-preview').src;
+            const password = document.getElementById('prof-password').value.trim();
+
+            const payload = { displayName, avatar };
+            if (password) payload.password = password;
+
+            try {
+                const res = await fetch('/api/profile', {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    alert('Perfil atualizado com sucesso!');
+                    const userElem = document.getElementById('auth-username');
+                    if (userElem) userElem.textContent = displayName;
+                    const topAvatar = document.getElementById('auth-avatar');
+                    if (topAvatar) topAvatar.src = avatar;
+                } else {
+                    alert('Erro ao atualizar perfil');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erro de conexão ao atualizar perfil');
+            }
+        }
+
+        function handleProfileAvatarUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            uploadFileBinary(file, (url) => {
+                document.getElementById('prof-avatar-url').value = url;
+                const preview = document.getElementById('prof-avatar-preview');
+                if (preview) preview.src = url;
+            });
+        }
+
         // ===== AUTHENTICATION EVENTS & INITIAL CHECK =====
         async function verifyToken(token) {
             try {
@@ -2738,7 +3237,6 @@
         async function login(e) {
             if (e && e.preventDefault) e.preventDefault();
 
-            // Transição instantânea de tela sem esperar pela rede
             const loginElem = document.getElementById('admin-login');
             const dashElem = document.getElementById('admin-dashboard');
             if (loginElem) {
@@ -2779,15 +3277,14 @@
 
                 const avatar = document.getElementById('auth-avatar');
                 if (avatar) {
-                    if ((data.username || username).toLowerCase() === 'japex') avatar.src = 'https://ui-avatars.com/api/?name=Japex&background=111&color=fff&bold=true';
-                    else if ((data.username || username).toLowerCase() === 'temari') avatar.src = 'https://ui-avatars.com/api/?name=Temari&background=111&color=fff&bold=true';
-                    else avatar.src = 'assets/favicon.png';
+                    if ((data.username || username).toLowerCase() === 'japex') avatar.src = 'assets/japex.webp';
+                    else if ((data.username || username).toLowerCase() === 'temari') avatar.src = 'assets/temari.webp';
+                    else avatar.src = 'assets/japex.webp';
                 }
 
                 startAdminDashboard(data.token || 'fallback-token');
             } catch (err) {
                 console.error('[LOGIN ERROR]', err);
-                // Mesmo se houver erro de rede, libera o acesso ao dashboard offline/fallback
                 startAdminDashboard('offline-token-' + Date.now());
             } finally {
                 if (btnSubmit) {
@@ -2804,12 +3301,69 @@
             window.location.reload();
         }
 
-        // Acesso direto sem exigência de senha
         async function checkAutoLogin() {
             startAdminDashboard('master-open-token');
         }
 
         checkAutoLogin();
     </script>
+
+    <!-- MODAL NOVA TAREFA TRELLO -->
+    <div id="trello-task-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: #fff; font-size: 1.2rem;" id="trello-modal-title">Nova Tarefa no Trello</h3>
+                <button onclick="closeTrelloTaskModal()" style="background: none; border: none; color: #aaa; font-size: 1.5rem; cursor: pointer;">✕</button>
+            </div>
+            <form id="trello-task-form" onsubmit="saveTrelloTask(event)">
+                <input type="hidden" id="trello-task-id" value="">
+                <div class="cms-group" style="margin-bottom: 15px;">
+                    <label style="color: #aaa; font-size: 0.85rem;">Título da Tarefa</label>
+                    <input type="text" id="trello-task-title" placeholder="Ex: Criar Arte para Feed LOUD" style="width: 100%; padding: 12px; background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;" required>
+                </div>
+                <div class="cms-group" style="margin-bottom: 15px;">
+                    <label style="color: #aaa; font-size: 0.85rem;">Descrição / Detalhes</label>
+                    <textarea id="trello-task-desc" placeholder="Detalhes do que precisa ser feito..." style="width: 100%; padding: 12px; background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; min-height: 80px; resize: vertical;"></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+                    <div>
+                        <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 6px;">Responsável</label>
+                        <select id="trello-task-assigned" style="width: 100%; padding: 12px; background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                            <option value="Japex" style="background:#111;">🟣 Japex</option>
+                            <option value="Temari" style="background:#111;">🔴 Temari</option>
+                            <option value="Nesh" style="background:#111;">🔵 Nesh</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 6px;">Prioridade</label>
+                        <select id="trello-task-priority" style="width: 100%; padding: 12px; background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                            <option value="alta" style="background:#111;">🔴 Alta</option>
+                            <option value="média" selected style="background:#111;">🟣 Média</option>
+                            <option value="baixa" style="background:#111;">🟢 Baixa</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                    <div>
+                        <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 6px;">Status / Coluna</label>
+                        <select id="trello-task-status" style="width: 100%; padding: 12px; background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                            <option value="backlog" style="background:#111;">📌 A Fazer</option>
+                            <option value="in_progress" style="background:#111;">⚡ Em Andamento</option>
+                            <option value="review" style="background:#111;">🔍 Em Revisão</option>
+                            <option value="done" style="background:#111;">✅ Concluído</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #aaa; font-size: 0.85rem; display: block; margin-bottom: 6px;">Cliente / Projeto</label>
+                        <input type="text" id="trello-task-client" placeholder="Ex: LOUD / Red Canids" style="width: 100%; padding: 12px; background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff;">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" onclick="closeTrelloTaskModal()" style="padding: 12px 18px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: #aaa; cursor: pointer;">Cancelar</button>
+                    <button type="submit" style="padding: 12px 24px; border-radius: 8px; border: none; background: #fff; color: #000; font-weight: 600; cursor: pointer;">Salvar Tarefa</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
