@@ -1,5 +1,5 @@
 /* ============================================================
-   ALDEIA — SERVIDOR DE PRODUÇÃO UNIFICADO & ROBUSTO (Node.js + Express)
+   ALDEIA — SERVIDOR DE PRODUÇÃO UNIFICADO & ROBUSTO (Node.js + Express + MongoDB Atlas)
    Pronto para Hospedagem no RENDER.COM, RAILWAY, VERCEL ou VPS
    ============================================================ */
 
@@ -12,14 +12,21 @@ const crypto = require('crypto');
 const multer = require('multer');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const mongoose = require('mongoose');
+const dns = require('dns');
 require('dotenv').config();
+
+// Configurar DNS do Node.js para IPv4 e resolver fallback (evita ECONNREFUSED em SRV no Windows)
+try {
+    dns.setDefaultResultOrder('ipv4first');
+    dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+} catch (_) {}
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 const ROOT_DIR = __dirname;
 
 // ===== CONFIGURAÇÃO DE SEGURANÇA E ADMIN =====
-// Hash SHA-256 da senha padronizada '123aldeia' ou vinda de ENV
 const DEFAULT_HASH = "0c88ccdb3a0615173fc7cc49491be2a12cae97c7192dadfde3064148e54cc7aa";
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || DEFAULT_HASH;
 
@@ -31,13 +38,11 @@ const ipRequests = new Map();  // ip -> array of timestamps
 // Limpeza periódica de memória (RAM) a cada 30 minutos
 setInterval(() => {
     const now = Date.now();
-    // Limpar tokens expirados
     for (const [token, timestamp] of validTokens.entries()) {
         if (now - timestamp > TOKEN_TTL) {
             validTokens.delete(token);
         }
     }
-    // Limpar requisições antigas de IP
     for (const [ip, timestamps] of ipRequests.entries()) {
         const recent = timestamps.filter(t => t > now - 60000);
         if (recent.length === 0) {
@@ -48,7 +53,7 @@ setInterval(() => {
     }
 }, 30 * 60 * 1000);
 
-// ===== UTILITÁRIOS SEGUROS DE PERSISTÊNCIA (I/O ATÔMICO) =====
+// ===== UTILITÁRIOS SEGUROS DE PERSISTÊNCIA EM FALLBACK JSON =====
 const memoryCache = new Map();
 
 function safeReadJSON(filename, defaultVal = []) {
@@ -92,18 +97,160 @@ function safeWriteJSON(filename, data) {
     }
 }
 
+// ===== CONEXÃO & MODELOS DO MONGODB ATLAS (NUVEM) =====
+let isMongoConnected = false;
+
+const projectSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    title: { type: String, default: 'Sem Título' },
+    category: { type: String, default: 'artes' },
+    categoryLabel: { type: String, default: 'Artes Avulsas' },
+    format: { type: String, default: 'post' },
+    aspectRatio: { type: String, default: '1:1' },
+    accentColor: { type: String, default: '#a855f7' },
+    cover: { type: String, default: '' },
+    assets: { type: Array, default: [] }
+}, { timestamps: true });
+
+const clientSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    leadId: { type: String, default: null },
+    nome: { type: String, default: 'Cliente Sem Nome' },
+    email: { type: String, default: '' },
+    telefone: { type: String, default: '' },
+    projeto: { type: String, default: 'Projeto Padrão' },
+    status: { type: String, default: 'Ativo' },
+    createdAt: { type: String, default: () => new Date().toISOString() }
+}, { timestamps: true });
+
+const submissionSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    timestamp: { type: String, default: () => new Date().toISOString() },
+    nome: { type: String, default: '' },
+    email: { type: String, default: '' },
+    telefone: { type: String, default: '' },
+    instagram: { type: String, default: '' },
+    projeto: { type: String, default: '' },
+    whatsappClicked: { type: String, default: 'Não' },
+    utmSource: { type: String, default: 'Direto' },
+    utmMedium: { type: String, default: '' },
+    utmCampaign: { type: String, default: '' },
+    visits: { type: Number, default: 1 },
+    firstVisit: { type: String, default: '' },
+    ipCountry: { type: String, default: '' },
+    ipRegion: { type: String, default: '' },
+    ipCity: { type: String, default: '' },
+    ipISP: { type: String, default: '' },
+    ipCoords: { type: String, default: '' }
+}, { timestamps: true });
+
+const siteContentSchema = new mongoose.Schema({
+    key: { type: String, default: 'main', unique: true },
+    content: { type: mongoose.Schema.Types.Mixed, default: {} }
+}, { timestamps: true });
+
+const auditLogSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    timestamp: { type: String, default: () => new Date().toISOString() },
+    username: { type: String, default: 'Desconhecido' },
+    ip: { type: String, default: '127.0.0.1' },
+    status: { type: String, default: '' },
+    userAgent: { type: String, default: '' }
+}, { timestamps: true });
+
+const ProjectModel = mongoose.model('Project', projectSchema);
+const ClientModel = mongoose.model('Client', clientSchema);
+const SubmissionModel = mongoose.model('Submission', submissionSchema);
+const SiteContentModel = mongoose.model('SiteContent', siteContentSchema);
+const AuditLogModel = mongoose.model('AuditLog', auditLogSchema);
+
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (MONGODB_URI) {
+    mongoose.connect(MONGODB_URI)
+        .then(async () => {
+            isMongoConnected = true;
+            console.log('✅ [MONGODB ATLAS] Conectado com sucesso ao banco na nuvem!');
+            await autoMigrateData();
+        })
+        .catch(err => {
+            console.error('❌ [MONGODB ATLAS] Erro ao conectar ao banco na nuvem:', err.message);
+        });
+} else {
+    console.warn('⚠️ [MONGODB ATLAS] MONGODB_URI não configurada no .env. Usando fallback JSON local.');
+}
+
+async function autoMigrateData() {
+    try {
+        // 1. Portfólio
+        const portfolioCount = await ProjectModel.countDocuments();
+        if (portfolioCount === 0) {
+            const localData = safeReadJSON('portfolio.json', []);
+            if (localData.length > 0) {
+                console.log(`[MIGRATION] Migrando ${localData.length} projetos do JSON para o MongoDB Atlas...`);
+                await ProjectModel.insertMany(localData);
+                console.log('✅ [MIGRATION] Portfólio migrado com sucesso para a nuvem!');
+            }
+        }
+
+        // 2. Clientes
+        const clientsCount = await ClientModel.countDocuments();
+        if (clientsCount === 0) {
+            const localClients = safeReadJSON('clients.json', []);
+            if (localClients.length > 0) {
+                console.log(`[MIGRATION] Migrando ${localClients.length} clientes para o MongoDB Atlas...`);
+                await ClientModel.insertMany(localClients);
+                console.log('✅ [MIGRATION] Clientes migrados com sucesso!');
+            }
+        }
+
+        // 3. Submissions / Leads
+        const subsCount = await SubmissionModel.countDocuments();
+        if (subsCount === 0) {
+            const localSubs = safeReadJSON('submissions.json', []);
+            if (localSubs.length > 0) {
+                console.log(`[MIGRATION] Migrando ${localSubs.length} leads para o MongoDB Atlas...`);
+                await SubmissionModel.insertMany(localSubs);
+                console.log('✅ [MIGRATION] Leads migrados com sucesso!');
+            }
+        }
+
+        // 4. Conteúdo do CMS
+        const contentDoc = await SiteContentModel.findOne({ key: 'main' });
+        if (!contentDoc) {
+            const localContent = safeReadJSON('site_content.json', {});
+            if (Object.keys(localContent).length > 0) {
+                console.log(`[MIGRATION] Migrando conteúdo do CMS para o MongoDB Atlas...`);
+                await SiteContentModel.create({ key: 'main', content: localContent });
+                console.log('✅ [MIGRATION] Conteúdo do CMS migrado com sucesso!');
+            }
+        }
+
+        // 5. Logs de Autenticação
+        const auditCount = await AuditLogModel.countDocuments();
+        if (auditCount === 0) {
+            const localAudit = safeReadJSON('login_audit.json', []);
+            if (localAudit.length > 0) {
+                console.log(`[MIGRATION] Migrando logs de login para o MongoDB Atlas...`);
+                await AuditLogModel.insertMany(localAudit.slice(-200));
+                console.log('✅ [MIGRATION] Logs de audit migrados com sucesso!');
+            }
+        }
+    } catch (err) {
+        console.error('[MIGRATION ERROR]', err.message);
+    }
+}
+
 // ===== UPLOAD DE ARQUIVOS (Cloudinary) =====
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// Configuração do Cloudinary com credenciais do .env
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Tipos permitidos (Imagens e Vídeos)
 const ALLOWED_MIME_TYPES = new Set([
     'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml',
     'video/mp4', 'video/webm', 'video/quicktime'
@@ -117,7 +264,7 @@ const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
         folder: 'aldeia_uploads',
-        resource_type: 'auto', // Permite imagem e vídeo automaticamente
+        resource_type: 'auto',
         allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'gif', 'svg', 'mp4', 'webm', 'mov']
     }
 });
@@ -140,13 +287,11 @@ const upload = multer({
 // ===== MIDDLEWARES =====
 app.set('trust proxy', 1);
 
-// Segurança com Helmet
 app.use(helmet({
-    contentSecurityPolicy: false, // Desativado para permitir fontes externas e CDNs
+    contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false
 }));
 
-// Proteção contra Força Bruta / DDoS (Rate Limiters)
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 1200,
@@ -172,7 +317,6 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.text({ type: 'text/plain', limit: '5kb' }));
 
-// Static file headers
 app.use(express.static(ROOT_DIR, {
     maxAge: '1d',
     setHeaders: (res) => {
@@ -180,7 +324,6 @@ app.use(express.static(ROOT_DIR, {
     }
 }));
 
-// Security headers para API
 app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
@@ -188,7 +331,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// Custom Rate Limiting de IP
 app.use((req, res, next) => {
     const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     const isLocal = clientIP === '::1' || clientIP === '127.0.0.1' || clientIP.startsWith('192.168.');
@@ -205,13 +347,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// ===== AUTENTICAÇÃO MULTIUSUÁRIO & MULTIFLEXÍVEL =====
-const USERS = {
-    'japex': ['Japex123', '123aldeia'],
-    'temari': ['Temari123', '123aldeia'],
-    'admin': ['123aldeia', 'admin', 'admin123']
-};
-
+// ===== AUTENTICAÇÃO =====
 function verifyToken(req) {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -219,9 +355,9 @@ function verifyToken(req) {
         if (validTokens.has(token)) {
             const data = validTokens.get(token);
             if (Date.now() - data.timestamp < TOKEN_TTL) {
-                return data; // Retorna o payload { timestamp, username }
+                return data;
             } else {
-                validTokens.delete(token); // Token expirado
+                validTokens.delete(token);
             }
         }
     }
@@ -234,27 +370,36 @@ function requireAuth(req, res, next) {
     next();
 }
 
-function logLoginAttempt(ip, status, userAgent, username) {
+async function logLoginAttempt(ip, status, userAgent, username) {
+    const logEntry = {
+        id: crypto.randomUUID(),
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        username: username || 'Desconhecido',
+        ip: ip || '127.0.0.1',
+        status: status,
+        userAgent: userAgent || 'Desconhecido'
+    };
+
+    if (isMongoConnected) {
+        try {
+            await AuditLogModel.create(logEntry);
+        } catch (e) {
+            console.error('[AUDIT MONGO] Erro ao gravar log:', e.message);
+        }
+    }
+
     try {
         let logs = safeReadJSON('login_audit.json', []);
-        logs.push({
-            id: crypto.randomUUID(),
-            timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-            username: username || 'Desconhecido',
-            ip: ip || '127.0.0.1',
-            status: status,
-            userAgent: userAgent || 'Desconhecido'
-        });
+        logs.push(logEntry);
         if (logs.length > 1000) logs = logs.slice(-1000);
         safeWriteJSON('login_audit.json', logs);
     } catch (e) {
-        console.error('[AUDIT] Erro ao gravar log:', e.message);
+        console.error('[AUDIT JSON] Erro:', e.message);
     }
 }
 
 // ===== ROTAS DE AUTENTICAÇÃO =====
-
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
     const { username, password } = req.body || {};
     const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     const ua = req.headers['user-agent'] || '';
@@ -267,7 +412,7 @@ app.post('/api/auth/login', (req, res) => {
 
     const newToken = crypto.randomUUID();
     validTokens.set(newToken, { timestamp: Date.now(), username: loggedUsername });
-    logLoginAttempt(clientIP, 'Sucesso', ua, loggedUsername);
+    await logLoginAttempt(clientIP, 'Sucesso', ua, loggedUsername);
     return res.json({ status: 'success', token: newToken, username: loggedUsername });
 });
 
@@ -279,36 +424,75 @@ app.get('/api/auth/verify', (req, res) => {
     return res.status(401).json({ status: 'error', message: 'Token inválido' });
 });
 
-app.get('/api/auth/logins', requireAuth, (req, res) => {
+app.get('/api/auth/logins', requireAuth, async (req, res) => {
+    if (isMongoConnected) {
+        try {
+            const logs = await AuditLogModel.find().sort({ createdAt: -1 }).limit(200).lean();
+            return res.json(logs);
+        } catch (e) {
+            console.error('[AUTH LOGINS MONGO]', e.message);
+        }
+    }
     const logs = safeReadJSON('login_audit.json', []);
     res.json(logs);
 });
 
 // ===== ROTAS DE CONTEÚDO CMS =====
-
-app.get('/api/content', (req, res) => {
+app.get('/api/content', async (req, res) => {
+    if (isMongoConnected) {
+        try {
+            const doc = await SiteContentModel.findOne({ key: 'main' }).lean();
+            if (doc && doc.content) {
+                return res.json(doc.content);
+            }
+        } catch (e) {
+            console.error('[CONTENT GET MONGO]', e.message);
+        }
+    }
     const content = safeReadJSON('site_content.json', {});
     res.json(content);
 });
 
-app.post('/api/content', requireAuth, (req, res) => {
-    const success = safeWriteJSON('site_content.json', req.body || {});
-    if (success) {
-        res.json({ status: 'success', message: 'Conteúdo atualizado com sucesso' });
+app.post('/api/content', requireAuth, async (req, res) => {
+    const contentData = req.body || {};
+    let saved = false;
+
+    if (isMongoConnected) {
+        try {
+            await SiteContentModel.findOneAndUpdate(
+                { key: 'main' },
+                { content: contentData },
+                { upsert: true, new: true }
+            );
+            saved = true;
+        } catch (e) {
+            console.error('[CONTENT POST MONGO]', e.message);
+        }
+    }
+
+    const jsonSuccess = safeWriteJSON('site_content.json', contentData);
+    if (saved || jsonSuccess) {
+        res.json({ status: 'success', message: 'Conteúdo atualizado com sucesso no MongoDB' });
     } else {
         res.status(500).json({ status: 'error', message: 'Erro ao salvar conteúdo' });
     }
 });
 
 // ===== ROTAS DE PORTFÓLIO =====
-
-app.get('/api/portfolio', (req, res) => {
+app.get('/api/portfolio', async (req, res) => {
+    if (isMongoConnected) {
+        try {
+            const projects = await ProjectModel.find().sort({ createdAt: -1 }).lean();
+            return res.json(projects);
+        } catch (e) {
+            console.error('[PORTFOLIO GET MONGO]', e.message);
+        }
+    }
     const portfolio = safeReadJSON('portfolio.json', []);
     res.json(portfolio);
 });
 
-app.post('/api/portfolio', requireAuth, (req, res) => {
-    let data = safeReadJSON('portfolio.json', []);
+app.post('/api/portfolio', requireAuth, async (req, res) => {
     const format = req.body.format || 'post';
     const aspectRatio = req.body.aspectRatio || (format === 'story' ? '9:16' : format === 'video' ? '16:9' : '1:1');
     
@@ -323,59 +507,128 @@ app.post('/api/portfolio', requireAuth, (req, res) => {
         cover: req.body.cover || '',
         assets: req.body.assets || []
     };
+
+    let savedInMongo = false;
+    if (isMongoConnected) {
+        try {
+            await ProjectModel.create(newProject);
+            savedInMongo = true;
+        } catch (e) {
+            console.error('[PORTFOLIO POST MONGO]', e.message);
+        }
+    }
+
+    let data = safeReadJSON('portfolio.json', []);
     data.push(newProject);
-    const success = safeWriteJSON('portfolio.json', data);
-    if (success) {
+    const jsonSuccess = safeWriteJSON('portfolio.json', data);
+
+    if (savedInMongo || jsonSuccess) {
         res.json({ status: 'success', project: newProject });
     } else {
         res.status(500).json({ status: 'error', message: 'Erro ao salvar projeto' });
     }
 });
 
-app.put('/api/portfolio/:id', requireAuth, (req, res) => {
-    let data = safeReadJSON('portfolio.json', []);
-    const index = data.findIndex(p => p.id === req.params.id);
-    if (index === -1) {
-        return res.status(404).json({ status: 'error', message: 'Projeto não encontrado' });
+app.put('/api/portfolio/:id', requireAuth, async (req, res) => {
+    const projId = req.params.id;
+    let updatedProj = null;
+
+    if (isMongoConnected) {
+        try {
+            updatedProj = await ProjectModel.findOneAndUpdate(
+                { id: projId },
+                { ...req.body, id: projId },
+                { new: true }
+            ).lean();
+        } catch (e) {
+            console.error('[PORTFOLIO PUT MONGO]', e.message);
+        }
     }
-    data[index] = {
-        ...data[index],
-        ...req.body,
-        id: req.params.id // Preserva o ID original
-    };
-    safeWriteJSON('portfolio.json', data);
-    res.json({ status: 'success', project: data[index] });
+
+    let data = safeReadJSON('portfolio.json', []);
+    const index = data.findIndex(p => p.id === projId);
+    if (index !== -1) {
+        data[index] = { ...data[index], ...req.body, id: projId };
+        safeWriteJSON('portfolio.json', data);
+        if (!updatedProj) updatedProj = data[index];
+    }
+
+    if (updatedProj) {
+        res.json({ status: 'success', project: updatedProj });
+    } else {
+        res.status(404).json({ status: 'error', message: 'Projeto não encontrado' });
+    }
 });
 
-app.delete('/api/portfolio/:id', requireAuth, (req, res) => {
+app.delete('/api/portfolio/:id', requireAuth, async (req, res) => {
+    const projId = req.params.id;
+    let deletedMongo = false;
+
+    if (isMongoConnected) {
+        try {
+            const resDel = await ProjectModel.deleteOne({ id: projId });
+            if (resDel.deletedCount > 0) deletedMongo = true;
+        } catch (e) {
+            console.error('[PORTFOLIO DELETE MONGO]', e.message);
+        }
+    }
+
     let data = safeReadJSON('portfolio.json', []);
     const initialLen = data.length;
-    data = data.filter(p => p.id !== req.params.id);
-    if (data.length === initialLen) {
-        return res.status(404).json({ status: 'error', message: 'Projeto não encontrado' });
+    data = data.filter(p => p.id !== projId);
+    const deletedJson = data.length < initialLen;
+    if (deletedJson) safeWriteJSON('portfolio.json', data);
+
+    if (deletedMongo || deletedJson) {
+        res.json({ status: 'success' });
+    } else {
+        res.status(404).json({ status: 'error', message: 'Projeto não encontrado' });
     }
-    safeWriteJSON('portfolio.json', data);
-    res.json({ status: 'success' });
 });
 
 // ===== ROTAS DE CLIENTES / CRM =====
-
-app.get('/api/clients', requireAuth, (req, res) => {
+app.get('/api/clients', requireAuth, async (req, res) => {
+    if (isMongoConnected) {
+        try {
+            const clients = await ClientModel.find().sort({ createdAt: -1 }).lean();
+            return res.json(clients);
+        } catch (e) {
+            console.error('[CLIENTS GET MONGO]', e.message);
+        }
+    }
     const clients = safeReadJSON('clients.json', []);
     res.json(clients);
 });
 
-app.post('/api/clients', requireAuth, (req, res) => {
-    let clients = safeReadJSON('clients.json', []);
+app.post('/api/clients', requireAuth, async (req, res) => {
     const body = req.body;
-    
+    let resultClients = [];
+
     if (Array.isArray(body)) {
-        clients = body;
+        resultClients = body;
+        if (isMongoConnected) {
+            try {
+                await ClientModel.deleteMany({});
+                await ClientModel.insertMany(body);
+            } catch (e) { console.error('[CLIENTS BULK MONGO]', e.message); }
+        }
+        safeWriteJSON('clients.json', resultClients);
     } else {
         const leadId = body.leadId || null;
-        if (leadId && clients.some(c => c.leadId === leadId)) {
+        let exists = false;
+        if (isMongoConnected && leadId) {
+            const existing = await ClientModel.findOne({ leadId }).lean();
+            if (existing) exists = true;
+        }
+        if (!exists && leadId) {
+            const localClients = safeReadJSON('clients.json', []);
+            if (localClients.some(c => c.leadId === leadId)) exists = true;
+        }
+
+        if (exists) {
             return res.status(400).json({ status: 'error', message: 'Este lead já foi convertido em cliente.' });
         }
+
         const newClient = {
             id: body.id || ('c_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7)),
             leadId: leadId,
@@ -386,79 +639,75 @@ app.post('/api/clients', requireAuth, (req, res) => {
             status: body.status || 'Ativo',
             createdAt: new Date().toISOString()
         };
+
+        if (isMongoConnected) {
+            try { await ClientModel.create(newClient); } catch (e) { console.error('[CLIENT POST MONGO]', e.message); }
+        }
+        let clients = safeReadJSON('clients.json', []);
         clients.push(newClient);
+        safeWriteJSON('clients.json', clients);
+        resultClients = clients;
     }
-    
-    const success = safeWriteJSON('clients.json', clients);
-    if (success) {
-        res.json({ status: 'success', clients: clients });
-    } else {
-        res.status(500).json({ status: 'error', message: 'Erro ao salvar clientes' });
-    }
+
+    res.json({ status: 'success', clients: resultClients });
 });
 
-app.put('/api/clients/:id', requireAuth, (req, res) => {
+app.put('/api/clients/:id', requireAuth, async (req, res) => {
+    const clientId = req.params.id;
+    let updatedClient = null;
+
+    if (isMongoConnected) {
+        try {
+            updatedClient = await ClientModel.findOneAndUpdate(
+                { id: clientId },
+                { ...req.body, id: clientId },
+                { new: true }
+            ).lean();
+        } catch (e) { console.error('[CLIENT PUT MONGO]', e.message); }
+    }
+
     let clients = safeReadJSON('clients.json', []);
-    const index = clients.findIndex(c => c.id === req.params.id);
-    if (index === -1) {
-        return res.status(404).json({ status: 'error', message: 'Cliente não encontrado' });
+    const index = clients.findIndex(c => c.id === clientId);
+    if (index !== -1) {
+        clients[index] = { ...clients[index], ...req.body, id: clientId };
+        safeWriteJSON('clients.json', clients);
+        if (!updatedClient) updatedClient = clients[index];
     }
-    clients[index] = {
-        ...clients[index],
-        ...req.body,
-        id: req.params.id
-    };
-    safeWriteJSON('clients.json', clients);
-    res.json({ status: 'success', client: clients[index] });
+
+    if (updatedClient) {
+        res.json({ status: 'success', client: updatedClient });
+    } else {
+        res.status(404).json({ status: 'error', message: 'Cliente não encontrado' });
+    }
 });
 
-app.delete('/api/clients/:id', requireAuth, (req, res) => {
+app.delete('/api/clients/:id', requireAuth, async (req, res) => {
+    const clientId = req.params.id;
+    let deleted = false;
+
+    if (isMongoConnected) {
+        try {
+            const r = await ClientModel.deleteOne({ id: clientId });
+            if (r.deletedCount > 0) deleted = true;
+        } catch (e) { console.error('[CLIENT DELETE MONGO]', e.message); }
+    }
+
     let clients = safeReadJSON('clients.json', []);
     const initialLen = clients.length;
-    clients = clients.filter(c => c.id !== req.params.id);
-    if (clients.length === initialLen) {
-        return res.status(404).json({ status: 'error', message: 'Cliente não encontrado' });
+    clients = clients.filter(c => c.id !== clientId);
+    if (clients.length < initialLen) {
+        safeWriteJSON('clients.json', clients);
+        deleted = true;
     }
-    safeWriteJSON('clients.json', clients);
-    res.json({ status: 'success' });
-});
 
-// ===== STREAMING DE VÍDEO COM SUPORTE A RANGE REQUESTS (HTTP 206 - SEEK SEM LAG) =====
-app.get('/assets/uploads/:filename', (req, res, next) => {
-    const filePath = path.join(ROOT_DIR, 'assets', 'uploads', req.params.filename);
-    if (!fs.existsSync(filePath)) return next();
-
-    const stat = fs.statSync(filePath);
-    const fileSize = stat.size;
-    const range = req.headers.range;
-
-    if (range) {
-        const parts = range.replace(/bytes=/, "").split("-");
-        const start = parseInt(parts[0], 10);
-        const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-        const chunksize = (end - start) + 1;
-        const file = fs.createReadStream(filePath, { start, end });
-        const ext = path.extname(filePath).toLowerCase();
-        let mimeType = 'video/mp4';
-        if (ext === '.webm') mimeType = 'video/webm';
-        if (ext === '.mov') mimeType = 'video/quicktime';
-        if (ext === '.webp') mimeType = 'image/webp';
-
-        const head = {
-            'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-            'Accept-Ranges': 'bytes',
-            'Content-Length': chunksize,
-            'Content-Type': mimeType,
-        };
-        res.writeHead(206, head);
-        file.pipe(res);
+    if (deleted) {
+        res.json({ status: 'success' });
     } else {
-        next();
+        res.status(404).json({ status: 'error', message: 'Cliente não encontrado' });
     }
 });
 
-// ===== UPLOAD =====
-
+// ===== UPLOAD DE MÍDIA =====
 app.post('/api/upload', requireAuth, (req, res) => {
     upload.single('file')(req, res, (err) => {
         if (err) {
@@ -467,17 +716,13 @@ app.post('/api/upload', requireAuth, (req, res) => {
         if (!req.file) {
             return res.status(400).json({ status: 'error', message: 'Nenhum arquivo enviado' });
         }
-        // O Cloudinary envia a URL completa e segura no req.file.path
         const cloudUrl = req.file.path;
         res.json({ status: 'success', url: cloudUrl });
     });
 });
 
-// ===== ROTAS DE LEADS / SUBMISSIONS =====
-
+// ===== ROTAS DE LEADS / FORMULÁRIO DE CONTATO =====
 app.post('/api/cadastro', async (req, res) => {
-    let submissions = safeReadJSON('submissions.json', []);
-    
     let clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     if (clientIP.includes(',')) clientIP = clientIP.split(',')[0].trim();
     
@@ -504,12 +749,16 @@ app.post('/api/cadastro', async (req, res) => {
     const {
         nome, email, telefone, instagram, projeto,
         utmSource, utmMedium, utmCampaign, visits, firstVisit
-    } = req.body;
+    } = req.body || {};
 
     const newSubmission = {
         id: crypto.randomUUID(),
         timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-        nome, email, telefone, instagram, projeto,
+        nome: nome || '',
+        email: email || '',
+        telefone: telefone || '',
+        instagram: instagram || '',
+        projeto: projeto || '',
         whatsappClicked: "Não",
         utmSource: utmSource || 'Direto',
         utmMedium: utmMedium || '',
@@ -523,17 +772,33 @@ app.post('/api/cadastro', async (req, res) => {
         ipCoords: `${geo.lat}, ${geo.lon}`
     };
 
+    if (isMongoConnected) {
+        try {
+            await SubmissionModel.create(newSubmission);
+        } catch (e) {
+            console.error('[SUBMISSION MONGO]', e.message);
+        }
+    }
+
+    let submissions = safeReadJSON('submissions.json', []);
     submissions.push(newSubmission);
     safeWriteJSON('submissions.json', submissions);
 
     res.json({ status: 'success', message: 'Cadastro recebido com sucesso', id: newSubmission.id });
 });
 
-app.post('/api/cadastro/click-link', (req, res) => {
+app.post('/api/cadastro/click-link', async (req, res) => {
     const { id } = req.body || {};
-    let submissions = safeReadJSON('submissions.json', []);
     let updated = false;
 
+    if (isMongoConnected && id) {
+        try {
+            const r = await SubmissionModel.findOneAndUpdate({ id }, { whatsappClicked: "Sim" });
+            if (r) updated = true;
+        } catch (e) { console.error('[SUBMISSION CLICK MONGO]', e.message); }
+    }
+
+    let submissions = safeReadJSON('submissions.json', []);
     submissions = submissions.map(sub => {
         if (sub.id === id) {
             updated = true;
@@ -549,15 +814,20 @@ app.post('/api/cadastro/click-link', (req, res) => {
     res.status(404).json({ status: 'error', message: 'Lead não encontrado' });
 });
 
-app.get('/api/submissions', requireAuth, (req, res) => {
+app.get('/api/submissions', requireAuth, async (req, res) => {
+    if (isMongoConnected) {
+        try {
+            const subs = await SubmissionModel.find().sort({ createdAt: -1 }).lean();
+            return res.json(subs);
+        } catch (e) { console.error('[SUBMISSIONS GET MONGO]', e.message); }
+    }
     const submissions = safeReadJSON('submissions.json', []);
     res.json(submissions);
 });
 
 // ===== EXPORTAÇÕES (SQL & CSV) =====
-
-app.get('/api/admin/export/sql', requireAuth, (req, res) => {
-    let sql = `-- ALDEIA DATABASE DUMP (SQL EXPORT)\n`;
+app.get('/api/admin/export/sql', requireAuth, async (req, res) => {
+    let sql = `-- ALDEIA DATABASE DUMP (SQL EXPORT FROM MONGODB/JSON)\n`;
     sql += `-- Gerado em: ${new Date().toISOString()}\n\n`;
 
     sql += `CREATE TABLE IF NOT EXISTS submissions (\n`;
@@ -570,7 +840,12 @@ app.get('/api/admin/export/sql', requireAuth, (req, res) => {
     sql += `    whatsapp_clicked VARCHAR(10)\n`;
     sql += `);\n\n`;
 
-    const subs = safeReadJSON('submissions.json', []);
+    let subs = [];
+    if (isMongoConnected) {
+        try { subs = await SubmissionModel.find().lean(); } catch (_) {}
+    }
+    if (subs.length === 0) subs = safeReadJSON('submissions.json', []);
+
     subs.forEach(s => {
         const id = (s.id || '').replace(/'/g, "''");
         const ts = (s.timestamp || '').replace(/'/g, "''");
@@ -593,7 +868,12 @@ app.get('/api/admin/export/sql', requireAuth, (req, res) => {
     sql += `    created_at DATETIME\n`;
     sql += `);\n\n`;
 
-    const clients = safeReadJSON('clients.json', []);
+    let clients = [];
+    if (isMongoConnected) {
+        try { clients = await ClientModel.find().lean(); } catch (_) {}
+    }
+    if (clients.length === 0) clients = safeReadJSON('clients.json', []);
+
     clients.forEach(c => {
         const id = (c.id || '').replace(/'/g, "''");
         const leadId = (c.leadId || '').replace(/'/g, "''");
@@ -611,8 +891,13 @@ app.get('/api/admin/export/sql', requireAuth, (req, res) => {
     res.send(sql);
 });
 
-app.get('/api/admin/export/csv', requireAuth, (req, res) => {
-    const subs = safeReadJSON('submissions.json', []);
+app.get('/api/admin/export/csv', requireAuth, async (req, res) => {
+    let subs = [];
+    if (isMongoConnected) {
+        try { subs = await SubmissionModel.find().lean(); } catch (_) {}
+    }
+    if (subs.length === 0) subs = safeReadJSON('submissions.json', []);
+
     let csv = `ID,Data,Nome,Email,Telefone,Projeto,WhatsApp Clicado\n`;
     subs.forEach(s => {
         const escapeCSV = (field) => `"${(field || '').toString().replace(/"/g, '""')}"`;
@@ -638,143 +923,7 @@ app.get('/api/security/stats', requireAuth, (req, res) => {
     res.json({ totalIPs: ipRequests.size, ips: statsList });
 });
 
-// ===== TELEMETRIA E ANALYTICS (NOVO CRM) =====
-
-app.post('/api/telemetry', (req, res) => {
-    let payload = req.body;
-    if (typeof payload === 'string') {
-        try { payload = JSON.parse(payload); } catch (_) {}
-    }
-    if (payload) {
-        let events = safeReadJSON('telemetry_log.json', []);
-        events.push({
-            id: crypto.randomUUID(),
-            timestamp: new Date().toISOString(),
-            ...payload
-        });
-        if (events.length > 5000) events = events.slice(-5000); // Manter últimos 5000
-        safeWriteJSON('telemetry_log.json', events);
-    }
-    res.json({ status: 'ok' });
-});
-
-app.get('/api/analytics/dashboard', requireAuth, (req, res) => {
-    const events = safeReadJSON('telemetry_log.json', []);
-    const leads = safeReadJSON('submissions.json', []);
-    
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const weekAgo = now.getTime() - (7 * 24 * 60 * 60 * 1000);
-    const monthAgo = now.getTime() - (30 * 24 * 60 * 60 * 1000);
-
-    let viewsToday = 0, viewsWeek = 0, viewsMonth = 0, viewsTotal = 0;
-    const portfolioClicks = {};
-
-    events.forEach(e => {
-        const t = new Date(e.timestamp).getTime();
-        const type = e.event_type || e.eventType;
-
-        if (type === 'page_view') {
-            viewsTotal++;
-            if (t >= today) viewsToday++;
-            if (t >= weekAgo) viewsWeek++;
-            if (t >= monthAgo) viewsMonth++;
-        }
-
-        if (type === 'portfolio_click') {
-            const item = e.portfolio_id || e.item || 'Desconhecido';
-            portfolioClicks[item] = (portfolioClicks[item] || 0) + 1;
-        }
-    });
-
-    const portfolioRank = Object.entries(portfolioClicks)
-        .map(([name, clicks]) => ({ name, clicks }))
-        .sort((a, b) => b.clicks - a.clicks)
-        .slice(0, 5); // Top 5
-
-    // Map de coordenadas conhecidas para fallbacks por cidade/região
-    const CITY_COORDS_MAP = {
-        'rio de janeiro': [-22.9068, -43.1729],
-        'são paulo': [-23.5505, -46.6333],
-        'sao paulo': [-23.5505, -46.6333],
-        'brasília': [-15.7801, -47.9292],
-        'brasilia': [-15.7801, -47.9292],
-        'belo horizonte': [-19.9167, -43.9345],
-        'curitiba': [-25.4284, -49.2733],
-        'porto alegre': [-30.0346, -51.2177],
-        'salvador': [-12.9777, -38.5016],
-        'recife': [-8.0476, -34.8770],
-        'fortaleza': [-3.7319, -38.5267],
-        'florianópolis': [-27.5954, -48.5480],
-        'goiânia': [-16.6869, -49.2648],
-        'manaus': [-3.1190, -60.0217],
-        'belém': [-1.4558, -48.4902],
-        'vitória': [-20.3155, -40.3128],
-        'campinas': [-22.9056, -47.0608],
-        'niterói': [-22.8833, -43.1036],
-        'lisboa': [38.7223, -9.1393],
-        'miami': [25.7617, -80.1918],
-        'nova york': [40.7128, -74.0060],
-        'londres': [51.5074, -0.1278],
-        'tóquio': [35.6762, 139.6503]
-    };
-
-    // Heatmap data via Leads & Telemetry (latitude, longitude, intensidade)
-    const heatmapPoints = [];
-
-    leads.forEach(l => {
-        let lat = null, lon = null;
-        if (l.ipCoords && l.ipCoords !== '0, 0' && l.ipCoords !== '0,0') {
-            const parts = l.ipCoords.split(',');
-            lat = parseFloat(parts[0]);
-            lon = parseFloat(parts[1]);
-        }
-        if ((!lat || isNaN(lat)) && (l.ipCity || l.cidade || l.ipRegion || l.regiao)) {
-            const cityName = (l.ipCity || l.cidade || l.ipRegion || l.regiao || '').toLowerCase().trim();
-            if (CITY_COORDS_MAP[cityName]) {
-                [lat, lon] = CITY_COORDS_MAP[cityName];
-            }
-        }
-        if (lat !== null && !isNaN(lat) && lon !== null && !isNaN(lon)) {
-            heatmapPoints.push([lat, lon, 0.9]); // Lead convertida tem intensidade alta (0.9)
-        }
-    });
-
-    // Processar telemetria para pontos de acesso adicionais
-    events.forEach(e => {
-        if (e.ipCoords && e.ipCoords !== '0, 0' && e.ipCoords !== '0,0') {
-            const parts = e.ipCoords.split(',');
-            const lat = parseFloat(parts[0]);
-            const lon = parseFloat(parts[1]);
-            if (!isNaN(lat) && !isNaN(lon)) {
-                heatmapPoints.push([lat, lon, 0.4]); // Visita simples tem intensidade moderada (0.4)
-            }
-        }
-    });
-
-    res.json({
-        leadsTotal: leads.length,
-        visitors: {
-            today: viewsToday,
-            week: viewsWeek,
-            month: viewsMonth,
-            total: viewsTotal
-        },
-        portfolioRank,
-        heatmap: heatmapPoints,
-        chartData: {
-            recent: events.slice(-100)
-        }
-    });
-});
-
-app.get('/api/telemetry/events', requireAuth, (req, res) => {
-    const events = safeReadJSON('telemetry_log.json', []);
-    res.json(events.slice(-200).reverse());
-});
-
 // ===== SERVIR PÁGINAS DA APLICAÇÃO =====
-
 app.get('/', (req, res) => {
     res.sendFile(path.join(ROOT_DIR, 'index.html'));
 });
@@ -783,7 +932,6 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(ROOT_DIR, 'admin.html'));
 });
 
-// Middleware Global de Tratamento de Erros 404 & 500
 app.use((req, res, next) => {
     if (req.accepts('html')) {
         res.status(404).sendFile(path.join(ROOT_DIR, 'index.html'));
@@ -797,9 +945,13 @@ app.use((err, req, res, next) => {
     res.status(500).json({ status: 'error', message: 'Erro interno no servidor' });
 });
 
-// ===== ROTA DE PING / HEALTHCHECK (ANTI-HIBERNAÇÃO) =====
 app.get('/ping', (req, res) => {
-    res.status(200).json({ status: 'active', uptime: process.uptime(), timestamp: new Date().toISOString() });
+    res.status(200).json({ 
+        status: 'active', 
+        uptime: process.uptime(), 
+        timestamp: new Date().toISOString(),
+        mongoConnected: isMongoConnected 
+    });
 });
 
 app.get('/health', (req, res) => {
@@ -811,35 +963,27 @@ const server = app.listen(PORT, () => {
     console.log(`\n======================================================`);
     console.log(`  ALDEIA Servidor Backend Unificado (Node.js + Express)`);
     console.log(`  Porta: ${PORT}`);
-    console.log(`  Segurança: Rate Limiter + Anti-DDoS + Token TTL`);
-    console.log(`  Persistência: Utilitários de I/O Atômico em JSON`);
+    console.log(`  Banco de Dados: MongoDB Atlas (Nuvem) + Fallback JSON`);
+    console.log(`  Uploads: Cloudinary`);
     console.log(`======================================================\n`);
-
-    // Self-Ping Keep-Alive automático para Render (Impede Hibernação no Plano Grátis)
-    const renderUrl = process.env.RENDER_EXTERNAL_URL;
-    if (renderUrl) {
-        const pingEndpoint = `${renderUrl.replace(/\/$/, '')}/ping`;
-        const https = require('https');
-        const http = require('http');
-        const client = pingEndpoint.startsWith('https') ? https : http;
-
-        setInterval(() => {
-            client.get(pingEndpoint, (res) => {
-                console.log(`[KEEP-ALIVE] Anti-hibernação ativo: ${pingEndpoint} (${res.statusCode})`);
-            }).on('error', (err) => {
-                console.warn(`[KEEP-ALIVE] Erro no ping: ${err.message}`);
-            });
-        }, 10 * 60 * 1000); // Executa a cada 10 minutos
-    }
 });
 
-// Graceful Shutdown Handler
 function shutdown() {
     console.log('\n[SERVER] Encerrando servidor com segurança...');
-    server.close(() => {
-        console.log('[SERVER] Servidor encerrado.');
-        process.exit(0);
-    });
+    if (isMongoConnected) {
+        mongoose.connection.close(false, () => {
+            console.log('[MONGODB] Conexão encerrada com sucesso.');
+            server.close(() => {
+                console.log('[SERVER] Servidor encerrado.');
+                process.exit(0);
+            });
+        });
+    } else {
+        server.close(() => {
+            console.log('[SERVER] Servidor encerrado.');
+            process.exit(0);
+        });
+    }
 }
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
