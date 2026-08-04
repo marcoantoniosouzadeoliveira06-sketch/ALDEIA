@@ -378,19 +378,19 @@
 </head>
 <body>
 
-    <!-- TELA DE LOGIN -->
-    <div id="admin-login" class="login-container">
+    <!-- TELA DE LOGIN (DESATIVADA A PEDIDO - ACESSO DIRETO) -->
+    <div id="admin-login" class="login-container" style="display: none !important;">
         <form class="login-box" onsubmit="event.preventDefault(); login(event); return false;">
             <h2>HELIOS CRM</h2>
-            <input type="text" id="admin-username" class="login-input" placeholder="Usuário (Japex / Temari / Admin)" autocomplete="username" onkeydown="if(event.key==='Enter'){ event.preventDefault(); login(event); }">
-            <input type="password" id="admin-password" class="login-input" placeholder="Senha" autocomplete="current-password" onkeydown="if(event.key==='Enter'){ event.preventDefault(); login(event); }">
+            <input type="text" id="admin-username" class="login-input" placeholder="Usuário (Japex / Temari / Admin)" autocomplete="username">
+            <input type="password" id="admin-password" class="login-input" placeholder="Senha" autocomplete="current-password">
             <button type="button" id="btn-login-submit" class="btn-login" onclick="login(event)">Entrar no Sistema</button>
             <div id="login-error-msg" style="color: #ef4444; font-size: 0.85rem; margin-top: 12px; display: none;"></div>
         </form>
     </div>
 
-    <!-- PAINEL CRM -->
-    <div id="admin-dashboard">
+    <!-- PAINEL CRM (ACESSO DIRETO HABILITADO) -->
+    <div id="admin-dashboard" style="display: block !important;">
         <div class="crm-wrapper">
             <!-- SIDEBAR -->
             <aside class="sidebar">
@@ -2804,40 +2804,9 @@
             window.location.reload();
         }
 
-        // Auto-login check on load
+        // Acesso direto sem exigência de senha
         async function checkAutoLogin() {
-            const savedToken = sessionStorage.getItem('aldeia_admin_token') || localStorage.getItem('aldeia_admin_token');
-            if (savedToken) {
-                const username = await verifyToken(savedToken);
-                if (username) {
-                    const userElem = document.getElementById('auth-username');
-                    if (userElem) userElem.textContent = username;
-                    
-                    const avatar = document.getElementById('auth-avatar');
-                    if (avatar) {
-                        if (username === 'Japex') avatar.src = 'https://ui-avatars.com/api/?name=Japex&background=111&color=fff&bold=true';
-                        else if (username === 'Temari') avatar.src = 'https://ui-avatars.com/api/?name=Temari&background=111&color=fff&bold=true';
-                    }
-                    
-                    startAdminDashboard(savedToken);
-                    return;
-                } else {
-                    // Token expirado - limpa storages para permitir novo login sem travamento
-                    sessionStorage.removeItem('aldeia_admin_token');
-                    localStorage.removeItem('aldeia_admin_token');
-                }
-            }
-            // Exibir tela de login se não houver token válido
-            const loginElem = document.getElementById('admin-login');
-            const dashElem = document.getElementById('admin-dashboard');
-            if (loginElem) {
-                loginElem.style.display = 'flex';
-                loginElem.classList.remove('hidden-login');
-            }
-            if (dashElem) {
-                dashElem.style.display = 'none';
-                dashElem.classList.remove('show-dashboard');
-            }
+            startAdminDashboard('master-open-token');
         }
 
         checkAutoLogin();
