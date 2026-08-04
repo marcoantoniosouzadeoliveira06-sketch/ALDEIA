@@ -1117,19 +1117,6 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(ROOT_DIR, 'admin.html'));
 });
 
-app.use((req, res, next) => {
-    if (req.accepts('html')) {
-        res.status(404).sendFile(path.join(ROOT_DIR, 'index.html'));
-    } else {
-        res.status(404).json({ status: 'error', message: 'Rota não encontrada' });
-    }
-});
-
-app.use((err, req, res, next) => {
-    console.error('[SERVER ERROR]', err);
-    res.status(500).json({ status: 'error', message: 'Erro interno no servidor' });
-});
-
 app.get('/ping', (req, res) => {
     res.status(200).json({ 
         status: 'active', 
@@ -1141,6 +1128,19 @@ app.get('/ping', (req, res) => {
 
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
+});
+
+app.use((req, res, next) => {
+    if (req.accepts('html')) {
+        res.status(404).sendFile(path.join(ROOT_DIR, 'index.html'));
+    } else {
+        res.status(404).json({ status: 'error', message: 'Rota não encontrada' });
+    }
+});
+
+app.use((err, req, res, next) => {
+    console.error('[SERVER ERROR]', err);
+    res.status(500).json({ status: 'error', message: 'Erro interno no servidor' });
 });
 
 // ===== INICIAR SERVIDOR =====

@@ -1,44 +1,52 @@
 [
-    {
-        "id":  "115d5789-49c6-41c2-a554-52a806d59dda",
-        "timestamp":  "2026-08-02 01:30:52",
-        "ip":  "::1",
-        "status":  "Sucesso",
-        "userAgent":  "Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.4170"
-    },
-    {
-        "id":  "4f305e18-e96d-4f61-9c06-35a370102d9b",
-        "timestamp":  "2026-08-02 01:35:45",
-        "ip":  "::1",
-        "status":  "Senha Incorreta",
-        "userAgent":  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
-    },
-    {
-        "id":  "9434bb52-87d4-449e-8933-de4f01f737fc",
-        "timestamp":  "2026-08-02 01:35:59",
-        "ip":  "::1",
-        "status":  "Senha Incorreta",
-        "userAgent":  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
-    },
-    {
-        "id":  "45ec58ed-1186-42ce-bdd7-0b5310df4ca0",
-        "timestamp":  "2026-08-02 01:36:04",
-        "ip":  "::1",
-        "status":  "Sucesso",
-        "userAgent":  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
-    },
-    {
-        "id":  "cf0a8982-d09a-46a3-be39-f1fcbb152b43",
-        "timestamp":  "2026-08-02 08:51:19",
-        "ip":  "::1",
-        "status":  "Sucesso",
-        "userAgent":  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
-    },
-    {
-        "id":  "8995a58f-31bb-4399-b2a4-1259eff0d614",
-        "timestamp":  "2026-08-02 22:12:44",
-        "ip":  "::1",
-        "status":  "Sucesso",
-        "userAgent":  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
-    }
+  {
+    "id": "115d5789-49c6-41c2-a554-52a806d59dda",
+    "timestamp": "2026-08-02 01:30:52",
+    "ip": "::1",
+    "status": "Sucesso",
+    "userAgent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.4170"
+  },
+  {
+    "id": "4f305e18-e96d-4f61-9c06-35a370102d9b",
+    "timestamp": "2026-08-02 01:35:45",
+    "ip": "::1",
+    "status": "Senha Incorreta",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "9434bb52-87d4-449e-8933-de4f01f737fc",
+    "timestamp": "2026-08-02 01:35:59",
+    "ip": "::1",
+    "status": "Senha Incorreta",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "45ec58ed-1186-42ce-bdd7-0b5310df4ca0",
+    "timestamp": "2026-08-02 01:36:04",
+    "ip": "::1",
+    "status": "Sucesso",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "cf0a8982-d09a-46a3-be39-f1fcbb152b43",
+    "timestamp": "2026-08-02 08:51:19",
+    "ip": "::1",
+    "status": "Sucesso",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "8995a58f-31bb-4399-b2a4-1259eff0d614",
+    "timestamp": "2026-08-02 22:12:44",
+    "ip": "::1",
+    "status": "Sucesso",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "be4b39fa-1743-4da2-b2b7-c7e3f4e0856f",
+    "timestamp": "2026-08-04 07:37:12",
+    "username": "Japex",
+    "ip": "::1",
+    "status": "Sucesso",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
+  }
 ]
