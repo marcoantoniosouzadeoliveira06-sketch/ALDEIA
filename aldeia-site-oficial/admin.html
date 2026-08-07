@@ -155,6 +155,236 @@
             background-color: #e4e4e7;
         }
 
+        /* ----- QMA SHIMMER SKELETON (Stripe DNA) ----- */
+        @keyframes qma-shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .qma-skeleton {
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0.03) 25%,
+                rgba(255,255,255,0.08) 50%,
+                rgba(255,255,255,0.03) 75%
+            );
+            background-size: 200% 100%;
+            animation: qma-shimmer 1.8s infinite ease-in-out;
+            border-radius: 6px;
+        }
+        .qma-skeleton-row {
+            display: flex;
+            align-items: center;
+            gap: var(--qma-gap-4);
+            padding: var(--qma-gap-4) var(--qma-gap-6);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .qma-skeleton-cell {
+            height: 14px;
+            border-radius: 4px;
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0.04) 25%,
+                rgba(255,255,255,0.10) 50%,
+                rgba(255,255,255,0.04) 75%
+            );
+            background-size: 200% 100%;
+            animation: qma-shimmer 1.8s infinite ease-in-out;
+        }
+        .qma-skeleton-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0.04) 25%,
+                rgba(255,255,255,0.10) 50%,
+                rgba(255,255,255,0.04) 75%
+            );
+            background-size: 200% 100%;
+            animation: qma-shimmer 1.8s infinite ease-in-out;
+        }
+
+        /* ----- QMA EMPTY STATE (Carmesim Edge) ----- */
+        @keyframes qma-pulse-carmesim {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+        .qma-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: var(--qma-gap-8);
+            min-height: 200px;
+            background: #0A0A0A;
+            border-radius: 12px;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .qma-empty-state::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(220,38,38,0.5), rgba(220,38,38,0.1) 50%, transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            animation: qma-pulse-carmesim 3s infinite ease-in-out;
+        }
+        .qma-empty-state-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: var(--qma-gap-4);
+            opacity: 0.3;
+        }
+        .qma-empty-state-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: var(--qma-gap-2);
+        }
+        .qma-empty-state-desc {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.4);
+            max-width: 320px;
+            line-height: 1.5;
+        }
+        .qma-empty-state-btn {
+            margin-top: var(--qma-gap-6);
+            padding: var(--qma-gap-2) var(--qma-gap-6);
+            border-radius: 8px;
+            background: rgba(220,38,38,0.15);
+            border: 1px solid rgba(220,38,38,0.3);
+            color: #f87171;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 300ms var(--qma-spring);
+        }
+        .qma-empty-state-btn:hover {
+            background: rgba(220,38,38,0.25);
+            border-color: rgba(220,38,38,0.5);
+        }
+
+        /* ----- QMA FADE-IN ANIMATION ----- */
+        @keyframes qma-fade-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .qma-fade-in {
+            animation: qma-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        /* ----- QMA SETTINGS GRID ----- */
+        .qma-settings-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--qma-gap-6);
+        }
+        .qma-settings-card {
+            background: #0A0A0A;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: var(--qma-gap-8);
+            display: flex;
+            flex-direction: column;
+            gap: var(--qma-gap-6);
+        }
+        .qma-settings-card.span-4 { grid-column: span 4; }
+        .qma-settings-card.span-8 { grid-column: span 8; }
+        .qma-settings-card.span-12 { grid-column: span 12; }
+        @media (max-width: 1024px) {
+            .qma-settings-card.span-4,
+            .qma-settings-card.span-8 {
+                grid-column: span 12;
+            }
+        }
+        .qma-settings-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: var(--qma-gap-1);
+        }
+        .qma-settings-value {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.85);
+            font-weight: 500;
+        }
+        .qma-settings-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #e4e4e7;
+            padding-bottom: var(--qma-gap-3);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: var(--qma-gap-2);
+        }
+
+        /* ----- QMA TOGGLE SWITCH ----- */
+        .qma-toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .qma-toggle input { opacity: 0; width: 0; height: 0; }
+        .qma-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 300ms var(--qma-spring);
+        }
+        .qma-toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 2px;
+            bottom: 2px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            transition: transform 300ms var(--qma-spring);
+        }
+        .qma-toggle input:checked + .qma-toggle-slider {
+            background: rgba(228,228,231,0.2);
+            border-color: rgba(228,228,231,0.4);
+        }
+        .qma-toggle input:checked + .qma-toggle-slider::before {
+            transform: translateX(20px);
+            background: #e4e4e7;
+        }
+        .qma-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--qma-gap-3) 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .qma-toggle-row:last-child { border-bottom: none; }
+        .qma-toggle-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .qma-toggle-title {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.85);
+            font-weight: 500;
+        }
+        .qma-toggle-desc {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.35);
+        }
+
         /* ----- LOGIN SCREEN ----- */
         .login-container {
             display: flex;
@@ -1061,7 +1291,10 @@
                             <table>
                                 <thead><tr><th>Horário</th><th>Sessão</th><th>Tipo do Evento</th><th>Detalhe</th></tr></thead>
                                 <tbody id="telemetry-logs-body">
-                                    <tr><td colspan="4" style="text-align:center;">Carregando...</td></tr>
+                                    <tr><td><div class="qma-skeleton-cell" style="width: 60%;"></div></td><td><div class="qma-skeleton-cell" style="width: 50%;"></div></td><td><div class="qma-skeleton-cell" style="width: 45%;"></div></td><td><div class="qma-skeleton-cell" style="width: 70%;"></div></td></tr>
+                                    <tr><td><div class="qma-skeleton-cell" style="width: 55%; animation-delay: 0.1s;"></div></td><td><div class="qma-skeleton-cell" style="width: 40%; animation-delay: 0.1s;"></div></td><td><div class="qma-skeleton-cell" style="width: 55%; animation-delay: 0.1s;"></div></td><td><div class="qma-skeleton-cell" style="width: 60%; animation-delay: 0.1s;"></div></td></tr>
+                                    <tr><td><div class="qma-skeleton-cell" style="width: 65%; animation-delay: 0.2s;"></div></td><td><div class="qma-skeleton-cell" style="width: 55%; animation-delay: 0.2s;"></div></td><td><div class="qma-skeleton-cell" style="width: 40%; animation-delay: 0.2s;"></div></td><td><div class="qma-skeleton-cell" style="width: 50%; animation-delay: 0.2s;"></div></td></tr>
+                                    <tr><td><div class="qma-skeleton-cell" style="width: 50%; animation-delay: 0.3s;"></div></td><td><div class="qma-skeleton-cell" style="width: 60%; animation-delay: 0.3s;"></div></td><td><div class="qma-skeleton-cell" style="width: 50%; animation-delay: 0.3s;"></div></td><td><div class="qma-skeleton-cell" style="width: 65%; animation-delay: 0.3s;"></div></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1081,7 +1314,9 @@
                                 </tr>
                             </thead>
                             <tbody id="logins-list">
-                                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Carregando registros...</td></tr>
+                                <tr><td><div class="qma-skeleton-cell" style="width: 55%;"></div></td><td><div class="qma-skeleton-cell" style="width: 45%;"></div></td><td><div class="qma-skeleton-cell" style="width: 35%;"></div></td><td><div class="qma-skeleton-cell" style="width: 60%;"></div></td></tr>
+                                <tr><td><div class="qma-skeleton-cell" style="width: 50%; animation-delay: 0.12s;"></div></td><td><div class="qma-skeleton-cell" style="width: 40%; animation-delay: 0.12s;"></div></td><td><div class="qma-skeleton-cell" style="width: 30%; animation-delay: 0.12s;"></div></td><td><div class="qma-skeleton-cell" style="width: 55%; animation-delay: 0.12s;"></div></td></tr>
+                                <tr><td><div class="qma-skeleton-cell" style="width: 60%; animation-delay: 0.24s;"></div></td><td><div class="qma-skeleton-cell" style="width: 50%; animation-delay: 0.24s;"></div></td><td><div class="qma-skeleton-cell" style="width: 40%; animation-delay: 0.24s;"></div></td><td><div class="qma-skeleton-cell" style="width: 50%; animation-delay: 0.24s;"></div></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1409,52 +1644,195 @@
 
             <!-- TAB: SETTINGS & UPLOADS -->
             <div id="settings-tab" class="tab-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--qma-gap-4);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--qma-gap-6);">
                     <h2 class="box-title" style="font-size: clamp(1.5rem, 2.5vw, 1.75rem); font-weight: 600;">Configurações e Sistema</h2>
+                    <button class="qma-btn accent" onclick="saveSettingsPanel()" style="font-size: 13px; padding: 10px 24px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2 2h11l4 4v9a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        Salvar Tudo
+                    </button>
                 </div>
 
-                <div class="qma-steel" style="padding: var(--qma-gap-8); border-radius: 12px; margin-bottom: var(--qma-gap-6);">
-                    <h3 style="font-size: 1.1rem; color: #a1a1aa; margin-bottom: var(--qma-gap-6);">Gerenciamento de Arquivos</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--qma-gap-6);">
-                        <div style="background: rgba(255,255,255,0.02); padding: var(--qma-gap-6); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; text-align: center;">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" style="margin-bottom: var(--qma-gap-3);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                            <h4 style="color: #e4e4e7; margin-bottom: var(--qma-gap-2);">Upload Massivo de Portfólio</h4>
-                            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: var(--qma-gap-4);">Suba múltiplos arquivos (webp, jpg, png, mp4) de uma vez para usar nos projetos.</p>
-                            <button class="qma-btn glass" style="width: 100%;" onclick="alert('Funcionalidade de upload na v2')">Selecionar Arquivos</button>
+                <div class="qma-settings-grid">
+                    <!-- BLOCO 1: PERFIL (span-4) -->
+                    <div class="qma-settings-card span-4">
+                        <div class="qma-settings-section-title">Perfil da Conta</div>
+                        <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--qma-gap-4);">
+                            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #1a1a1a, #252525); border: 2px solid rgba(228,228,231,0.15); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #e4e4e7; font-weight: 700;">A</div>
+                            <div>
+                                <div class="qma-settings-value" style="font-size: 1.1rem;">ALDEIA Admin</div>
+                                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.35); margin-top: 4px;">Administrador Global</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2);">
+                                <div style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></div>
+                                <span style="font-size: 0.7rem; color: #10b981; font-weight: 500;">Online</span>
+                            </div>
                         </div>
-                        <div style="background: rgba(255,255,255,0.02); padding: var(--qma-gap-6); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column;">
-                            <h4 style="color: #e4e4e7; margin-bottom: var(--qma-gap-2);">Estatísticas de Disco</h4>
-                            <div style="margin-top: auto; display: flex; flex-direction: column; gap: var(--qma-gap-2);">
-                                <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted);">
-                                    <span>Imagens</span> <span>142 Arquivos</span>
+                        <div style="display: flex; flex-direction: column; gap: var(--qma-gap-4); margin-top: var(--qma-gap-4); padding-top: var(--qma-gap-4); border-top: 1px solid rgba(255,255,255,0.06);">
+                            <div>
+                                <label class="qma-settings-label">Nome de Exibição</label>
+                                <input type="text" class="qma-input" id="settings-display-name" value="ALDEIA" placeholder="Nome exibido no painel">
+                            </div>
+                            <div>
+                                <label class="qma-settings-label">E-mail</label>
+                                <input type="email" class="qma-input" id="settings-email" value="contato@aldeia.cc" placeholder="E-mail do admin">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BLOCO 2: SISTEMA & TOGGLES (span-8) -->
+                    <div class="qma-settings-card span-8">
+                        <div class="qma-settings-section-title">Sistema & Controles</div>
+                        
+                        <div class="qma-toggle-row">
+                            <div class="qma-toggle-info">
+                                <span class="qma-toggle-title">Modo Manutenção</span>
+                                <span class="qma-toggle-desc">Exibe uma página de "Em breve" para visitantes do site</span>
+                            </div>
+                            <label class="qma-toggle">
+                                <input type="checkbox" id="toggle-maintenance">
+                                <span class="qma-toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="qma-toggle-row">
+                            <div class="qma-toggle-info">
+                                <span class="qma-toggle-title">Analytics & Telemetria</span>
+                                <span class="qma-toggle-desc">Coleta eventos de navegação, cliques e geolocalização dos visitantes</span>
+                            </div>
+                            <label class="qma-toggle">
+                                <input type="checkbox" id="toggle-analytics" checked>
+                                <span class="qma-toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="qma-toggle-row">
+                            <div class="qma-toggle-info">
+                                <span class="qma-toggle-title">Backup Automático (JSON)</span>
+                                <span class="qma-toggle-desc">Salva uma cópia dos leads e portfólio em /data/ a cada 6 horas</span>
+                            </div>
+                            <label class="qma-toggle">
+                                <input type="checkbox" id="toggle-autobackup" checked>
+                                <span class="qma-toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="qma-toggle-row">
+                            <div class="qma-toggle-info">
+                                <span class="qma-toggle-title">Rate Limiter (Anti-DDoS)</span>
+                                <span class="qma-toggle-desc">Bloqueia IPs com mais de 100 requisições por minuto</span>
+                            </div>
+                            <label class="qma-toggle">
+                                <input type="checkbox" id="toggle-ratelimit" checked>
+                                <span class="qma-toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="qma-toggle-row">
+                            <div class="qma-toggle-info">
+                                <span class="qma-toggle-title">Notificações WhatsApp</span>
+                                <span class="qma-toggle-desc">Envia alerta no WhatsApp quando um novo lead entra</span>
+                            </div>
+                            <label class="qma-toggle">
+                                <input type="checkbox" id="toggle-wa-notify">
+                                <span class="qma-toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <!-- Gerenciamento de Arquivos -->
+                        <div style="margin-top: var(--qma-gap-4); padding-top: var(--qma-gap-4); border-top: 1px solid rgba(255,255,255,0.06);">
+                            <div class="qma-settings-section-title" style="border-bottom: none; padding-bottom: 0; margin-bottom: var(--qma-gap-4);">Gerenciamento de Arquivos</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--qma-gap-4);">
+                                <div style="background: rgba(255,255,255,0.02); padding: var(--qma-gap-6); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; text-align: center;">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" style="margin-bottom: var(--qma-gap-3);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    <h4 style="color: #e4e4e7; font-size: 0.85rem; margin-bottom: var(--qma-gap-1);">Upload Massivo</h4>
+                                    <p style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: var(--qma-gap-3);">webp, jpg, png, mp4</p>
+                                    <button class="qma-btn glass" style="width: 100%; font-size: 0.75rem; padding: 8px;" onclick="alert('Upload massivo — v2')">Selecionar</button>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted);">
-                                    <span>Vídeos</span> <span>8 Arquivos</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #fff; font-weight: 600; margin-top: var(--qma-gap-2); padding-top: var(--qma-gap-2); border-top: 1px solid rgba(255,255,255,0.1);">
-                                    <span>Total (Render)</span> <span>~45 MB</span>
+                                <div style="background: rgba(255,255,255,0.02); padding: var(--qma-gap-6); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column;">
+                                    <h4 style="color: #e4e4e7; font-size: 0.85rem; margin-bottom: var(--qma-gap-3);">Estatísticas de Disco</h4>
+                                    <div style="display: flex; flex-direction: column; gap: var(--qma-gap-2); margin-top: auto;">
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);"><span>Imagens</span><span>142 arqs</span></div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);"><span>Vídeos</span><span>8 arqs</span></div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #fff; font-weight: 600; margin-top: var(--qma-gap-1); padding-top: var(--qma-gap-2); border-top: 1px solid rgba(255,255,255,0.08);"><span>Total (Render)</span><span>~45 MB</span></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="qma-steel" style="padding: var(--qma-gap-8); border-radius: 12px;">
-                    <h3 style="font-size: 1.1rem; color: #a1a1aa; margin-bottom: var(--qma-gap-6);">Controle de Acessos</h3>
-                    <div style="display: flex; flex-direction: column; gap: var(--qma-gap-4);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: var(--qma-gap-4); border-bottom: 1px solid rgba(255,255,255,0.05);">
-                            <div>
-                                <h4 style="color: #e4e4e7; font-size: 14px;">Japex</h4>
-                                <p style="font-size: 12px; color: var(--text-muted);">Administrador Global</p>
+                    <!-- BLOCO 3: SEGURANÇA (span-12) -->
+                    <div class="qma-settings-card span-12">
+                        <div class="qma-settings-section-title">Segurança & Controle de Acessos</div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--qma-gap-6);">
+                            <!-- User: Japex -->
+                            <div style="background: rgba(255,255,255,0.02); padding: var(--qma-gap-6); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: var(--qma-gap-4);">
+                                <div style="display: flex; align-items: center; gap: var(--qma-gap-3);">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #1a1a1a, #252525); border: 1px solid rgba(228,228,231,0.1); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: #e4e4e7; font-weight: 600;">J</div>
+                                    <div>
+                                        <div style="font-size: 0.9rem; font-weight: 600; color: #e4e4e7;">Japex</div>
+                                        <div style="font-size: 0.7rem; color: var(--text-muted);">Administrador Global</div>
+                                    </div>
+                                    <div style="margin-left: auto; display: flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.15);">
+                                        <div style="width: 5px; height: 5px; border-radius: 50%; background: #10b981;"></div>
+                                        <span style="font-size: 0.65rem; color: #10b981;">Ativo</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="qma-settings-label">Nova Senha</label>
+                                    <input type="password" class="qma-input" placeholder="••••••••" style="height: 40px; font-size: 13px;">
+                                </div>
+                                <button class="qma-btn glass" style="font-size: 0.75rem; padding: 8px 16px; align-self: flex-start;">Alterar Senha</button>
                             </div>
-                            <button class="qma-btn glass" style="padding: 6px 12px; font-size: 12px;">Alterar Senha</button>
+                            <!-- User: Temari -->
+                            <div style="background: rgba(255,255,255,0.02); padding: var(--qma-gap-6); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: var(--qma-gap-4);">
+                                <div style="display: flex; align-items: center; gap: var(--qma-gap-3);">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #1a1a1a, #252525); border: 1px solid rgba(228,228,231,0.1); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: #e4e4e7; font-weight: 600;">T</div>
+                                    <div>
+                                        <div style="font-size: 0.9rem; font-weight: 600; color: #e4e4e7;">Temari</div>
+                                        <div style="font-size: 0.7rem; color: var(--text-muted);">Administrador Global</div>
+                                    </div>
+                                    <div style="margin-left: auto; display: flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.15);">
+                                        <div style="width: 5px; height: 5px; border-radius: 50%; background: #10b981;"></div>
+                                        <span style="font-size: 0.65rem; color: #10b981;">Ativo</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="qma-settings-label">Nova Senha</label>
+                                    <input type="password" class="qma-input" placeholder="••••••••" style="height: 40px; font-size: 13px;">
+                                </div>
+                                <button class="qma-btn glass" style="font-size: 0.75rem; padding: 8px 16px; align-self: flex-start;">Alterar Senha</button>
+                            </div>
+                            <!-- User: Nesh -->
+                            <div style="background: rgba(255,255,255,0.02); padding: var(--qma-gap-6); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; gap: var(--qma-gap-4);">
+                                <div style="display: flex; align-items: center; gap: var(--qma-gap-3);">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #1a1a1a, #252525); border: 1px solid rgba(228,228,231,0.1); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; color: #e4e4e7; font-weight: 600;">N</div>
+                                    <div>
+                                        <div style="font-size: 0.9rem; font-weight: 600; color: #e4e4e7;">Nesh</div>
+                                        <div style="font-size: 0.7rem; color: var(--text-muted);">Editor / Designer</div>
+                                    </div>
+                                    <div style="margin-left: auto; display: flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);">
+                                        <div style="width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.3);"></div>
+                                        <span style="font-size: 0.65rem; color: rgba(255,255,255,0.4);">Offline</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="qma-settings-label">Nova Senha</label>
+                                    <input type="password" class="qma-input" placeholder="••••••••" style="height: 40px; font-size: 13px;">
+                                </div>
+                                <button class="qma-btn glass" style="font-size: 0.75rem; padding: 8px 16px; align-self: flex-start;">Alterar Senha</button>
+                            </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: var(--qma-gap-4); border-bottom: 1px solid rgba(255,255,255,0.05);">
+
+                        <!-- Exportação SQL -->
+                        <div style="margin-top: var(--qma-gap-4); padding-top: var(--qma-gap-6); border-top: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--qma-gap-4);">
                             <div>
-                                <h4 style="color: #e4e4e7; font-size: 14px;">Temari</h4>
-                                <p style="font-size: 12px; color: var(--text-muted);">Administrador Global</p>
+                                <div style="font-size: 0.85rem; color: #e4e4e7; font-weight: 500;">Exportação de Dados</div>
+                                <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">Gere um dump SQL completo do banco de dados MongoDB</div>
                             </div>
-                            <button class="qma-btn glass" style="padding: 6px 12px; font-size: 12px;">Alterar Senha</button>
+                            <button class="qma-btn glass" style="font-size: 0.75rem; padding: 8px 20px;" onclick="exportSQLDump()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Exportar SQL
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1607,7 +1985,7 @@
                         <div style="color: var(--text-muted); font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(sub.projeto)}</div>
                     </div>
                     <div style="text-align: right; flex-shrink: 0; margin-left: 10px;">
-                        <span style="font-size: 0.75rem; color: #a855f7; font-weight: 600;">${escapeHTML(sub.timestamp ? sub.timestamp.split(' ')[1] || sub.timestamp : 'Novo')}</span>
+                        <span style="font-size: 0.75rem; color: #a1a1aa; font-weight: 600;">${escapeHTML(sub.timestamp ? sub.timestamp.split(' ')[1] || sub.timestamp : 'Novo')}</span>
                         <div style="font-size: 0.7rem; color: #888;">Ver →</div>
                     </div>
                 `;
@@ -1629,7 +2007,7 @@
                 const item = document.createElement('div');
                 item.style.cssText = 'display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);';
                 item.innerHTML = `
-                    <span style="font-size: 0.85rem; font-weight: 700; color: #a855f7; width: 20px;">#${idx + 1}</span>
+                    <span style="font-size: 0.85rem; font-weight: 700; color: #a1a1aa; width: 20px;">#${idx + 1}</span>
                     <img src="${p.coverImage || p.cover || 'assets/logo-tp.svg'}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover; background: #222;">
                     <div style="flex: 1; overflow: hidden;">
                         <div style="font-size: 0.85rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(p.title)}</div>
@@ -1653,8 +2031,47 @@
             return phone.replace(/\D/g, '');
         }
 
-        // Fetch submissions and render Leads
-        async function loadSubmissions() {
+        // Fetch submissions and render Leads — QMA Circuit Breaker
+        let _leadsCircuitOpen = false;
+        let _leadsCircuitTimer = null;
+        const LEADS_CIRCUIT_COOLDOWN = 30000; // 30s before retry
+
+        function _renderLeadsSkeleton(container) {
+            let skeletonHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const delay = i * 0.12;
+                skeletonHTML += `<tr>
+                    <td><div class="qma-skeleton-cell" style="width: ${60 + Math.random()*30}%; animation-delay: ${delay}s;"></div></td>
+                    <td><div class="qma-skeleton-cell" style="width: ${50 + Math.random()*30}%; animation-delay: ${delay + 0.05}s;"></div></td>
+                    <td style="text-align:center;"><div class="qma-skeleton-cell" style="width: 40px; margin: 0 auto; animation-delay: ${delay + 0.1}s;"></div></td>
+                    <td><div class="qma-skeleton-cell" style="width: ${40 + Math.random()*20}%; animation-delay: ${delay + 0.15}s;"></div></td>
+                    <td><div class="qma-skeleton-cell" style="width: 70%; animation-delay: ${delay + 0.2}s;"></div></td>
+                </tr>`;
+            }
+            container.innerHTML = skeletonHTML;
+        }
+
+        function _renderLeadsEmptyError(container, table) {
+            if (table) table.style.display = 'none';
+            const wrapper = table ? table.parentElement : container.parentElement;
+            const existingEmpty = wrapper.querySelector('.qma-empty-state');
+            if (existingEmpty) existingEmpty.remove();
+
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'qma-empty-state qma-fade-in';
+            emptyDiv.innerHTML = `
+                <svg class="qma-empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="rgba(248,113,113,0.5)" stroke-width="1.5">
+                    <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z"/>
+                    <path d="M12 15.75h.007v.008H12v-.008z"/>
+                </svg>
+                <div class="qma-empty-state-title">Conexão Interrompida</div>
+                <div class="qma-empty-state-desc">O servidor de leads não respondeu. O Circuit Breaker foi ativado e tentará reconectar em 30 segundos.</div>
+                <button class="qma-empty-state-btn" onclick="loadSubmissions(true)">Tentar Novamente</button>
+            `;
+            wrapper.appendChild(emptyDiv);
+        }
+
+        async function loadSubmissions(forceRetry) {
             const listContainer = document.getElementById('submissions-list');
             if (!listContainer) return;
 
@@ -1663,14 +2080,36 @@
             const statTotal = document.getElementById('stat-total');
             const statLast = document.getElementById('stat-last');
 
-            listContainer.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Carregando dados...</td></tr>';
-            if (emptyState) emptyState.style.display = 'none';
+            // Remove any previous empty state
+            const wrapper = table ? table.parentElement : listContainer.parentElement;
+            const prevEmpty = wrapper.querySelector('.qma-empty-state');
+            if (prevEmpty) prevEmpty.remove();
+
+            // Circuit Breaker guard
+            if (_leadsCircuitOpen && !forceRetry) {
+                _renderLeadsEmptyError(listContainer, table);
+                return;
+            }
+            if (forceRetry) {
+                _leadsCircuitOpen = false;
+                clearTimeout(_leadsCircuitTimer);
+            }
+
+            // Show skeleton shimmer
             if (table) table.style.display = 'table';
+            if (emptyState) emptyState.style.display = 'none';
+            _renderLeadsSkeleton(listContainer);
 
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
                 const response = await fetch('/api/submissions?t=' + Date.now(), {
-                    headers: getAuthHeaders()
+                    headers: getAuthHeaders(),
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
+
                 if (response.ok) {
                     rawLeads = await response.json();
                     
@@ -1696,6 +2135,7 @@
                     
                     const reversedData = [...rawLeads].reverse();
                     listContainer.innerHTML = '';
+
 
                     reversedData.forEach(sub => {
                         const cleanPhone = getCleanPhone(sub.telefone);
@@ -1760,8 +2200,49 @@
                     updateLeadsMap();
                 }
             } catch (err) {
-                console.error(err);
-                listContainer.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Erro na conexão com o servidor.</td></tr>';
+                console.error('[QMA Circuit Breaker] Leads fetch failed:', err);
+                // Open the circuit — prevent hammering a dead server
+                _leadsCircuitOpen = true;
+                _leadsCircuitTimer = setTimeout(() => {
+                    _leadsCircuitOpen = false;
+                    console.log('[QMA Circuit Breaker] Circuit closed. Auto-retrying...');
+                    loadSubmissions();
+                }, LEADS_CIRCUIT_COOLDOWN);
+
+                // Try local fallback
+                try {
+                    const fallbackRes = await fetch('/data/submissions.json?t=' + Date.now());
+                    if (fallbackRes.ok) {
+                        rawLeads = await fallbackRes.json();
+                        console.log('[QMA Circuit Breaker] Fallback local loaded:', rawLeads.length, 'leads');
+                        if (statTotal) statTotal.textContent = rawLeads.length;
+                        if (table) table.style.display = 'table';
+                        listContainer.innerHTML = '';
+                        if (rawLeads.length === 0) {
+                            listContainer.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Nenhum lead encontrado (cache local).</td></tr>';
+                            return;
+                        }
+                        const reversedData = [...rawLeads].reverse();
+                        reversedData.forEach(sub => {
+                            const cleanPhone = getCleanPhone(sub.telefone);
+                            const tr = document.createElement('tr');
+                            tr.className = 'qma-fade-in';
+                            tr.innerHTML = `
+                                <td><strong>${escapeHTML(sub.nome || '-')}</strong><br><small style="color:var(--text-muted)">${escapeHTML(sub.email || '-')}</small></td>
+                                <td>${escapeHTML(sub.projeto || '-')}</td>
+                                <td style="text-align:center;"><span class="badge-whatsapp-clicked ${sub.whatsappClicked === 'Sim' ? 'clicked-yes' : 'clicked-no'}">${escapeHTML(sub.whatsappClicked || 'Não')}</span></td>
+                                <td>${escapeHTML(sub.timestamp || '-')}</td>
+                                <td><small style="color:#f59e0b;">⚠ cache local</small></td>
+                            `;
+                            listContainer.appendChild(tr);
+                        });
+                        updateLeadsMap();
+                        return;
+                    }
+                } catch (_) { /* fallback also failed */ }
+
+                // All connections failed — render Carmesim empty state
+                _renderLeadsEmptyError(listContainer, table);
             }
         }
 
@@ -1944,7 +2425,19 @@
         async function loadLoginLogs() {
             const listContainer = document.getElementById('logins-list');
             if (!listContainer) return;
-            listContainer.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Carregando registros...</td></tr>';
+
+            // Skeleton shimmer loading
+            let skeletonHTML = '';
+            for (let i = 0; i < 4; i++) {
+                const d = i * 0.12;
+                skeletonHTML += `<tr>
+                    <td><div class="qma-skeleton-cell" style="width: ${50 + Math.random()*30}%; animation-delay: ${d}s;"></div></td>
+                    <td><div class="qma-skeleton-cell" style="width: ${35 + Math.random()*25}%; animation-delay: ${d + 0.05}s;"></div></td>
+                    <td><div class="qma-skeleton-cell" style="width: ${45 + Math.random()*20}%; animation-delay: ${d + 0.1}s;"></div></td>
+                    <td><div class="qma-skeleton-cell" style="width: ${55 + Math.random()*25}%; animation-delay: ${d + 0.15}s;"></div></td>
+                </tr>`;
+            }
+            listContainer.innerHTML = skeletonHTML;
             
             try {
                 const response = await fetch('/api/auth/logins?t=' + Date.now(), {
@@ -1959,8 +2452,10 @@
                         if (listContainer) listContainer.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum registro de login.</td></tr>';
                         return;
                     }
-                    [...rawLogins].reverse().forEach(log => {
+                    [...rawLogins].reverse().forEach((log, idx) => {
                         const tr = document.createElement('tr');
+                        tr.className = 'qma-fade-in';
+                        tr.style.animationDelay = (idx * 0.04) + 's';
                         const isSuccess = log.status === 'Sucesso';
                         const statusBadge = isSuccess
                             ? '<span class="badge-whatsapp-clicked clicked-yes" style="display:inline-block;">Sucesso</span>'
@@ -1975,11 +2470,11 @@
                         listContainer.appendChild(tr);
                     });
                 } else {
-                    listContainer.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Não foi possível carregar o histórico de logins.</td></tr>';
+                    listContainer.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f87171; font-size: 0.85rem;">Não foi possível carregar o histórico de logins.</td></tr>';
                 }
             } catch (err) {
-                console.error(err);
-                listContainer.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Erro na conexão ao buscar logins.</td></tr>';
+                console.error('[QMA] Login logs error:', err);
+                listContainer.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #f87171; font-size: 0.85rem;">Servidor de logins indisponível.</td></tr>';
             }
         }
 
@@ -2832,6 +3327,9 @@
             if (typeof loadTelemetryData === 'function') {
                 loadTelemetryData();
             }
+            if (typeof loadSavedSettings === 'function') {
+                loadSavedSettings();
+            }
         }
 
         // ===== TELEMETRY DASHBOARD =====
@@ -3046,12 +3544,61 @@
             if (modal) modal.style.display = 'none';
         }
 
+        // ===== SETTINGS PANEL SAVE =====
+        function saveSettingsPanel() {
+            const settings = {
+                displayName: document.getElementById('settings-display-name')?.value || 'ALDEIA',
+                email: document.getElementById('settings-email')?.value || '',
+                maintenance: document.getElementById('toggle-maintenance')?.checked || false,
+                analytics: document.getElementById('toggle-analytics')?.checked || true,
+                autobackup: document.getElementById('toggle-autobackup')?.checked || true,
+                ratelimit: document.getElementById('toggle-ratelimit')?.checked || true,
+                waNotify: document.getElementById('toggle-wa-notify')?.checked || false
+            };
+            localStorage.setItem('aldeia_settings', JSON.stringify(settings));
+
+            // QMA Toast feedback
+            const toast = document.createElement('div');
+            toast.className = 'qma-fade-in';
+            toast.style.cssText = 'position: fixed; bottom: 32px; right: 32px; background: #0A0A0A; border: 1px solid rgba(16,185,129,0.4); padding: 14px 24px; border-radius: 10px; color: #10b981; font-size: 0.85rem; font-weight: 500; z-index: 999999; box-shadow: 0 8px 32px rgba(0,0,0,0.6);';
+            toast.textContent = '✓ Configurações salvas com sucesso';
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.4s'; setTimeout(() => toast.remove(), 500); }, 2500);
+        }
+
+        // Load saved settings on init
+        function loadSavedSettings() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('aldeia_settings'));
+                if (!saved) return;
+                const setChecked = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
+                const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+                setVal('settings-display-name', saved.displayName);
+                setVal('settings-email', saved.email);
+                setChecked('toggle-maintenance', saved.maintenance);
+                setChecked('toggle-analytics', saved.analytics);
+                setChecked('toggle-autobackup', saved.autobackup);
+                setChecked('toggle-ratelimit', saved.ratelimit);
+                setChecked('toggle-wa-notify', saved.waNotify);
+            } catch (_) {}
+        }
+
         // Fetch and load security stats (Rate Limiter)
         async function loadSecurityStats() {
             const container = document.getElementById('security-stats-list');
             if (!container) return;
             
-            container.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Carregando métricas de segurança...</td></tr>';
+            // Skeleton shimmer loading
+            let skeletonHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const d = i * 0.12;
+                skeletonHTML += `<tr>
+                    <td><div class="qma-skeleton-cell" style="width: ${50 + Math.random()*30}%; animation-delay: ${d}s;"></div></td>
+                    <td><div class="qma-skeleton-cell" style="width: ${40 + Math.random()*20}%; animation-delay: ${d + 0.05}s;"></div></td>
+                    <td><div class="qma-skeleton-cell" style="width: ${30 + Math.random()*30}%; animation-delay: ${d + 0.1}s;"></div></td>
+                </tr>`;
+            }
+            container.innerHTML = skeletonHTML;
             
             try {
                 const response = await fetch('/api/security/stats', {
@@ -3067,8 +3614,10 @@
                         return;
                     }
                     
-                    data.ips.forEach(ipStat => {
+                    data.ips.forEach((ipStat, idx) => {
                         const tr = document.createElement('tr');
+                        tr.className = 'qma-fade-in';
+                        tr.style.animationDelay = (idx * 0.05) + 's';
                         const statusBadge = ipStat.isBlocked 
                             ? '<span class="badge-whatsapp-clicked clicked-no" style="display:inline-block;">Bloqueado (429 Excedido)</span>'
                             : '<span class="badge-whatsapp-clicked clicked-yes" style="display:inline-block;">Ativo / Seguro</span>';
@@ -3081,11 +3630,11 @@
                         container.appendChild(tr);
                     });
                 } else {
-                    container.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Não foi possível carregar as métricas de segurança (401/500).</td></tr>';
+                    container.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #f87171; font-size: 0.85rem;">Não foi possível carregar as métricas de segurança.</td></tr>';
                 }
             } catch (err) {
-                console.error(err);
-                container.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">Erro ao carregar métricas.</td></tr>';
+                console.error('[QMA] Security stats error:', err);
+                container.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #f87171; font-size: 0.85rem;">Servidor de métricas indisponível.</td></tr>';
             }
         }
 
