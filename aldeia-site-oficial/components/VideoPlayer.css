@@ -141,10 +141,10 @@
     top: 0;
     left: 0;
     height: 100%;
-    background: var(--accent, #a855f7);
+    background: var(--accent, #ffffff);
     border-radius: 2px;
     width: 0%;
-    box-shadow: 0 0 10px var(--accent, #a855f7);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
 }
 
 .aldeia-video-timeline-handle {

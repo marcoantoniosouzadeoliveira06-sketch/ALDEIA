@@ -70,5 +70,53 @@
         "payload":  "{\"d\":\"h/dYUUAvhcemq0RhUNMRodhOPrTkBsgQ2bbLeip+EXbFYti0lsuhKPTwflTywTgR4gAJHWWBTL24WOZCRk/nIWzJRGstfdIL96OkEJTn+pAy+rI9Q0uLj4LzHPuhZ79Ef4myb5/tylYFvFDUcwtnC+H28oZuPyVMHkBiC8JdWcdJ9Z6zatIJm5aamQp2nidztVlB59YOpDmtqVXLuCPmMRus86DC503qQPuZhhmpYZD0AQWa+DIPFOQZeJq3qoczruZODTEcXUvSf7k7pa8yYcVA6ezPUDT57VDGM1DK+w94SOsLLjYyHgH+KhyxJ/vaGJeoRtbi1C2B45yRdlM1o2k7vxgzywL+W5jKOu1Sq5VUi689VQhfBzBIg9r5M+igpB+4TueKKASi6Vnuj3lPELWnEoD5MUWD4X1+4LsqcroCSojPTBImCaBJ8eXdSK4KSrsOvIB3HqzVMZUw6ErQes4HQ1+cuuHGTQ8aaJZ29uYczJQwIgNt2gG5JZSns1Bz\",\"v\":1}",
         "maskedIP":  "0.0.x.x",
         "serverTs":  "2026-07-06 20:37:15.904"
+    },
+    {
+        "id":  "8e13d3b0-8960-422e-8f35-10faf85af1d0",
+        "payload":  "{\"session_id\":\"e7bf0081d9b7fcf32e6b327dc869a579\",\"event_type\":\"page_view\",\"page_url\":\"/\"}",
+        "maskedIP":  "0.0.x.x",
+        "serverTs":  "2026-08-06 15:08:00.868"
+    },
+    {
+        "id":  "42533072-8acd-4aaa-b50b-11e2a7365786",
+        "payload":  "{\"session_id\":\"e7bf0081d9b7fcf32e6b327dc869a579\",\"event_type\":\"page_view\",\"page_url\":\"/portfolio.html\"}",
+        "maskedIP":  "0.0.x.x",
+        "serverTs":  "2026-08-06 15:08:06.781"
+    },
+    {
+        "id":  "b67fd4ed-3787-4ff3-98dd-a48b4cb870a9",
+        "payload":  "{\"session_id\":\"e7bf0081d9b7fcf32e6b327dc869a579\",\"event_type\":\"portfolio_click\",\"portfolio_id\":\"Identidade FURY\"}",
+        "maskedIP":  "0.0.x.x",
+        "serverTs":  "2026-08-06 15:08:10.854"
+    },
+    {
+        "id":  "1dd32f6e-07ea-421e-ac3c-b4ab028f5db6",
+        "payload":  "{\"session_id\":\"e7bf0081d9b7fcf32e6b327dc869a579\",\"event_type\":\"page_view\",\"page_url\":\"/projeto.html\"}",
+        "maskedIP":  "0.0.x.x",
+        "serverTs":  "2026-08-06 15:08:10.921"
+    },
+    {
+        "id":  "d202c86e-e523-4cec-8027-505c5b69000c",
+        "payload":  "{\"session_id\":\"e7bf0081d9b7fcf32e6b327dc869a579\",\"event_type\":\"page_view\",\"page_url\":\"/index.html\"}",
+        "maskedIP":  "0.0.x.x",
+        "serverTs":  "2026-08-06 15:08:16.969"
+    },
+    {
+        "id":  "a37c2c87-2c2b-4640-8067-dc64f4c44113",
+        "payload":  "{\"d\":\"DSCA8i+TMf9ToMoQSQ7+myhyt7Bx+F4Uj1TXK9OtBZ8ZZmw/3XV/awYBDxZ483r38d3sdGm1KjS4EL9rqVD44Lcubeofbt/Ery5oa9zF7MgeVvmPJw/lQdBFuEkA4Hjx+cLC5AJVxVAbtHQbgYn/8Hlr5tWU/tbF/07YUT6GMIVQ58BHqr9dZwMqarKhrkqj1Gi+MvgLUGQ/6YTPSSybQ/6xWBpD+5oJU9NVQNxgXdQjmAp/iVpCrSeiumzI4hOQ5HD38KNNwcsp1vbahtzS7ZoE8tPsqoWOlVL0Pzb4QpvPIBlJwqq7i1N27Na6CmCW90nA8ARY8HwSguNCjKbVda/cTu7bXjXuecZLbFUesqbkHq6WxB5xmij/w9Ie8rF0/JwyxyRdJRoa9LTOkG9oGc0WDgQcuEFAwK/+euAmEyuDL52rrGLVFFrfPkCkIWXF3k68socCR9nscnwV1ynS6u5jf2o31/zHOiyYL+daqcvkGwMAUlKqVnNeQQJ3/oDWkXmszREg13Y3WKYLPpA0rw==\",\"v\":1}",
+        "maskedIP":  "0.0.x.x",
+        "serverTs":  "2026-08-06 15:25:59.965"
+    },
+    {
+        "id":  "618e3b6e-a312-4737-864f-1c4db3d53b82",
+        "payload":  "{\"session_id\":\"746e7c6a51efb2cb26d19c86667a0b04\",\"event_type\":\"abandonment\",\"converted\":false,\"dwell_time\":13.37,\"page_url\":\"/\"}",
+        "maskedIP":  "0.0.x.x",
+        "serverTs":  "2026-08-06 15:26:07.737"
+    },
+    {
+        "id":  "13e68c2c-2bd5-406c-8623-b903c8649002",
+        "payload":  "{\"d\":\"CqJiFlw/Xd95LMLejg1xgReGFc+5rWiqLKHGztk/NQ2OGEQYni9QDVH+w1KajdCVhs0yBGHdROC/eoHP4IeSD4rY0/JDtZj2rHLrMxYdlM+8Ax9ZtIuc12GyDGx78WGzYpc1mNfVqm06JpjAYiewY/s8kCXyXooLqipEX+5tYTlOy8UZvIoHxOFEKysMLQXCi299uTCKPtN9EAQZTrehzdmw8gYCVk2vtu5itqanlLsYzJnr+hi12dlLGzVl7dFPlu2KuW7i6vsm/OvLY3XzL0Zwh0PM1G5EPpTcxeBe2yCOt+GPF9RcFtKHCNktlBB3s/B5Ep5FdvR7oxkF/KYwg8v0rJGvUkxaRQLOZzTmNernGHtb/C/T3VqqseE2fWyhcszwA9ezC10uXYmTQZ56HFUHBISZhO/oqTf2/odY8zue5QpaCMX1a4/BKccVA6DOoJYvGmLWOD7RENNhk61A8AUNTyEzeWFhx5t7U0D8Tp9ZXvFyFTjGPTaU9TPlpxmJftD3XXVrI+sAzBkQIttFIA==\",\"v\":1}",
+        "maskedIP":  "0.0.x.x",
+        "serverTs":  "2026-08-06 16:31:40.473"
     }
 ]

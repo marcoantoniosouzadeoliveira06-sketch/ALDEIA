@@ -6,9 +6,18 @@
     "categoryLabel": "Identidade Visual",
     "cover": "assets/portfolio/1.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/1.webp" },
-      { "type": "image", "src": "assets/portfolio/5.webp" },
-      { "type": "image", "src": "assets/portfolio/3.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/1.webp"
+      },
+      {
+        "type": "image",
+        "src": "assets/portfolio/5.webp"
+      },
+      {
+        "type": "image",
+        "src": "assets/portfolio/3.webp"
+      }
     ],
     "member": {
       "name": "Designer Japex",
@@ -23,8 +32,14 @@
     "categoryLabel": "Vídeos",
     "cover": "assets/portfolio/6.webp",
     "assets": [
-      { "type": "video", "src": "assets/hero-bg.mp4" },
-      { "type": "image", "src": "assets/portfolio/6.webp" }
+      {
+        "type": "video",
+        "src": "assets/hero-bg.mp4"
+      },
+      {
+        "type": "image",
+        "src": "assets/portfolio/6.webp"
+      }
     ],
     "member": {
       "name": "Designer Temari",
@@ -39,8 +54,14 @@
     "categoryLabel": "Social Media",
     "cover": "assets/portfolio/2.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/2.webp" },
-      { "type": "image", "src": "assets/portfolio/4.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/2.webp"
+      },
+      {
+        "type": "image",
+        "src": "assets/portfolio/4.webp"
+      }
     ]
   },
   {
@@ -50,7 +71,10 @@
     "categoryLabel": "Artes Avulsas",
     "cover": "assets/portfolio/7.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/7.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/7.webp"
+      }
     ]
   },
   {
@@ -60,8 +84,14 @@
     "categoryLabel": "Identidade Visual",
     "cover": "assets/portfolio/5.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/5.webp" },
-      { "type": "image", "src": "assets/portfolio/8.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/5.webp"
+      },
+      {
+        "type": "image",
+        "src": "assets/portfolio/8.webp"
+      }
     ]
   },
   {
@@ -71,7 +101,10 @@
     "categoryLabel": "Vídeos",
     "cover": "assets/portfolio/8.webp",
     "assets": [
-      { "type": "video", "src": "assets/hero-bg.mp4" }
+      {
+        "type": "video",
+        "src": "assets/hero-bg.mp4"
+      }
     ]
   },
   {
@@ -81,7 +114,10 @@
     "categoryLabel": "Social Media",
     "cover": "assets/portfolio/3.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/3.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/3.webp"
+      }
     ]
   },
   {
@@ -91,7 +127,10 @@
     "categoryLabel": "Artes Avulsas",
     "cover": "assets/portfolio/4.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/4.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/4.webp"
+      }
     ]
   },
   {
@@ -101,7 +140,10 @@
     "categoryLabel": "Identidade Visual",
     "cover": "assets/portfolio/9.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/9.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/9.webp"
+      }
     ]
   },
   {
@@ -111,7 +153,10 @@
     "categoryLabel": "Vídeos",
     "cover": "assets/portfolio/10.webp",
     "assets": [
-      { "type": "video", "src": "assets/hero-bg.mp4" }
+      {
+        "type": "video",
+        "src": "assets/hero-bg.mp4"
+      }
     ]
   },
   {
@@ -121,7 +166,10 @@
     "categoryLabel": "Social Media",
     "cover": "assets/portfolio/11.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/11.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/11.webp"
+      }
     ]
   },
   {
@@ -131,7 +179,10 @@
     "categoryLabel": "Artes Avulsas",
     "cover": "assets/portfolio/12.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/12.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/12.webp"
+      }
     ]
   },
   {
@@ -141,7 +192,10 @@
     "categoryLabel": "Identidade Visual",
     "cover": "assets/portfolio/13.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/13.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/13.webp"
+      }
     ]
   },
   {
@@ -151,7 +205,10 @@
     "categoryLabel": "Vídeos",
     "cover": "assets/portfolio/14.webp",
     "assets": [
-      { "type": "video", "src": "assets/hero-bg.mp4" }
+      {
+        "type": "video",
+        "src": "assets/hero-bg.mp4"
+      }
     ]
   },
   {
@@ -161,7 +218,10 @@
     "categoryLabel": "Social Media",
     "cover": "assets/portfolio/15.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/15.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/15.webp"
+      }
     ]
   },
   {
@@ -171,7 +231,10 @@
     "categoryLabel": "Artes Avulsas",
     "cover": "assets/portfolio/16.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/16.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/16.webp"
+      }
     ]
   },
   {
@@ -181,7 +244,10 @@
     "categoryLabel": "Identidade Visual",
     "cover": "assets/portfolio/17.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/17.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/17.webp"
+      }
     ]
   },
   {
@@ -191,7 +257,10 @@
     "categoryLabel": "Vídeos",
     "cover": "assets/portfolio/18.webp",
     "assets": [
-      { "type": "video", "src": "assets/hero-bg.mp4" }
+      {
+        "type": "video",
+        "src": "assets/hero-bg.mp4"
+      }
     ]
   },
   {
@@ -201,7 +270,10 @@
     "categoryLabel": "Social Media",
     "cover": "assets/portfolio/19.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/19.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/19.webp"
+      }
     ]
   },
   {
@@ -211,7 +283,10 @@
     "categoryLabel": "Artes Avulsas",
     "cover": "assets/portfolio/20.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/20.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/20.webp"
+      }
     ]
   },
   {
@@ -221,7 +296,111 @@
     "categoryLabel": "Artes Avulsas",
     "cover": "assets/portfolio/21.webp",
     "assets": [
-      { "type": "image", "src": "assets/portfolio/21.webp" }
+      {
+        "type": "image",
+        "src": "assets/portfolio/21.webp"
+      }
     ]
+  },
+  {
+    "id": "p1785920635655",
+    "title": "DFTGGDSGF",
+    "category": "Vídeos",
+    "categoryLabel": "Artes Avulsas",
+    "format": "post",
+    "aspectRatio": "1:1",
+    "accentColor": "#ffffff",
+    "cover": "",
+    "assets": []
+  },
+  {
+    "id": "p1785921692563",
+    "title": "KK",
+    "category": "Artes Avulsas",
+    "categoryLabel": "Artes Avulsas",
+    "format": "post",
+    "aspectRatio": "1:1",
+    "accentColor": "#ffffff",
+    "cover": "",
+    "assets": []
+  },
+  {
+    "id": "p1785923097333",
+    "title": "SDSDFDF",
+    "category": "artes",
+    "categoryLabel": "Artes Avulsas",
+    "format": "auto",
+    "aspectRatio": "1:1",
+    "accentColor": "#0008ff",
+    "cover": "",
+    "assets": []
+  },
+  {
+    "id": "p1785923231110",
+    "title": "ASSAA",
+    "category": "social",
+    "categoryLabel": "Artes Avulsas",
+    "format": "auto",
+    "aspectRatio": "1:1",
+    "accentColor": "#a855f7",
+    "cover": "",
+    "assets": []
+  },
+  {
+    "id": "p1785923882776",
+    "title": "HHHHHHHHH",
+    "category": "artes",
+    "categoryLabel": "Artes Avulsas",
+    "format": "auto",
+    "aspectRatio": "1:1",
+    "accentColor": "#a855f7",
+    "cover": "",
+    "assets": [
+      {
+        "type": "image"
+      },
+      {
+        "type": "video"
+      }
+    ]
+  },
+  {
+    "id": "p1785926563771",
+    "title": "ERER",
+    "category": "artes",
+    "categoryLabel": "Artes Avulsas",
+    "format": "auto",
+    "aspectRatio": "1:1",
+    "accentColor": "#a855f7",
+    "cover": "",
+    "assets": [
+      {
+        "type": "image"
+      },
+      {
+        "type": "image"
+      }
+    ]
+  },
+  {
+    "id": "p1786046307778",
+    "title": "neymar",
+    "category": "artes",
+    "categoryLabel": "Artes Avulsas",
+    "format": "auto",
+    "aspectRatio": "1:1",
+    "accentColor": "#e4e4e7",
+    "cover": "https://res.cloudinary.com/iszvbnc9/image/upload/v1786046412/aldeia_uploads/navkjzw5aydnik2do14b.webp",
+    "assets": [
+      {
+        "type": "video",
+        "src": "https://res.cloudinary.com/iszvbnc9/video/upload/v1786046426/aldeia_uploads/esc9dv9sz7iacmeknjsa.mp4"
+      }
+    ],
+    "member": {
+      "name": "Designer Japex",
+      "role": "Fundador",
+      "photo": "https://res.cloudinary.com/iszvbnc9/image/upload/v1786046405/aldeia_uploads/gyhkmzywb2yqiwm1ensq.webp"
+    }
   }
 ]

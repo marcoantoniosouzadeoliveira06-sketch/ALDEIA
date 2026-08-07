@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ALDEIA | Agência de Design & Performance Digital</title>
+    <!-- FAVICON ALDEIA -->
+    <link rel="icon" type="image/svg+xml" href="assets/logo-tp.svg">
+    <link rel="alternate icon" type="image/webp" href="assets/logo-primaria.webp">
+    <link rel="apple-touch-icon" href="assets/logo-primaria.webp">
     <meta name="description" content="Criação de sites com UI/UX e design de alto padrão. Projetos para empresas exigentes que buscam presença digital diferenciada.">
     <meta name="keywords" content="agência de design, web design, UI UX, design estratégico, performance digital, sites de alta conversão, e-sports design, identidade visual">
     <meta name="author" content="ALDEIA Design">
@@ -319,18 +323,18 @@
                         </div>
                         <h2 class="mega-title scroll-float">PORTFÓLIO</h2>
                     </div>
-                    <p class="section-desc reveal-up" data-delay="0.2">Projetos que elevam a percepção. Cada detalhe, interação e escolha visual é pensada para posicionar no nível certo.</p>
+                    <p id="home-port-subtitle" class="section-desc reveal-up" data-delay="0.2">Projetos que elevam a percepção. Cada detalhe, interação e escolha visual é pensada para posicionar no nível certo.</p>
                 </div>
 
                 <div class="portfolio-banner-container reveal-up" data-delay="0.3">
                     <a href="portfolio.html" class="portfolio-banner-link">
                         <div class="portfolio-banner-img">
-                            <img src="assets/portfolio/1.webp" alt="Veja o Portfólio ALDEIA" loading="lazy">
+                            <img id="home-port-cover" src="assets/portfolio/1.webp" alt="Veja o Portfólio ALDEIA" loading="lazy">
                         </div>
                         <div class="portfolio-banner-overlay"></div>
                         <div class="portfolio-banner-content">
-                            <h3>Galeria de Casos</h3>
-                            <span class="btn-cta banner-btn">VEJA O PORTFÓLIO COMPLETO ↗</span>
+                            <h3 id="home-port-title">Galeria de Casos</h3>
+                            <span id="home-port-btn" class="btn-cta banner-btn">VEJA O PORTFÓLIO COMPLETO ↗</span>
                         </div>
                     </a>
                 </div>
@@ -599,7 +603,7 @@
         <div class="modal-content">
             <button class="modal-close" onclick="closeBudgetModal()">✕</button>
             <div id="modal-success-screen" style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                <svg style="width: 64px; height: 64px; stroke: #a855f7; margin-bottom: 24px; fill: none;" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg style="width: 64px; height: 64px; stroke: #ffffff; margin-bottom: 24px; fill: none;" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
                 <h3 style="font-family: var(--font-h); font-size: 1.8rem; margin-bottom: 12px; text-transform: uppercase;">Cadastro Enviado!</h3>
@@ -892,25 +896,24 @@
 
                     const cleanPhone = telefone.replace(/\D/g, '');
                     const waBtn = document.getElementById('modal-wa-btn');
-                    waBtn.href = `https://wa.me/5521980638271?text=Olá!%20Meu%20nome%20é%20${encodeURIComponent(nome)}.%20Acabei%20de%20solicitar%20um%20orçamento%20no%20site%20para%20o%20projeto:%20${encodeURIComponent(projeto)}.`;
+                    waBtn.href = `https://wa.me/5521980638271?text=Olá,%20meu%20nome%20é%20${encodeURIComponent(nome)}.%20Eu%20quero%20fazer%20um%20${encodeURIComponent(projeto)}%20com%20a%20Agência%20ALDEIA.%20Como%20posso%20fazer?`;
 
-                    // Register WhatsApp click event
+                    // Register WhatsApp click event for analytics if possible (fire and forget)
                     if (submissionId) {
-                        waBtn.onclick = async function() {
-                            try {
-                                await fetch('/api/cadastro/click-link', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ id: submissionId })
-                                });
-                            } catch (clickErr) {
-                                console.error('Failed to register WA click:', clickErr);
-                            }
-                        };
+                        fetch('/api/cadastro/click-link', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: submissionId })
+                        }).catch(() => {});
                     }
 
                     document.getElementById('modal-form-screen').style.display = 'none';
                     document.getElementById('modal-success-screen').style.display = 'flex';
+                    
+                    // Automatically redirect to WhatsApp!
+                    setTimeout(() => {
+                        window.location.href = waBtn.href;
+                    }, 1500);
                 } else {
                     alert('Erro ao enviar. Tente novamente.');
                 }
@@ -1141,6 +1144,19 @@
                         }
                     }
 
+                    // Home Portfolio
+                    if (content.homePortfolio) {
+                        const hp = content.homePortfolio;
+                        const t = document.getElementById('home-port-title');
+                        if (t && hp.title) t.textContent = hp.title;
+                        const st = document.getElementById('home-port-subtitle');
+                        if (st && hp.subtitle) st.textContent = hp.subtitle;
+                        const btn = document.getElementById('home-port-btn');
+                        if (btn && hp.buttonText) btn.textContent = hp.buttonText;
+                        const cov = document.getElementById('home-port-cover');
+                        if (cov && hp.cover) cov.src = hp.cover;
+                    }
+
                     // Portfolio Gallery Dome
                     if (content.portfolio && content.portfolio.length > 0) {
                         window.aldeiaPortfolioImages = content.portfolio;
@@ -1311,5 +1327,182 @@
 
     <!-- TELEMETRIA DE CHECKOUT (Conversão, Dwell-Time, Anti-Spoofing) -->
     <script src="assets/telemetry.js"></script>
+    <!-- HEADLESS CMS INTEGRATION SCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 1. Fetch Text Content CMS
+            try {
+                const res = await fetch('/api/content');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && Object.keys(data).length > 0) {
+                        for (const [id, value] of Object.entries(data)) {
+                            if (typeof value === 'object' && value !== null) continue;
+                            const el = document.getElementById(id);
+                            if (el) el.innerText = value;
+                        }
+                    }
+                }
+            } catch (e) { console.error('CMS Content Error', e); }
+
+            // 2. Fetch Portfolio CMS
+            try {
+                const pRes = await fetch('/api/portfolio');
+                if (pRes.ok) {
+                    const portfolioData = await pRes.json();
+                    const portGrid = document.querySelector('.portfolio-grid');
+                    // We only replace if we have data to avoid wiping out placeholders if DB is empty
+                    if (portfolioData.data && portfolioData.data.length > 0 && portGrid) {
+                        portGrid.innerHTML = '';
+                        portfolioData.data.forEach((item, index) => {
+                            const delay = index * 0.1;
+                            const isVideo = item.coverImage && item.coverImage.match(/\.(mp4|webm|ogg)$/i);
+                            
+                            const mediaHTML = isVideo 
+                                ? `<video src="${item.coverImage}" autoplay loop muted playsinline class="case-img" style="object-fit: cover; width: 100%; height: 100%;"></video>`
+                                : `<img src="${item.coverImage}" alt="${item.title}" class="case-img" loading="lazy">`;
+
+                            portGrid.innerHTML += `
+                            <article class="case-card scroll-fade" style="animation-delay: ${delay}s">
+                                <div class="case-media">
+                                    <div class="case-overlay">
+                                        <div class="case-category">${item.category}</div>
+                                        <div class="case-actions">
+                                            <a href="#" class="case-btn view-btn"><span class="material-symbols-outlined">visibility</span></a>
+                                        </div>
+                                    </div>
+                                    ${mediaHTML}
+                                </div>
+                                <div class="case-info">
+                                    <h3 class="case-title" style="color: ${item.highlightColor || '#fff'}">${item.title}</h3>
+                                    ${item.author && item.author.name ? `<p class="case-meta">By ${item.author.name}</p>` : ''}
+                                </div>
+                            </article>`;
+                        });
+                    }
+                }
+            } catch (e) { console.error('CMS Portfolio Error', e); }
+
+            // 3. Form Submission Integration
+            const cForm = document.getElementById('modal-cadastro-form');
+            if (cForm) {
+                cForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const submitBtn = cForm.querySelector('button[type="submit"]');
+                    const originalText = submitBtn ? submitBtn.innerText : 'ENVIAR';
+                    if (submitBtn) submitBtn.innerText = 'ENVIANDO...';
+
+                    const payload = {
+                        nome: document.getElementById('m-nome')?.value,
+                        email: document.getElementById('m-email')?.value,
+                        telefone: document.getElementById('m-telefone')?.value,
+                        instagram: document.getElementById('m-instagram')?.value,
+                        projeto: [document.getElementById('m-servico')?.value, document.getElementById('m-detalhes')?.value].filter(Boolean).join(' - ') || 'Contato via Site',
+                    };
+
+                    try {
+                        const res = await fetch('/api/cadastro', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        if (res.ok) {
+                            cForm.reset();
+                            if (submitBtn) submitBtn.innerText = 'ENVIADO! REDIRECIONANDO...';
+                            
+                            // Automatically open WhatsApp!
+                            const nome = document.getElementById('m-nome')?.value || '';
+                            const projeto = [document.getElementById('m-servico')?.value, document.getElementById('m-detalhes')?.value].filter(Boolean).join(' - ') || 'Projeto';
+                            const waUrl = `https://wa.me/5521980638271?text=Olá,%20meu%20nome%20é%20${encodeURIComponent(nome)}.%20Eu%20quero%20fazer%20um%20${encodeURIComponent(projeto)}%20com%20a%20Agência%20ALDEIA.%20Como%20posso%20fazer?`;
+                            
+                            setTimeout(() => {
+                                window.location.href = waUrl;
+                                if (submitBtn) submitBtn.innerText = originalText;
+                            }, 1500);
+                        } else {
+                            if (submitBtn) submitBtn.innerText = 'ERRO NO ENVIO';
+                            setTimeout(() => { if (submitBtn) submitBtn.innerText = originalText; }, 3000);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        if (submitBtn) submitBtn.innerText = 'ERRO DE CONEXÃO';
+                        setTimeout(() => { if (submitBtn) submitBtn.innerText = originalText; }, 3000);
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- Aldeia Analytics Tracker (Rabbit Max V9) -->
+    <script>
+        (function() {
+            let sessionId = localStorage.getItem('aldeia_session');
+            if (!sessionId) {
+                sessionId = 's_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+                localStorage.setItem('aldeia_session', sessionId);
+            }
+
+            let eventsBuffer = [];
+            const FLUSH_INTERVAL = 3000;
+
+            function trackEvent(eventType, path, elementId, x, y) {
+                eventsBuffer.push({
+                    sessionId,
+                    eventType,
+                    path: path || window.location.pathname,
+                    elementId: elementId || '',
+                    x: Math.round(x || 0),
+                    y: Math.round(y || 0),
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            function flushEvents() {
+                if (eventsBuffer.length === 0) return;
+                const payload = [...eventsBuffer];
+                eventsBuffer = [];
+                
+                try {
+                    if (navigator.sendBeacon) {
+                        navigator.sendBeacon('/api/analytics', JSON.stringify({ events: payload }));
+                    } else {
+                        fetch('/api/analytics', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ events: payload })
+                        }).catch(() => {});
+                    }
+                } catch (e) {}
+            }
+
+            // Track Clicks
+            document.addEventListener('click', (e) => {
+                const el = e.target.closest('a, button, .case-card, .item');
+                let elId = '';
+                if (el) {
+                    elId = el.id || el.getAttribute('href') || el.className;
+                }
+                
+                // Track percentage of width/height instead of absolute pixels for better responsive heatmap
+                const xPct = (e.clientX / window.innerWidth) * 100;
+                const yPct = ((e.clientY + window.scrollY) / document.documentElement.scrollHeight) * 100;
+                
+                trackEvent('click', window.location.pathname, elId, xPct, yPct);
+            });
+
+            // Track Page View
+            trackEvent('pageview', window.location.pathname, '', 0, 0);
+
+            // Flush on interval and on page unload
+            setInterval(flushEvents, FLUSH_INTERVAL);
+            window.addEventListener('beforeunload', flushEvents);
+            window.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') flushEvents();
+            });
+            
+            window.__aldeiaTracker = { trackEvent };
+        })();
+    </script>
 </body>
 </html>

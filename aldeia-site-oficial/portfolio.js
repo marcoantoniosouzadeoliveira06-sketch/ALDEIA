@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             el.className = 'portfolio-card';
             el.style.animationDelay = `${delay}s`;
             
-            const accentColor = p.accentColor || p.color || '#a855f7';
+            const accentColor = p.accentColor || p.color || '#ffffff';
             el.style.setProperty('--card-accent', accentColor);
 
             // Mapeamento de formatos de imagem

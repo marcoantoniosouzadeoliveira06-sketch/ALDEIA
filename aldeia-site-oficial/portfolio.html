@@ -359,7 +359,7 @@
             <button class="modal-close" onclick="closeBudgetModal()">✕</button>
             <div id="modal-success-screen"
                 style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                <svg style="width: 64px; height: 64px; stroke: #a855f7; margin-bottom: 24px; fill: none;"
+                <svg style="width: 64px; height: 64px; stroke: #ffffff; margin-bottom: 24px; fill: none;"
                     viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
@@ -949,6 +949,74 @@
             }
         }
         loadContent();
+
+        let allPortfolioData = [];
+        async function loadPortfolio() {
+            try {
+                const res = await fetch('/api/portfolio');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.data && data.data.length > 0) {
+                        allPortfolioData = data.data;
+                        renderPortfolioGrid('all');
+                    } else {
+                        document.getElementById('portfolio-grid').innerHTML = '<p style="color:#a1a1aa; text-align:center; width:100%;">Nenhum projeto encontrado.</p>';
+                    }
+                }
+            } catch(e) {
+                console.error('Error fetching portfolio:', e);
+            }
+        }
+
+        function renderPortfolioGrid(filter) {
+            const grid = document.getElementById('portfolio-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            
+            const filtered = filter === 'all' 
+                ? allPortfolioData 
+                : allPortfolioData.filter(item => {
+                    const cat = (item.category || '').toLowerCase();
+                    if (filter === 'identidade') return cat.includes('identidade') || cat.includes('visual');
+                    if (filter === 'social') return cat.includes('social') || cat.includes('media') || cat.includes('mídia');
+                    if (filter === 'videos') return cat.includes('vídeo') || cat.includes('video') || cat.includes('motion');
+                    if (filter === 'artes') return cat.includes('arte') || cat.includes('avulsa');
+                    return false;
+                });
+
+            filtered.forEach((item, index) => {
+                const delay = (index % 10) * 0.1;
+                const isVideo = item.coverImage && item.coverImage.match(/\.(mp4|webm|ogg)$/i);
+                
+                const mediaHTML = isVideo 
+                    ? `<video src="${item.coverImage}" autoplay loop muted playsinline class="case-img" style="object-fit: cover; width: 100%; height: 100%;"></video>`
+                    : `<img src="${item.coverImage}" alt="${item.title}" class="case-img" loading="lazy">`;
+
+                grid.innerHTML += `
+                <article class="case-card scroll-fade" style="animation-delay: ${delay}s">
+                    <div class="case-media">
+                        <div class="case-overlay">
+                            <div class="case-category">${item.category}</div>
+                            <h3 class="case-title">${item.title}</h3>
+                            <a href="${item.link || '#'}" class="case-link" target="_blank">Ver Projeto</a>
+                        </div>
+                        ${mediaHTML}
+                    </div>
+                </article>
+                `;
+            });
+        }
+
+        const portTabs = document.querySelectorAll('.portfolio-tab');
+        portTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                portTabs.forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                renderPortfolioGrid(e.target.getAttribute('data-filter'));
+            });
+        });
+
+        loadPortfolio();
 
         // --- DECRYPT TEXT EFFECT ---
         function decryptText(element, duration = 800) {

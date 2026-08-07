@@ -285,7 +285,7 @@ try {
                 $fileStream.Close()
                 
                 # Return the relative path
-                $responseJson = '{"url":"assets/uploads/' + $uniqueName + '"}'
+                $responseJson = '{"status":"success","url":"/assets/uploads/' + $uniqueName + '"}'
                 $buffer = [System.Text.Encoding]::UTF8.GetBytes($responseJson)
                 $response.ContentType = "application/json"
                 $response.ContentLength64 = $buffer.Length

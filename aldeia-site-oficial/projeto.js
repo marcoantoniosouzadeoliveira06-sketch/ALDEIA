@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Aplicando a cor de destaque dinâmica da equipe no projeto
-        const accentColor = project.accentColor || project.color || '#a855f7';
+        const accentColor = project.accentColor || project.color || '#ffffff';
         document.documentElement.style.setProperty('--accent', accentColor);
         document.documentElement.style.setProperty('--accent-glow', accentColor + '44');
 
