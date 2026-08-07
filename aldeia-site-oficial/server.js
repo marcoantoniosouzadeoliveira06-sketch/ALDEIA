@@ -567,7 +567,7 @@ app.post('/api/content', requireAuth, async (req, res) => {
 
     const jsonSuccess = safeWriteJSON('site_content.json', contentData);
     if (saved || jsonSuccess) {
-        res.json({ status: 'success', message: 'Conteúdo atualizado com sucesso no MongoDB' });
+        res.json({ status: 'success', message: 'Conteúdo atualizado com sucesso' });
     } else {
         res.status(500).json({ status: 'error', message: 'Erro ao salvar conteúdo' });
     }
