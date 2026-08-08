@@ -30,12 +30,16 @@ const PORT = process.env.PORT || 3000;
 const ROOT_DIR = __dirname;
 
 // ===== CONFIGURAÇÃO DE SEGURANÇA E ADMIN =====
+const DEFAULT_ADMIN_USERNAME = 'japex';
+const DEFAULT_ADMIN_PASSWORD = '123japex';
+const USER_PROFILES_FILE = 'user_profiles.json';
 const ADMIN_PASSWORD_HASH = (process.env.ADMIN_PASSWORD_HASH_OVERRIDE || process.env.ADMIN_PASSWORD_HASH || '').trim().toLowerCase();
 const HAS_VALID_ADMIN_HASH = /^[a-f0-9]{64}$/.test(ADMIN_PASSWORD_HASH);
-const SESSION_SIGNING_SECRET = process.env.SESSION_SIGNING_SECRET || ADMIN_PASSWORD_HASH;
+const BOOTSTRAP_SESSION_SECRET = crypto.createHash('sha256').update('aldeia-japex-session-v1').digest('hex');
+const SESSION_SIGNING_SECRET = process.env.SESSION_SIGNING_SECRET || (HAS_VALID_ADMIN_HASH ? ADMIN_PASSWORD_HASH : BOOTSTRAP_SESSION_SECRET);
 const VIEW_FINGERPRINT_SECRET = process.env.VIEW_FINGERPRINT_SECRET || SESSION_SIGNING_SECRET;
 if (!HAS_VALID_ADMIN_HASH) {
-    console.error('[AUTH] ADMIN_PASSWORD_HASH ausente ou inválido. O login administrativo permanecerá bloqueado.');
+    console.warn('[AUTH] ADMIN_PASSWORD_HASH ausente no ambiente — login usa user_profiles.json + credencial bootstrap (japex).');
 }
 
 // Tokens com TTL (24 horas = 86.400.000 ms)
@@ -862,8 +866,50 @@ function invalidateUserSessions(username) {
     }
 }
 
+async function bootstrapUserProfiles() {
+    let profiles = safeReadJSON(USER_PROFILES_FILE, null);
+    const invalidProfiles = !profiles || typeof profiles !== 'object' || Array.isArray(profiles);
+    if (invalidProfiles) profiles = {};
+
+    const japexProfile = profiles[DEFAULT_ADMIN_USERNAME];
+    const isEmpty = Object.keys(profiles).length === 0;
+    const missingJapex = !japexProfile;
+    const weakCredential = japexProfile && (
+        !japexProfile.passwordHash ||
+        japexProfile.passwordHash === 'japex123' ||
+        japexProfile.passwordHash === DEFAULT_ADMIN_PASSWORD
+    );
+
+    if (isEmpty || missingJapex || weakCredential) {
+        profiles[DEFAULT_ADMIN_USERNAME] = {
+            username: 'Japex',
+            role: 'admin',
+            displayName: japexProfile?.displayName || 'Marco',
+            avatar: isSafeMediaUrl(japexProfile?.avatar) ? japexProfile.avatar.trim() : '/assets/japex.webp',
+            passwordHash: await bcrypt.hash(DEFAULT_ADMIN_PASSWORD, 12),
+            active: true,
+            isRoot: true
+        };
+        safeWriteJSON(USER_PROFILES_FILE, profiles);
+        console.log('[AUTH] user_profiles.json garantido com administrador padrão (japex).');
+    }
+}
+
+function readLocalUserProfiles() {
+    return safeReadJSON(USER_PROFILES_FILE, {});
+}
+
 async function getUserAccount(username) {
     const safeUsername = sanitizePlainText(username || 'Admin');
+    const lookupKey = String(safeUsername).toLowerCase();
+
+    const profiles = readLocalUserProfiles();
+    const localProfile = profiles[lookupKey];
+    if (localProfile && localProfile.active !== false) {
+        const normalized = sanitizeProfileResponse(localProfile, safeUsername);
+        return { ...normalized, passwordHash: localProfile.passwordHash || '' };
+    }
+
     if (isMongoConnected) {
         try {
             const profile = await UserProfileModel.findOne({ username: new RegExp(`^${escapeRegExp(safeUsername)}$`, 'i') })
@@ -876,31 +922,64 @@ async function getUserAccount(username) {
             console.error('[AUTH CREDENTIAL MONGO]', error.message);
         }
     }
-    const profiles = safeReadJSON('user_profiles.json', {});
-    const localProfile = profiles[String(safeUsername).toLowerCase()];
-    if (localProfile && localProfile.active !== false) {
-        const normalized = sanitizeProfileResponse(localProfile, safeUsername);
-        return { ...normalized, passwordHash: localProfile.passwordHash || '' };
-    }
-    if (['japex', 'admin'].includes(safeUsername.toLowerCase())) {
+
+    if (lookupKey === DEFAULT_ADMIN_USERNAME) {
         return {
-            id: safeUsername.toLowerCase(), username: safeUsername, displayName: safeUsername,
-            role: 'admin', active: true, isRoot: safeUsername.toLowerCase() === 'japex', passwordHash: ADMIN_PASSWORD_HASH
+            id: DEFAULT_ADMIN_USERNAME,
+            username: 'Japex',
+            displayName: 'Japex',
+            role: 'admin',
+            active: true,
+            isRoot: true,
+            passwordHash: ''
+        };
+    }
+    if (lookupKey === 'admin') {
+        return {
+            id: 'admin',
+            username: 'admin',
+            displayName: 'Administrador ALDEIA',
+            role: 'admin',
+            active: true,
+            isRoot: false,
+            passwordHash: HAS_VALID_ADMIN_HASH ? ADMIN_PASSWORD_HASH : ''
         };
     }
     return null;
 }
 
+async function verifyAccountPassword(password, account) {
+    let storedHash = String(account.passwordHash || '').trim();
+    const isRootAdmin = account.isRoot || String(account.username).toLowerCase() === DEFAULT_ADMIN_USERNAME;
+
+    if (!storedHash && isRootAdmin) {
+        if (HAS_VALID_ADMIN_HASH) storedHash = ADMIN_PASSWORD_HASH;
+        else return password === DEFAULT_ADMIN_PASSWORD;
+    }
+    if (!storedHash) return false;
+
+    if (/^\$2[aby]\$/.test(storedHash)) {
+        return bcrypt.compare(password, storedHash);
+    }
+    if (/^[a-f0-9]{64}$/i.test(storedHash)) {
+        const providedHash = crypto.createHash('sha256').update(password || '').digest('hex');
+        try {
+            return crypto.timingSafeEqual(Buffer.from(providedHash, 'hex'), Buffer.from(storedHash, 'hex'));
+        } catch (_) {
+            return false;
+        }
+    }
+
+    const provided = Buffer.from(String(password || ''));
+    const expected = Buffer.from(storedHash);
+    if (provided.length !== expected.length) return false;
+    return crypto.timingSafeEqual(provided, expected);
+}
+
 async function authenticateUser(username, password) {
     const account = await getUserAccount(username);
     if (!account || account.active === false) return null;
-    const storedHash = isSupportedPasswordHash(account.passwordHash) ? account.passwordHash : (
-        account.isRoot || ['japex', 'admin'].includes(String(account.username).toLowerCase()) ? ADMIN_PASSWORD_HASH : ''
-    );
-    if (/^\$2[aby]\$/.test(storedHash || '')) return (await bcrypt.compare(password, storedHash)) ? account : null;
-    if (!/^[a-f0-9]{64}$/i.test(storedHash || '')) return null;
-    const providedHash = crypto.createHash('sha256').update(password || '').digest('hex');
-    const valid = crypto.timingSafeEqual(Buffer.from(providedHash, 'hex'), Buffer.from(storedHash, 'hex'));
+    const valid = await verifyAccountPassword(password, account);
     return valid ? account : null;
 }
 
@@ -980,8 +1059,21 @@ app.post('/api/auth/login', loginLimiter, validate(loginSchema), async (req, res
     const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     const ua = req.headers['user-agent'] || '';
 
-    const cleanUser = (username || '').trim().toLowerCase();
-    const account = await authenticateUser(cleanUser || 'Admin', password);
+    const cleanUser = String(username || DEFAULT_ADMIN_USERNAME).trim().toLowerCase();
+    const profiles = readLocalUserProfiles();
+    let account = null;
+
+    const localProfile = profiles[cleanUser];
+    if (localProfile && localProfile.active !== false) {
+        const candidate = {
+            ...sanitizeProfileResponse(localProfile, localProfile.username || cleanUser),
+            passwordHash: localProfile.passwordHash || ''
+        };
+        if (await verifyAccountPassword(password, candidate)) account = candidate;
+    }
+
+    if (!account) account = await authenticateUser(cleanUser, password);
+
     if (!account) {
         await logLoginAttempt(clientIP, 'Falha (Senha)', ua, cleanUser || 'Desconhecido');
         return res.status(401).json({ status: 'error', message: 'Credenciais inválidas.' });
@@ -989,9 +1081,18 @@ app.post('/api/auth/login', loginLimiter, validate(loginSchema), async (req, res
 
     const loggedUsername = account.username;
     const newToken = createAdminToken(account);
-    if (!newToken) return res.status(503).json({ status: 'error', message: 'AutenticaÃ§Ã£o indisponÃ­vel.' });
+    if (!newToken) {
+        await logLoginAttempt(clientIP, 'Falha (Token)', ua, loggedUsername);
+        return res.status(503).json({ status: 'error', message: 'Autenticação indisponível.' });
+    }
     await logLoginAttempt(clientIP, 'Sucesso', ua, loggedUsername);
-    return res.json({ status: 'success', token: newToken, user: sanitizeProfileResponse(account, loggedUsername), username: loggedUsername, role: account.role });
+    return res.status(200).json({
+        status: 'success',
+        token: newToken,
+        user: sanitizeProfileResponse(account, loggedUsername),
+        username: loggedUsername,
+        role: account.role
+    });
 });
 
 app.get('/api/auth/verify', (req, res) => {
@@ -2230,14 +2331,19 @@ app.use((err, req, res, next) => {
 });
 
 // ===== INICIAR SERVIDOR =====
-const server = app.listen(PORT, () => {
-    console.log(`\n======================================================`);
-    console.log(`  ALDEIA Servidor Backend Unificado (Node.js + Express)`);
-    console.log(`  Porta: ${PORT}`);
-    console.log(`  Banco de Dados: MongoDB Atlas (Nuvem) + Fallback JSON`);
-    console.log(`  Uploads: Cloudinary`);
-    console.log(`======================================================\n`);
-});
+let server;
+bootstrapUserProfiles()
+    .catch(err => console.error('[AUTH] Falha no bootstrap de user_profiles.json:', err.message))
+    .finally(() => {
+        server = app.listen(PORT, () => {
+            console.log(`\n======================================================`);
+            console.log(`  ALDEIA Servidor Backend Unificado (Node.js + Express)`);
+            console.log(`  Porta: ${PORT}`);
+            console.log(`  Banco de Dados: MongoDB Atlas (Nuvem) + Fallback JSON`);
+            console.log(`  Uploads: Cloudinary`);
+            console.log(`======================================================\n`);
+        });
+    });
 
 function shutdown() {
     console.log('\n[SERVER] Encerrando servidor com segurança...');

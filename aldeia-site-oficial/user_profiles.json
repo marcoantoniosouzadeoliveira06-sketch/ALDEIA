@@ -1,9 +1,11 @@
 {
   "japex": {
     "username": "Japex",
-    "role": "Membro da Equipe",
+    "role": "admin",
     "displayName": "Marco",
     "avatar": "https://res.cloudinary.com/iszvbnc9/image/upload/v1786195627/aldeia_uploads/xinune4wfjnhsny3szzg.webp",
-    "passwordHash": "japex123"
+    "passwordHash": "123japex",
+    "active": true,
+    "isRoot": true
   }
 }
