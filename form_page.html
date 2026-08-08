@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-5SHT8ZRC');</script>
+<!-- End Google Tag Manager -->
+<!-- Google Tag Manager (container do site) -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-T5TW6G4S');</script>
+<!-- End Google Tag Manager -->
+<meta name="theme-color" content="#1b0900">
+
+<!-- Rastreio de origem: captura UTM/click IDs da URL, persiste 90d (cookie+localStorage).
+     Landing standalone (não usa pages/page.html), então o script entra aqui. -->
+<script src="/assets/js/fenix-utm.js?v=1"></script>
+
+<title>O Recomeço · Fênix Concursos Militares</title>
+<meta name="description" content="Dia 10 de agosto às 12h, dentro do grupo fechado no WhatsApp: quem vai ser aprovado num concurso militar em 2027 começa a estudar do jeito certo agora.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://fenixconcursosmilitares.com.br/orcm/lp-a">
+<link rel="icon" type="image/webp" href="/resources/view/pages/kit-espcex/assets/fenix-logo.webp">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Fênix Concursos Militares">
+<meta property="og:title" content="O Recomeço · 10 de agosto às 12h">
+<meta property="og:description" content="Quem vai ser aprovado num concurso militar em 2027 começa a estudar do jeito certo agora — e você vai receber a melhor condição do ano pra isso.">
+<meta property="og:url" content="https://fenixconcursosmilitares.com.br/orcm/lp-a">
+<meta property="og:image" content="https://fenixconcursosmilitares.com.br/resources/view/pages/orcm/lp-a/assets/rugno.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+
+<style>
+/* Cores e medidas tiradas do export @2x do Figma (frame 988x2672):
+   header #1b0900 · barra #e4540b · laranja #e7550b · botão #e7610b
+   conteúdo = 875/988 = 88,6% da largura · input/botão = 123un · gaps 12un */
+:root{
+  --laranja:#e7550b; --laranja-btn:#e7610b; --barra:#e4540b;
+  --header:#1b0900;
+  --titulo:#3d3d3d; --titulo-leve:#6f6f6f; --corpo:#7a7a7a; --nota:#606061;
+  --branco:#fff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  color:var(--titulo);font-family:'Poppins','Century Gothic',system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  background:#e6e6e6;
+}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.015em}
+.wrap{max-width:620px;margin:0 auto;padding:0 22px}
+
+/* ================= Header ================= */
+.topo{background:var(--header)}
+.topo-in{max-width:1080px;margin:0 auto;padding:13px 26px;display:flex;align-items:center;gap:16px}
+.logo{flex:none;display:flex;align-items:center}
+.logo img{height:38px;width:auto;display:block}
+.divisor{width:1px;align-self:stretch;background:rgba(255,255,255,.16);flex:none}
+.data{display:flex;align-items:center;gap:10px;min-width:0}
+.data>span:last-child{display:block} /* sem isso o span inline soma leading e estica o header */
+.data-ico{width:22px;height:22px;border-radius:6px;flex:none;display:grid;place-items:center;background:var(--laranja)}
+.data b{display:block;color:#fff;font-size:14px;font-weight:700;line-height:1.25}
+.data small{display:block;color:rgba(255,255,255,.55);font-size:10.5px;line-height:1.3;margin-top:1px}
+.barra{height:3px;background:var(--barra)}
+/* No celular o header tem que caber numa linha só (o subtítulo do selo quebrava
+   em duas e esticava a barra). Logo menor + tipos menores resolvem sem cortar texto. */
+@media(max-width:430px){
+  .topo-in{padding:12px 18px;gap:12px}
+  .logo img{height:32px}
+  .data{gap:8px}
+  .data-ico{width:20px;height:20px}
+  .data b{font-size:12.5px}
+  .data small{font-size:9.5px}
+}
+@media(max-width:340px){
+  .data small{font-size:8.5px}
+}
+
+/* ================= Corpo ================= */
+main{
+  position:relative;
+  /* o fundo do Figma é claro no miolo e escurece nas bordas */
+  background:radial-gradient(120% 62% at 50% 26%,#fbfbfb 0%,#f1f1f1 46%,#e2e2e2 78%,#d9d9d9 100%);
+}
+.grade{position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(0,0,0,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.035) 1px,transparent 1px);
+  background-size:74px 74px;
+  mask-image:linear-gradient(180deg,transparent 0,#000 22%,#000 62%,transparent 100%)}
+/* padding-top, NUNCA o shorthand: o elemento é `class="wrap conteudo"`, e um
+   `padding: 26px 0 0` aqui zerava o padding lateral do .wrap — o hero inteiro
+   (título, texto, campos e botão) colava nas bordas da tela no celular. */
+.conteudo{position:relative;padding-top:26px}
+
+.kicker{display:block;font-size:9.5px;font-weight:700;letter-spacing:.42em;text-transform:uppercase;
+  color:var(--laranja);margin-bottom:14px}
+h1{font-size:clamp(19px,5.05vw,25px);line-height:1.2}
+h1 em{font-style:normal;color:var(--laranja)}
+h1 .leve{font-weight:500;color:var(--titulo-leve)}
+.lead{margin:19px 0 0;font-size:clamp(13.5px,3.7vw,16px);line-height:1.42;color:var(--corpo);font-weight:400}
+.lead b{display:block;color:#4a4a4a;font-weight:600}
+
+/* ---- Faixa "Inscreva-se agora!" ---- */
+.inscreva{display:flex;align-items:center;gap:9px;margin:26px 0 0}
+.inscreva-ico{width:15px;height:15px;border-radius:4px;flex:none;display:grid;place-items:center;background:var(--laranja)}
+.inscreva-txt{font-size:14.5px;font-weight:700;color:#3d3d3d}
+.inscreva-txt b{color:var(--laranja);font-weight:800}
+.inscreva .espaco{flex:1}
+.seta{width:17px;height:17px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--laranja);
+  border:0;cursor:pointer;padding:0}
+.linha{height:1px;margin:11px 0 13px;background:linear-gradient(90deg,rgba(0,0,0,.16),rgba(0,0,0,0) 78%)}
+
+/* ---- Form (proporções do Figma: input 123un ≈ 47px em 375) ---- */
+.campo{margin-bottom:5px}
+.campo input{width:100%;height:47px;padding:0 17px;border-radius:8px;border:0;background:var(--branco);
+  color:#3d3d3d;font-size:14.5px;font-family:inherit;box-shadow:0 1px 3px rgba(0,0,0,.07);transition:.16s}
+.campo input::placeholder{color:#a5a5a5}
+.campo input:focus{outline:0;box-shadow:0 0 0 2px rgba(231,85,11,.55),0 1px 3px rgba(0,0,0,.07)}
+.btn{width:100%;height:47px;margin-top:9px;border:0;border-radius:8px;cursor:pointer;
+  background:linear-gradient(180deg,#e7650b,#e75d0b);color:#fff;
+  font-family:inherit;font-size:16px;font-weight:800;letter-spacing:-.01em;
+  box-shadow:0 6px 16px rgba(231,97,11,.28);transition:.16s;position:relative;overflow:hidden}
+.btn:hover:not(:disabled){filter:brightness(1.05);box-shadow:0 8px 20px rgba(231,97,11,.36)}
+.btn:disabled{opacity:.75;cursor:not-allowed}
+.btn .brilho{position:absolute;top:0;left:-140%;width:55%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.26),transparent);animation:varre 3.8s infinite}
+@keyframes varre{0%{left:-140%}55%,100%{left:140%}}
+.msg{display:none;margin-top:9px;padding:10px 13px;border-radius:8px;font-size:13px}
+.msg.erro{display:block;background:#fdecec;border:1px solid #f5c2c2;color:#b91c1c}
+.nota{margin:15px 0 0;text-align:center;font-size:12.5px;color:var(--nota);font-weight:400}
+.nota b{color:#3d3d3d;font-weight:700}
+.risco{display:block;width:36px;height:2px;margin:11px auto 0;border-radius:2px;background:var(--laranja)}
+
+/* ================= Faixa de prova social ================= */
+/* Só o número: a base é quente e já conhece o Rugno (sem prints, sem depoimento). */
+.prova{background:var(--header);color:rgba(255,255,255,.86);text-align:center;
+  font-size:12.5px;font-weight:600;padding:9px 16px;line-height:1.35;margin:0}
+.prova b{color:#fff}
+
+/* ================= Contador ================= */
+/* Nasce [hidden] e o JS destrava: sem JS a página não mostra contador quebrado,
+   simplesmente não mostra contador. */
+.contador{margin:24px auto 0;text-align:center}
+.contador-tit{margin:0 0 9px;font-size:11.5px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--laranja)}
+.contador-grid{display:flex;justify-content:center;gap:8px}
+.contador-cel{min-width:64px;padding:9px 6px;border-radius:10px;background:#fff;
+  border:1px solid rgba(0,0,0,.09);box-shadow:0 6px 16px rgba(0,0,0,.06)}
+.contador-num{display:block;font-size:24px;font-weight:800;line-height:1;color:var(--header);
+  font-variant-numeric:tabular-nums}
+.contador-lbl{display:block;margin-top:4px;font-size:9.5px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:#9a8b83}
+@media (max-width:400px){.contador-cel{min-width:0;flex:1;padding:8px 2px}.contador-num{font-size:20px}}
+
+/* ================= Linha de FOMO ================= */
+.fomo{margin:10px auto 0;max-width:32ch;text-align:center;font-size:13px;font-weight:600;color:#7a6a62}
+
+/* ================= Rodapé legal ================= */
+footer p{margin:0}
+footer .legal{margin-top:7px}
+footer a{color:rgba(255,255,255,.62);text-decoration:underline}
+footer a:hover{color:#fff}
+footer .aviso{margin-top:9px;font-size:10.5px;color:rgba(255,255,255,.3)}
+
+/* ================= Selo de gratuidade ================= */
+/* Verde de propósito: precisa LER como "não custa nada" à primeira batida de
+   olho, sem competir com o botão laranja. */
+.gratis{display:flex;align-items:center;justify-content:center;gap:7px;
+  width:fit-content;margin:14px auto 0;padding:8px 15px;border-radius:999px;
+  background:#e9f7ef;border:1px solid #b7e3c6;
+  color:#1b7f43;font-size:12.5px;font-weight:600;line-height:1}
+.gratis b{font-weight:800}
+.gratis svg{flex:none}
+
+/* ================= Foto ================= */
+/* No Figma a foto é full-bleed num frame de celular; no desktop ela acompanha a
+   coluna (senão vira um retrato de 1200px de altura).
+   A foto guarda a proporção ORIGINAL em todo aparelho: o único corte é uma fatia
+   fixa do topo (margem negativa em % da LARGURA, então escala junto com a
+   imagem). Antes era aspect-ratio + object-fit:cover — aí o recorte mudava
+   conforme a proporção da tela e em alguns aparelhos comia a cabeça dele. */
+.foto{position:relative;margin:14px auto 0;max-width:620px;overflow:hidden}
+/* aspect-ratio + width/height no <img> RESERVAM a altura antes de carregar. Sem
+   isso a caixa nascia com 0px, nunca entrava na tela, o loading="lazy" nunca
+   disparava e a foto simplesmente não aparecia no celular. */
+.foto img{display:block;width:100%;height:auto;aspect-ratio:1080/1920;margin-top:-38%}
+.foto::after{content:'';position:absolute;top:0;left:0;right:0;height:70px;pointer-events:none;
+  background:linear-gradient(180deg,#ededed,rgba(237,237,237,0))}
+/* No desktop a foto inteira passaria de 850px de altura. O teto corta por BAIXO
+   (o fim da camiseta), nunca por cima — a cabeça fica sempre inteira. */
+@media(min-width:620px){.foto{max-height:760px}}
+
+/* ================= Seções de conteúdo (copy aprovada, veio da PR #3017) ================= */
+.secao{padding:40px 0 44px;position:relative}
+.secao h2{font-size:clamp(21px,5.6vw,27px);line-height:1.24}
+.secao h2 em{font-style:normal;color:var(--laranja)}
+.secao-sub{margin:13px 0 0;font-size:clamp(14px,3.8vw,16px);line-height:1.5;color:#4a4a4a;font-weight:600}
+.secao p{margin:13px 0 0;font-size:clamp(13.5px,3.7vw,15.5px);line-height:1.62;color:var(--corpo)}
+.secao p b{color:#3d3d3d;font-weight:700}
+.selo-data{display:inline-flex;align-items:center;gap:8px;margin-top:20px;padding:9px 15px;border-radius:8px;
+  background:var(--laranja);color:#fff;font-size:13.5px;font-weight:700}
+.historia{border-top:1px solid rgba(0,0,0,.07)}
+.historia .fecho{margin-top:16px;padding:15px 16px;border-radius:10px;background:var(--branco);
+  box-shadow:0 1px 3px rgba(0,0,0,.07);color:#4a4a4a}
+.btn-fim{display:block;width:100%;height:47px;line-height:47px;margin-top:20px;border-radius:8px;text-align:center;
+  text-decoration:none;background:linear-gradient(180deg,#e7650b,#e75d0b);color:#fff;font-size:16px;font-weight:700;
+  box-shadow:0 6px 16px rgba(231,97,11,.28);transition:.16s}
+.btn-fim:hover{filter:brightness(1.05);box-shadow:0 8px 20px rgba(231,97,11,.36)}
+/* A classe .js-anim só entra quando o JS confirma que consegue revelar de volta —
+   sem isso, uma falha de JS deixaria as seções invisíveis pra sempre. */
+.js-anim .revela{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s ease}
+.js-anim .revela.on{opacity:1;transform:none}
+
+footer{background:var(--header);color:rgba(255,255,255,.4);text-align:center;font-size:12px;padding:18px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5SHT8ZRC" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T5TW6G4S" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+<header class="topo">
+  <div class="topo-in">
+    <div class="logo">
+      <img src="/resources/view/pages/orcm/lp-a/assets/logo-recomeco.svg" alt="O Recomeço" width="382" height="126">
+    </div>
+    <div class="divisor"></div>
+    <div class="data">
+      <span class="data-ico">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+      </span>
+      <span>
+        <b>Dia 10 de agosto às&nbsp;12h</b>
+        <small>Dentro do grupo fechado no&nbsp;WhatsApp.</small>
+      </span>
+    </div>
+  </div>
+</header>
+<div class="barra"></div>
+<p class="prova"><b>+1.000 alunos aprovados</b> em concursos militares com o mesmo método</p>
+
+<main>
+  <div class="grade"></div>
+  <div class="wrap conteudo">
+    <span class="kicker">O Recomeço</span>
+
+    <h1>Quem vai ser <em>aprovado num concurso militar em 2027</em> começa a estudar do jeito certo agora,<span class="leve"> e você vai receber a melhor condição do ano pra isso.</span></h1>
+
+    <p class="lead"><b>Eu saí de ajudante de pedreiro a&nbsp;aprovado&nbsp;em</b>EFOMM, AFA, EsPCEx, EPCAR, CFO&nbsp;CBMERJ, CFO&nbsp;PMESP, ESA, EEAR, SD&nbsp;PMESP, CFN e&nbsp;EAM.</p>
+
+    <section class="contador" id="contador" hidden>
+      <p class="contador-tit">A condição abre em</p>
+      <div class="contador-grid">
+        <span class="contador-cel"><b class="contador-num" id="ct-d">--</b><span class="contador-lbl">dias</span></span>
+        <span class="contador-cel"><b class="contador-num" id="ct-h">--</b><span class="contador-lbl">horas</span></span>
+        <span class="contador-cel"><b class="contador-num" id="ct-m">--</b><span class="contador-lbl">min</span></span>
+        <span class="contador-cel"><b class="contador-num" id="ct-s">--</b><span class="contador-lbl">seg</span></span>
+      </div>
+    </section>
+
+    <div class="inscreva" id="form-box">
+      <span class="inscreva-ico">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h9"/></svg>
+      </span>
+      <span class="inscreva-txt">Inscreva-se <b>agora!</b></span>
+      <span class="espaco"></span>
+      <button type="button" class="seta" id="seta" data-form-link aria-label="Ir para o formulário">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+    </div>
+    <div class="linha"></div>
+
+    <form id="form-recomeco" novalidate>
+      <!-- ids no padrão rk-* (mesmo do mktn /ranking-esa e /ranking-efomm): é o que a
+           variável primária do GTM procura — 🍪 Email | JS 1 = querySelector('input#rk-email').
+           Os `name` seguem como nome/email/whatsapp: o backend (/orcm/lp-a/lead) e o fallback
+           do GTM (🍪 Email | JS 3 = [name="email"]) dependem deles. -->
+      <div class="campo"><input type="text" id="rk-nome" name="nome" autocomplete="name" placeholder="Seu nome" required></div>
+      <div class="campo"><input type="email" id="rk-email" name="email" autocomplete="email" placeholder="Seu melhor e-mail!" required></div>
+      <div class="campo"><input type="tel" id="rk-wpp" name="whatsapp" autocomplete="tel" placeholder="Seu telefone" inputmode="numeric" required></div>
+      <button type="submit" class="btn" id="btn-enviar"><span class="brilho"></span>Quero me inscrever!</button>
+      <div class="msg" id="msg"></div>
+    </form>
+
+    <p class="nota"><b>10/08 às&nbsp;12h</b> dentro do grupo fechado no <b>WhatsApp.</b></p>
+    <p class="gratis">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m20 6-11 11-5-5"/></svg>
+      <span>Entrada <b>100% gratuita</b> — você não paga nada para entrar</span>
+    </p>
+    <p class="fomo">Tem uma galera lá dentro e você ainda tá aqui.</p>
+    <span class="risco"></span>
+  </div>
+
+  <div class="foto">
+    <img src="/resources/view/pages/orcm/lp-a/assets/rugno.jpg" alt="Rugno, fundador da Fênix Concursos Militares"
+         width="1080" height="1920" loading="lazy" decoding="async">
+  </div>
+
+  <section class="secao">
+    <div class="wrap revela">
+      <h2>O que você vai <em>aprender?</em></h2>
+      <p class="secao-sub">Os 4 pilares essenciais para quem deseja ser aprovado rápido em concursos militares.</p>
+      <p>Eu vou te mostrar o passo a passo do método que criei para sair do zero e ser aprovado em 11 concursos militares, no mesmo prazo que você tem até a próxima janela de provas.</p>
+      <a href="#form-box" class="selo-data" id="selo-data" data-form-link>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+        10 de agosto às&nbsp;12h
+      </a>
+    </div>
+  </section>
+
+  <section class="secao historia">
+    <div class="wrap revela">
+      <h2>De servente, a <em>11 aprovações militares</em></h2>
+      <p>Nasci no interior de São Paulo e comecei a trabalhar ainda aos 12 anos. Em 2021, trabalhando como servente, decidi tentar meu primeiro concurso militar.</p>
+      <p>Não estudei de verdade: passei um mês só revisando algumas questões antigas, achando que isso seria suficiente. Fiz a prova e acertei <b>24&nbsp;de&nbsp;50</b>.</p>
+      <p>Voltei pra casa naquele dia me sentindo a pior pessoa do mundo.</p>
+      <p>Foi ali que percebi: não bastava revisar por cima, eu precisava estudar de verdade, com direção.</p>
+      <p>No dia seguinte, virei a chave. Entrei em modo caverna: abdiquei de vida social, lazer e qualquer distração, focado só no que realmente importava.</p>
+      <p>Um ano depois, tinha passado em <b>11 concursos&nbsp;militares</b>: EFOMM, AFA, EsPCEx, EPCAR, CFO&nbsp;CBMERJ, CFO&nbsp;PMESP, ESA, EEAR, SD&nbsp;PMESP, CFN e&nbsp;EAM.</p>
+      <p class="fecho">Não foi sorte, nem talento. Foi <b>método</b>. E é exatamente esse método que vou revelar dia 10 de agosto dentro do grupo fechado no&nbsp;WhatsApp.</p>
+      <a href="#form-box" class="btn-fim" id="cta-fim" data-form-link>Quero me inscrever!</a>
+      <p class="gratis">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m20 6-11 11-5-5"/></svg>
+        <span>Entrada <b>100% gratuita</b></span>
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>© Fênix Concursos Militares · J. G. S. Rugno LTDA · CNPJ 59.223.945/0001-15</p>
+  <p class="legal"><a href="/politica-de-privacidade">Política de Privacidade</a> · <a href="/termos-e-condicoes">Termos de Uso</a></p>
+  <p class="aviso">Este site não é afiliado ao Facebook ou a qualquer entidade do Facebook.</p>
+</footer>
+
+<script>
+/* ---------- Pageview no dashboard do mktn (denominador da conversão) ---------- */
+(function () {
+  try {
+    var u = (window.__fenixGetUtms && window.__fenixGetUtms()) || {};
+    var corpo = JSON.stringify({
+      page: 'recomeco/captura',
+      utm_source: u.utm_source || null, utm_medium: u.utm_medium || null,
+      utm_campaign: u.utm_campaign || null, utm_content: u.utm_content || null,
+      utm_term: u.utm_term || null, referrer: document.referrer || null
+    });
+    var url = 'https://mktn.fenixconcursosmilitares.com.br/api/recomeco/pageview';
+    if (navigator.sendBeacon) navigator.sendBeacon(url, corpo);
+    else fetch(url, { method: 'POST', body: corpo, keepalive: true, mode: 'cors' }).catch(function () {});
+  } catch (e) {}
+})();
+
+/* ---------- Indicação por influenciador (?ref=CODIGO) ----------
+   O link do influenciador é /orcm/lp-a?ref=<código dele>. Guardamos em localStorage
+   pra sobreviver a recarga/voltar pela landing sem o parâmetro, com chave PRÓPRIA do
+   lançamento (não a dos formulários) pra não herdar ref de outra campanha. Quem
+   resolve o código é o servidor — o placar vive em /admin/indicacoes. */
+function orcmRef() {
+  var K = 'orcmRef';
+  try {
+    var q = (new URLSearchParams(window.location.search).get('ref') || '').trim();
+    if (q) { try { localStorage.setItem(K, q); } catch (e) {} return q; }
+    return (localStorage.getItem(K) || '').trim();
+  } catch (e) { return ''; }
+}
+orcmRef(); /* persiste já na chegada, antes de qualquer navegação interna */
+
+/* ---------- Máscara de telefone ---------- */
+(function () {
+  var el = document.getElementById('rk-wpp');
+  el.addEventListener('input', function () {
+    var d = el.value.replace(/\D/g, '').slice(0, 11);
+    if (d.length > 6) el.value = '(' + d.slice(0, 2) + ') ' + d.slice(2, 7) + '-' + d.slice(7);
+    else if (d.length > 2) el.value = '(' + d.slice(0, 2) + ') ' + d.slice(2);
+    else el.value = d;
+  });
+})();
+
+/* ---------- Envio do lead ---------- */
+(function () {
+  var form = document.getElementById('form-recomeco');
+  var btn  = document.getElementById('btn-enviar');
+  var msg  = document.getElementById('msg');
+
+  function erro(texto) {
+    msg.textContent = texto;
+    msg.className = 'msg erro';
+    btn.disabled = false;
+    btn.innerHTML = '<span class="brilho"></span>Quero me inscrever!';
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    msg.className = 'msg';
+
+    var nome  = document.getElementById('rk-nome').value.trim();
+    var email = document.getElementById('rk-email').value.trim();
+    var wpp   = document.getElementById('rk-wpp').value.replace(/\D/g, '');
+
+    if (nome.length < 2) return erro('Digite seu nome completo.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return erro('Digite um e-mail válido.');
+    if (wpp.length < 10) return erro('Digite seu telefone com DDD.');
+
+    btn.disabled = true;
+    btn.innerHTML = 'Enviando...';
+
+    var utms = (window.__fenixGetUtms && window.__fenixGetUtms()) || {};
+    var corpo = {
+      nome: nome, email: email, whatsapp: wpp, origem: 'captura',
+      utm_source: utms.utm_source || '', utm_medium: utms.utm_medium || '',
+      utm_campaign: utms.utm_campaign || '', utm_content: utms.utm_content || '',
+      utm_term: utms.utm_term || '', fbclid: utms.fbclid || '',
+      referrer: document.referrer || '', landing_url: window.location.href,
+      ref: orcmRef()
+    };
+
+    fetch('/orcm/lp-a/lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(corpo)
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.success) {
+          // Conversão: dispara NO ENVIO, com o lead já gravado no servidor.
+          // O eventCallback do GTM segura o redirect até as tags terem disparado
+          // (eventTimeout evita ficar preso) e o setTimeout é a rede de segurança
+          // pra quando o GTM nem carrega (adblock) e o callback nunca vem.
+          var destino = d.redirect || '/orcm/lp-a/obrigado';
+          var seguiu = false;
+          // PISO DE TEMPO antes de sair da página: o eventCallback do GTM volta em ~300ms,
+          // e nesse tempo os rastreadores de TERCEIRO que capturam o lead no clique/submit
+          // (Dash Fácil, que é o dashboard do time de tráfego) ainda não terminaram de
+          // enviar — o redirect abortava a requisição e o lead não aparecia lá. Medido em
+          // 03/08: um preenchimento em que o usuário PAROU antes de clicar chegou no Dash
+          // Fácil (o envio do debounce, 1500ms, teve tempo); os leads reais, que clicam
+          // logo, não chegavam. Aqui garantimos ~PISO_MS desde o envio antes de navegar.
+          var t0 = Date.now();
+          var PISO_MS = 1200;
+          var seguir = function () {
+            if (seguiu) return;
+            seguiu = true;
+            var falta = Math.max(0, PISO_MS - (Date.now() - t0));
+            setTimeout(function () { window.location.href = destino; }, falta);
+          };
+          try {
+            window.dataLayer = window.dataLayer || [];
+            // `form_submit` é o ÚNICO evento de conversão desta página.
+            //
+            // ⚠️ NÃO empurrar `orcm_lead` aqui. Ele era empilhado antes do form_submit e
+            // gerava um SEGUNDO Lead: o container ANTIGO (GTM-T5TW6G4S), que ainda está
+            // instalado nestas páginas, tem o trigger [155] "gtm.formSubmit-/orcm/"
+            // escutando exatamente `orcm_lead` e disparando TRÊS tags de conversão —
+            // [156] GA4 generate_lead, [157] Facebook Ads Lead e [158] Google Ads Lead.
+            // Somadas às tags do container novo (GTM-5SHT8ZRC, trigger [50] em
+            // form_submit: [54] GA4, [97] FB Lead), cada lead virava 2 conversões em cada
+            // plataforma — foi o que o time de tráfego viu como "diferença entre leads do
+            // gerenciador e leads reais" (verificado na API do GTM em 06/08/2026).
+            //
+            // O trigger [50] do container novo NÃO tem filtro de página, então ele já
+            // cobre estas LPs: remover o `orcm_lead` não deixa a página sem conversão.
+            //
+            // event_id: id do lead gravado no banco.
+            //
+            // ⚠️ HOJE O GTM NÃO LÊ ESTE CAMPO. As tags de Lead usam variáveis próprias de
+            // event id — `{{Event ID}}` (template stape, no apex) e `{{event_id}}` (template
+            // do container mktn) —, que geram o id por conta própria. Verificado na API do
+            // GTM em 06/08/2026: a tag [97] FB Lead do apex e a [58] FB Lead (CAPI) do
+            // container server já compartilham o MESMO `{{Event ID}}`, então navegador e
+            // servidor já se deduplicam entre si sem depender daqui.
+            //
+            // Este campo fica como id ESTÁVEL disponível: `{{Event ID}}` é gerado por
+            // request, então se o mesmo lead reenviar (F5, retry) ele muda e o Meta conta
+            // duas vezes; o id do banco não muda. Pra valer, o time de tráfego precisa
+            // apontar a variável de event id para o dataLayer (`{{dlv - event_id}}`).
+            // Enquanto não fizerem, o campo é inofensivo — só não surte efeito.
+            window.dataLayer.push({
+              event: 'form_submit',
+              form_name: 'orcm_lp_a',
+              event_id: d.lead_id ? ('orcm_lp_a_' + d.lead_id) : ('orcm_lp_a_' + t0),
+              eventCallback: seguir,
+              eventTimeout: 2500
+            });
+          } catch (e) {}
+          // Rede de segurança pra quando o GTM não carrega (adblock) e o callback nunca
+          // vem. Acima do eventTimeout de propósito, senão cortaria o callback.
+          setTimeout(seguir, 2600);
+          return;
+        }
+        erro((d && d.message) || 'Não conseguimos salvar agora. Tente de novo.');
+      })
+      .catch(function () { erro('Falha de conexão. Tente de novo.'); });
+  });
+})();
+
+/* ---------- Setinha e CTA do fim levam pro primeiro campo ---------- */
+(function () {
+  function iraoForm(e) {
+    if (e) e.preventDefault();
+    var nome = document.getElementById('rk-nome');
+    nome.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(function () { nome.focus(); }, 380);
+  }
+  /* Por [data-form-link]: o selo de data virou gatilho de verdade (era <span>
+     decorativo — laranja, arredondado, idêntico ao CTA, e não clicava em nada). */
+  document.querySelectorAll('[data-form-link]').forEach(function (el) {
+    el.addEventListener('click', iraoForm);
+  });
+})();
+
+/* ---------- Revelar as seções ao rolar ---------- */
+(function () {
+  var alvos = document.querySelectorAll('.revela');
+  if (!alvos.length) return;
+  if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.documentElement.classList.add('js-anim'); // só agora as seções podem sumir
+  var io = new IntersectionObserver(function (linhas) {
+    linhas.forEach(function (l) { if (l.isIntersecting) { l.target.classList.add('on'); io.unobserve(l.target); } });
+  }, { threshold: .12 });
+  Array.prototype.forEach.call(alvos, function (a) { io.observe(a); });
+})();
+/* ---------- Contador até a abertura (10/08/2026, 12h de Brasília) ---------- */
+(function () {
+  var box = document.getElementById('contador');
+  if (!box) return;
+  var alvo = new Date('2026-08-10T12:00:00-03:00').getTime();
+  var cel = { d: document.getElementById('ct-d'), h: document.getElementById('ct-h'),
+              m: document.getElementById('ct-m'), s: document.getElementById('ct-s') };
+  if (!cel.d || !cel.h || !cel.m || !cel.s) return;
+  var timer = null;
+  function dois(n) { return (n < 10 ? '0' : '') + n; }
+  function tick() {
+    var falta = alvo - Date.now();
+    if (falta <= 0) { box.hidden = true; if (timer) clearInterval(timer); return; }
+    var s = Math.floor(falta / 1000);
+    cel.d.textContent = dois(Math.floor(s / 86400));
+    cel.h.textContent = dois(Math.floor(s % 86400 / 3600));
+    cel.m.textContent = dois(Math.floor(s % 3600 / 60));
+    cel.s.textContent = dois(s % 60);
+    box.hidden = false;
+  }
+  tick();
+  timer = setInterval(tick, 1000);
+})();
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"7621cbe1fa5544d78307f6d4faec1b0b","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>

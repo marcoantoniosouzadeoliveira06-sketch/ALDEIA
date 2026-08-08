@@ -10,6 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
         'videos': 'Vídeos',
         'artes': 'Artes Avulsas'
     };
+    const escapeHTML = (value) => String(value ?? '').replace(/[&<>'"]/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[char]));
+    const safeColor = (value) => /^#[0-9a-f]{6}$/i.test(value || '') ? value : '#ffffff';
+    const safeMedia = (value, fallback) => /^(?:https?:\/\/|\/?assets\/)/.test(value || '') ? value : fallback;
 
     // Retorna projetos padrão caso a API não tenha dados ou esteja offline
     function getFallbackProjects() {
@@ -84,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             el.className = 'portfolio-card';
             el.style.animationDelay = `${delay}s`;
             
-            const accentColor = p.accentColor || p.color || '#ffffff';
+            const accentColor = safeColor(p?.accentColor || p?.color);
             el.style.setProperty('--card-accent', accentColor);
 
             // Mapeamento de formatos de imagem
@@ -101,20 +106,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.style.aspectRatio = ratio;
             }
             
-            const catLabel = p.categoryLabel || CATEGORY_MAP[p.category] || 'Arte Avulsa';
+            const catLabel = escapeHTML(p?.categoryLabel || CATEGORY_MAP[p?.category] || 'Arte Avulsa');
+            const safeTitle = escapeHTML(p?.title || 'Projeto ALDEIA');
+            const safeCover = safeMedia(p?.cover, `assets/portfolio/${(index % 21) + 1}.webp`);
             const badgeStyle = `background: ${accentColor}22; border: 1px solid ${accentColor}66; color: ${accentColor === '#ffffff' ? '#fff' : accentColor};`;
             
             let creatorHtml = '';
-            if (p.member && p.member.name) {
+            if (p?.member?.name) {
+                const memberName = escapeHTML(p.member.name);
                 const rawPhoto = p.member.photo ? p.member.photo.trim() : '';
                 const fallbackAvatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.member.name) + '&background=random';
-                const photoSrc = rawPhoto || fallbackAvatar;
+                const photoSrc = safeMedia(rawPhoto, fallbackAvatar);
                 creatorHtml = `
                     <div class="portfolio-card-creator" style="display: flex; align-items: center; gap: 8px; margin-top: 12px; transform: translateY(10px); opacity: 0.8; transition: opacity 0.3s;">
-                        <img src="${photoSrc}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid ${accentColor}88;" alt="${p.member.name}" onerror="this.onerror=null;this.src='${fallbackAvatar}';">
+                        <img src="${escapeHTML(photoSrc)}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid ${accentColor}88;" alt="${memberName}" onerror="this.onerror=null;this.src='${fallbackAvatar}';">
                         <div style="display: flex; flex-direction: column; line-height: 1.2;">
                             <span style="font-size: 0.75rem; color: #aaa;">Criador</span>
-                            <span style="font-size: 0.85rem; color: #fff; font-weight: 600;">${p.member.name}</span>
+                            <span style="font-size: 0.85rem; color: #fff; font-weight: 600;">${memberName}</span>
                         </div>
                     </div>
                 `;
@@ -122,21 +130,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             el.innerHTML = `
                 <div class="portfolio-card-img">
-                    <img src="${p.cover}" alt="${p.title}" loading="lazy" onerror="this.onerror=null;this.src='assets/portfolio/${(index % 21) + 1}.webp';">
+                    <img src="${escapeHTML(safeCover)}" alt="${safeTitle}" loading="lazy" onerror="this.onerror=null;this.src='assets/portfolio/${(index % 21) + 1}.webp';">
                 </div>
                 <div class="portfolio-card-badge" style="${badgeStyle}">${catLabel}</div>
                 <div class="portfolio-card-overlay">
                     <span class="portfolio-card-cat" style="color:${accentColor}">${catLabel}</span>
-                    <h3 class="portfolio-card-title">${p.title}</h3>
+                    <h3 class="portfolio-card-title">${safeTitle}</h3>
                     ${creatorHtml}
                 </div>
             `;
             
             el.addEventListener('click', () => {
                 if (window.__aldeiaTracker && window.__aldeiaTracker.trackPortfolioClick) {
-                    window.__aldeiaTracker.trackPortfolioClick(p.title);
+                    window.__aldeiaTracker.trackPortfolioClick(p?.title || 'Projeto ALDEIA');
                 }
-                window.location.href = 'projeto.html?id=' + p.id;
+                window.location.href = 'projeto.html?id=' + encodeURIComponent(p?.id || 'p1');
             });
             grid.appendChild(el);
         });

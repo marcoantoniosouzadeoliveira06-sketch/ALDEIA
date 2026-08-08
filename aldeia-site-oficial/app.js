@@ -523,18 +523,9 @@
             if (callback) callback();
             return;
         }
-        let i = 0;
-        el.textContent = '';
-        function type() {
-            if (i < text.length) {
-                el.textContent += text.charAt(i);
-                i++;
-                setTimeout(type, speed);
-            } else if (callback) {
-                callback();
-            }
-        }
-        type();
+        el.textContent = text;
+        el.dataset.text = text;
+        if (callback) callback();
     }
 
     // ===== PROFILE CARD 3D TILT ENGINE =====
@@ -695,76 +686,222 @@
     initProfileCards();
 
     // ===== LANGUAGE SELECTOR =====
+    if (!window.__aldeiaTranslatorBound) {
     const langBtn = document.getElementById('lang-btn');
     const langDropdown = document.getElementById('lang-dropdown');
     const langCurrent = document.querySelector('.lang-current');
+
+    const languagePacks = {
+        en: {
+            nav: ['Home', 'About', 'Portfolio', 'Solutions', 'Founders'],
+            mobile: ['/01 Home', '/02 About', '/03 Portfolio', '/04 Solutions', '/05 Questions', '/06 Founders', '/07 Contact'],
+            hero: ['UNIQUE PROJECTS', 'NEED A', 'UNIQUE AGENCY'],
+            heroSubtitle: 'You are visiting the agency trusted by major names in e-sports, events and competitive gaming in Brazil and abroad.',
+            about: 'We work with <em>professional designers focused on design and marketing for major brands and e-sports teams in Brazil and abroad.</em> Our focus is clear: <strong>websites, landing pages, visual identity, branding and high-impact creative work,</strong> with maximum attention to aesthetics, experience and technology.',
+            aboutCards: ['We create for different markets and international clients, always exploring identity, visual rhythm and interaction.', 'Based in São Paulo and Rio de Janeiro, we work remotely with brands that value excellent design and premium digital presence.'],
+            scroll: 'SCROLL DOWN',
+            labels: ['About Aldeia', 'Aldeia Identity', 'Projects', 'Services', 'FAQ', 'Founders & CEOs'],
+            headings: ['PORTFOLIO', 'SOLUTIONS', 'QUESTIONS', 'MINDSET'],
+            identity: 'AGENCY DNA',
+            portfolioSubtitle: 'Projects that raise perception. Every detail, interaction and visual choice is designed to position your brand at the right level.',
+            portfolioTitle: 'Case Gallery',
+            portfolioButton: 'VIEW THE FULL PORTFOLIO ↗',
+            services: '<strong>It is not about volume. It is about quality.</strong><br>Brands, websites and creative work built with strategy, aesthetics and intent.',
+            serviceTitles: ['Websites and Landing Pages', 'Logo and Visual Identity', 'Social Media Creative'],
+            serviceTexts: ['Websites with bold design, modern interactions and real performance, built to communicate value and generate results.', 'From strategy to symbol: memorable brands with purpose and a complete brand guide.', 'Social media as a premium visual showcase aligned with the brand’s positioning.'],
+            faqQuestions: ['Does payment need to be made upfront?', 'When does the project begin?', 'What is the delivery timeline?', 'Can I request changes?', 'Which tools do you use to build websites?', 'What makes Aldeia different?'],
+            faqAnswers: ['No. Projects are split into 50% at the start and 50% upon final delivery. Credit card installments are also available.', 'After quote approval and the 50% deposit, the project enters the production schedule.', 'Timelines vary by scope: landing pages usually take 7–10 business days, while institutional websites and visual identities start at approximately 15 business days.', 'Yes. Every project includes an adjustment stage within the agreed scope.', 'We develop with HTML, CSS and JavaScript to ensure maximum performance, complete layout freedom and a publication-ready delivery.', 'We combine strategic design, creative direction and technology to build distinctive work with purpose.'],
+            faq: ['Important answers before we begin.', 'Clarity is part of every well-executed project.'],
+            founders: 'The minds behind the agency’s design and strategic positioning.',
+            cta: 'Let’s <strong>take it off the drawing board</strong> and bring it to life.',
+            budget: 'Request a quote',
+            future: 'If you want something <strong>above the standard,</strong> we are ready to build it.',
+            footer: 'Looking for something <strong>outside the standard?</strong><br>Let’s talk.',
+            footerHeadings: ['Navigation', 'Social', 'Contact'],
+            copyright: 'Aldeia Studio © 2026. All rights reserved.',
+            modalTitle: 'Request your quote',
+            modalDescription: 'Tell us your idea and let’s bring your project to life.',
+            formLabels: ['Full name', 'Contact email', 'WhatsApp', 'Instagram (Optional)', 'Project idea'],
+            submit: 'Send proposal'
+        },
+        es: {
+            nav: ['Inicio', 'Nosotros', 'Portafolio', 'Soluciones', 'Fundadores'],
+            mobile: ['/01 Inicio', '/02 Nosotros', '/03 Portafolio', '/04 Soluciones', '/05 Preguntas', '/06 Fundadores', '/07 Contacto'],
+            hero: ['PROYECTOS ÚNICOS', 'NECESITAN UNA', 'AGENCIA ÚNICA'],
+            heroSubtitle: 'Estás en el sitio de la agencia elegida por grandes nombres de los e-sports, eventos y gaming competitivo de Brasil y del exterior.',
+            about: 'Trabajamos con <em>diseñadores profesionales enfocados en diseño y marketing para grandes marcas y equipos de e-sports de Brasil y del exterior.</em> Nuestro foco es claro: <strong>sitios web, landing pages, identidad visual, branding y piezas de alto impacto,</strong> con máxima atención a la estética, la experiencia y la tecnología.',
+            aboutCards: ['Creamos para distintos mercados y clientes internacionales, explorando identidad, ritmo visual e interacción.', 'Desde São Paulo y Río de Janeiro, trabajamos de forma remota con marcas que valoran el diseño excelente y una presencia digital premium.'],
+            scroll: 'DESPLÁZATE HACIA ABAJO',
+            labels: ['Sobre Aldeia', 'Identidad Aldeia', 'Proyectos', 'Servicios', 'Preguntas', 'Fundadores y CEOs'],
+            headings: ['PORTAFOLIO', 'SOLUCIONES', 'PREGUNTAS', 'MENTALIDAD'],
+            identity: 'ADN DE LA AGENCIA',
+            portfolioSubtitle: 'Proyectos que elevan la percepción. Cada detalle, interacción y elección visual posiciona tu marca en el nivel correcto.',
+            portfolioTitle: 'Galería de casos',
+            portfolioButton: 'VER EL PORTAFOLIO COMPLETO ↗',
+            services: '<strong>No se trata de volumen, sino de nivel.</strong><br>Marcas, sitios y piezas creativas desarrolladas con estrategia, estética e intención.',
+            serviceTitles: ['Sitios web y landing pages', 'Logotipo e identidad visual', 'Creatividades para redes sociales'],
+            serviceTexts: ['Sitios con diseño sólido, interacciones modernas y rendimiento real, pensados para comunicar valor y generar resultados.', 'De la estrategia al símbolo: marcas memorables con propósito y un manual completo.', 'Las redes sociales como vitrina visual premium alineada con el posicionamiento de la marca.'],
+            faqQuestions: ['¿El pago debe hacerse al contado?', '¿Cuándo comienza el proyecto?', '¿Cuál es el plazo de entrega?', '¿Puedo solicitar cambios?', '¿Qué herramientas utilizan para crear sitios?', '¿Qué hace diferente a Aldeia?'],
+            faqAnswers: ['No. Los proyectos se dividen en 50% al inicio y 50% en la entrega final. También es posible pagar con tarjeta.', 'Después de aprobar el presupuesto y abonar el 50%, el proyecto entra en la agenda de producción.', 'Los plazos varían según el alcance: una landing page suele tardar de 7 a 10 días hábiles; los sitios institucionales y las identidades visuales comienzan alrededor de 15 días.', 'Sí. Cada proyecto incluye una etapa de ajustes dentro del alcance acordado.', 'Desarrollamos con HTML, CSS y JavaScript para garantizar máximo rendimiento, libertad visual y una entrega lista para publicar.', 'Combinamos diseño estratégico, dirección creativa y tecnología para crear trabajos distintivos con propósito.'],
+            faq: ['Respuestas importantes antes de comenzar.', 'La claridad forma parte de todo proyecto bien ejecutado.'],
+            founders: 'Las mentes detrás del diseño y el posicionamiento estratégico de la agencia.',
+            cta: 'Vamos a <strong>sacarlo del borrador</strong> y hacerlo realidad.',
+            budget: 'Solicitar presupuesto',
+            future: 'Si buscas algo <strong>por encima del estándar,</strong> estamos listos para construirlo.',
+            footer: '¿Buscas algo <strong>fuera de lo común?</strong><br>Hablemos.',
+            footerHeadings: ['Navegación', 'Redes', 'Contacto'],
+            copyright: 'Aldeia Studio © 2026. Todos los derechos reservados.',
+            modalTitle: 'Solicita tu presupuesto',
+            modalDescription: 'Cuéntanos tu idea y demos vida a tu proyecto.',
+            formLabels: ['Nombre completo', 'Correo de contacto', 'WhatsApp', 'Instagram (Opcional)', 'Idea del proyecto'],
+            submit: 'Enviar propuesta'
+        },
+        fr: {
+            nav: ['Accueil', 'À propos', 'Portfolio', 'Solutions', 'Fondateurs'],
+            mobile: ['/01 Accueil', '/02 À propos', '/03 Portfolio', '/04 Solutions', '/05 Questions', '/06 Fondateurs', '/07 Contact'],
+            hero: ['PROJETS UNIQUES', 'MÉRITENT UNE', 'AGENCE UNIQUE'],
+            heroSubtitle: 'Vous êtes sur le site de l’agence choisie par de grands noms de l’e-sport, de l’événementiel et du gaming compétitif au Brésil et à l’étranger.',
+            about: 'Nous travaillons avec <em>des designers professionnels spécialisés dans le design et le marketing pour de grandes marques et équipes d’e-sport au Brésil et à l’étranger.</em> Notre objectif est clair : <strong>sites web, landing pages, identité visuelle, branding et créations à fort impact,</strong> avec une attention maximale portée à l’esthétique, à l’expérience et à la technologie.',
+            aboutCards: ['Nous créons pour différents marchés et clients internationaux, en explorant l’identité, le rythme visuel et l’interaction.', 'Basés à São Paulo et Rio de Janeiro, nous travaillons à distance avec des marques qui valorisent l’excellence du design et une présence numérique premium.'],
+            scroll: 'FAITES DÉFILER',
+            labels: ['À propos d’Aldeia', 'Identité Aldeia', 'Projets', 'Services', 'FAQ', 'Fondateurs et CEOs'],
+            headings: ['PORTFOLIO', 'SOLUTIONS', 'QUESTIONS', 'VISION'],
+            identity: 'ADN DE L’AGENCE',
+            portfolioSubtitle: 'Des projets qui élèvent la perception. Chaque détail, interaction et choix visuel positionne votre marque au bon niveau.',
+            portfolioTitle: 'Galerie de projets',
+            portfolioButton: 'VOIR LE PORTFOLIO COMPLET ↗',
+            services: '<strong>Ce n’est pas une question de volume, mais de niveau.</strong><br>Marques, sites et créations conçus avec stratégie, esthétique et intention.',
+            serviceTitles: ['Sites web et landing pages', 'Logo et identité visuelle', 'Créations pour réseaux sociaux'],
+            serviceTexts: ['Des sites au design affirmé, aux interactions modernes et aux performances réelles, conçus pour transmettre de la valeur et générer des résultats.', 'De la stratégie au symbole : des marques mémorables, porteuses de sens, avec un guide complet.', 'Les réseaux sociaux comme vitrine visuelle premium, alignée sur le positionnement de la marque.'],
+            faqQuestions: ['Le paiement doit-il être effectué comptant ?', 'Quand le projet commence-t-il ?', 'Quel est le délai de livraison ?', 'Puis-je demander des modifications ?', 'Quels outils utilisez-vous pour créer les sites ?', 'Qu’est-ce qui distingue Aldeia ?'],
+            faqAnswers: ['Non. Les projets sont réglés à 50% au démarrage et à 50% lors de la livraison finale. Le paiement par carte est également possible.', 'Après validation du devis et versement de l’acompte de 50%, le projet entre dans le planning de production.', 'Les délais varient selon le périmètre : une landing page prend généralement 7 à 10 jours ouvrés, tandis que les sites institutionnels et identités visuelles commencent autour de 15 jours.', 'Oui. Chaque projet comprend une phase d’ajustements dans le périmètre convenu.', 'Nous développons en HTML, CSS et JavaScript afin de garantir des performances maximales, une liberté visuelle totale et une livraison prête à publier.', 'Nous associons design stratégique, direction créative et technologie pour créer des projets distinctifs et porteurs de sens.'],
+            faq: ['Des réponses importantes avant de commencer.', 'La clarté fait partie de tout projet bien exécuté.'],
+            founders: 'Les esprits derrière le design et le positionnement stratégique de l’agence.',
+            cta: 'Sortons-le <strong>du brouillon</strong> pour lui donner vie.',
+            budget: 'Demander un devis',
+            future: 'Si vous cherchez quelque chose <strong>au-dessus des standards,</strong> nous sommes prêts à le construire.',
+            footer: 'Vous cherchez quelque chose <strong>hors norme ?</strong><br>Parlons-en.',
+            footerHeadings: ['Navigation', 'Réseaux', 'Contact'],
+            copyright: 'Aldeia Studio © 2026. Tous droits réservés.',
+            modalTitle: 'Demandez votre devis',
+            modalDescription: 'Parlez-nous de votre idée et donnons vie à votre projet.',
+            formLabels: ['Nom complet', 'E-mail de contact', 'WhatsApp', 'Instagram (Optionnel)', 'Idée du projet'],
+            submit: 'Envoyer la proposition'
+        }
+    };
+
+    const originalLanguageContent = new Map();
+
+    const rememberAndSet = (element, value, useHtml = false) => {
+        if (!element || value == null) return;
+        if (!originalLanguageContent.has(element)) {
+            originalLanguageContent.set(element, {
+                html: element.innerHTML,
+                text: element.textContent
+            });
+        }
+        if (useHtml) element.innerHTML = value;
+        else element.textContent = value;
+    };
+
+    const setMany = (selector, values, useHtml = false) => {
+        document.querySelectorAll(selector).forEach((element, index) => {
+            if (values[index] != null) rememberAndSet(element, values[index], useHtml);
+        });
+    };
+
+    const restorePortuguese = () => {
+        originalLanguageContent.forEach((content, element) => {
+            if (element.isConnected) element.innerHTML = content.html;
+        });
+    };
+
+    const applyNativeTranslation = (language) => {
+        if (language === 'pt') {
+            restorePortuguese();
+            return;
+        }
+
+        const pack = languagePacks[language];
+        if (!pack) return;
+
+        setMany('#gooey-nav nav a', pack.nav);
+        setMany('.mobile-nav-links .mobile-nav-link', pack.mobile);
+        setMany('.hero-title-cinematic > span', pack.hero.slice(0, 2));
+        const typewriter = document.getElementById('typewriter-text');
+        if (typewriter) {
+            typewriter.dataset.text = pack.hero[2];
+            rememberAndSet(typewriter, pack.hero[2]);
+        }
+        rememberAndSet(document.getElementById('hero-subtitle'), pack.heroSubtitle);
+        rememberAndSet(document.getElementById('about-big-text'), pack.about, true);
+        setMany('.about-cards > .about-card p', pack.aboutCards);
+        rememberAndSet(document.querySelector('.hero-scroll-cinematic span'), pack.scroll);
+        setMany('main .section-label .label-text', pack.labels);
+        setMany('main .mega-title', pack.headings);
+        rememberAndSet(document.querySelector('.logos-section-title'), pack.identity);
+        rememberAndSet(document.getElementById('home-port-subtitle'), pack.portfolioSubtitle);
+        rememberAndSet(document.getElementById('home-port-title'), pack.portfolioTitle);
+        rememberAndSet(document.getElementById('home-port-btn'), pack.portfolioButton);
+        rememberAndSet(document.getElementById('services-desc'), pack.services, true);
+        setMany('#services-accordion-list .svc-title', pack.serviceTitles);
+        setMany('#services-accordion-list .svc-text > p', pack.serviceTexts);
+        setMany('#faq-list-container .faq-q', pack.faqQuestions);
+        setMany('#faq-list-container .faq-answer', pack.faqAnswers);
+        setMany('#faq-desc-container p', pack.faq);
+        rememberAndSet(document.querySelector('#fundadores .section-desc'), pack.founders);
+        rememberAndSet(document.querySelector('#contato .cta-left p'), pack.cta, true);
+        document.querySelectorAll('[data-budget-trigger]:not(#floating-whatsapp-widget)')
+            .forEach((element) => rememberAndSet(element, `${pack.budget}<span class="btn-arrow-icon">→</span>`, true));
+        rememberAndSet(document.getElementById('future-subtitle'), pack.future, true);
+        rememberAndSet(document.getElementById('footer-desc'), pack.footer, true);
+        setMany('footer .footer-col:not(.footer-brand) h4', pack.footerHeadings);
+        rememberAndSet(document.querySelector('.footer-bottom span'), pack.copyright);
+        rememberAndSet(document.querySelector('#modal-form-screen h2'), pack.modalTitle);
+        rememberAndSet(document.querySelector('#modal-form-screen > p'), pack.modalDescription);
+        setMany('#modal-cadastro-form .input-label', pack.formLabels);
+        rememberAndSet(document.getElementById('m-btn-text'), pack.submit);
+    };
 
     if (langBtn && langDropdown) {
         // Toggle dropdown
         langBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             langDropdown.classList.toggle('active');
+            langBtn.setAttribute('aria-expanded', String(langDropdown.classList.contains('active')));
         });
 
         // Close on click outside
         document.addEventListener('click', () => {
             langDropdown.classList.remove('active');
+            langBtn.setAttribute('aria-expanded', 'false');
         });
 
-        // Parse cookie to show active language
-        const getCookie = (name) => {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        };
-
-        const googtrans = getCookie('googtrans');
-        if (googtrans) {
-            const activeLang = googtrans.split('/').pop().toUpperCase();
-            if (langCurrent) langCurrent.textContent = activeLang;
-        } else {
-            if (langCurrent) langCurrent.textContent = 'PT';
-        }
+        const activeLanguage = localStorage.getItem('aldeia_language') || 'pt';
+        if (langCurrent) langCurrent.textContent = activeLanguage.toUpperCase();
+        window.addEventListener('load', () => {
+            applyNativeTranslation(activeLanguage);
+            setTimeout(() => applyNativeTranslation(activeLanguage), 1200);
+        }, { once: true });
     }
 
     // Function to change language
     window.changeLanguage = function(langCode) {
         const targetLang = langCode.toLowerCase();
-        const domain = window.location.hostname;
-        const isLocalhost = domain === 'localhost' || domain === '127.0.0.1' || /^(\d+\.){3}\d+$/.test(domain);
+        if (targetLang !== 'pt' && !languagePacks[targetLang]) return;
 
-        // Delete previous cookies to avoid conflicts/duplicates
-        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=" + domain + ";";
-        if (!isLocalhost) {
-            document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=." + domain + ";";
-            const parts = domain.split('.');
-            if (parts.length > 2) {
-                const parentDomain = parts.slice(-2).join('.');
-                document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=." + parentDomain + ";";
-            }
-        }
-
-        if (targetLang !== 'pt') {
-            // Set cookie for both domain and path (omit domain on localhost)
-            document.cookie = "googtrans=/pt/" + targetLang + "; path=/;";
-            if (!isLocalhost) {
-                document.cookie = "googtrans=/pt/" + targetLang + "; path=/; domain=" + domain + ";";
-                document.cookie = "googtrans=/pt/" + targetLang + "; path=/; domain=." + domain + ";";
-            }
-        }
-
-        // Dynamically trigger Google Translate dropdown in the DOM if it is loaded
-        const selectEl = document.querySelector('.goog-te-combo');
-        if (selectEl) {
-            selectEl.value = targetLang === 'pt' ? '' : targetLang;
-            selectEl.dispatchEvent(new Event('change'));
-            if (langCurrent) langCurrent.textContent = targetLang.toUpperCase();
-        } else {
-            // Fallback: reload the page so Google Translate reads the newly set cookie on load
-            location.reload();
-        }
+        document.documentElement.lang = targetLang === 'pt' ? 'pt-BR' : targetLang;
+        localStorage.setItem('aldeia_language', targetLang);
+        if (langCurrent) langCurrent.textContent = targetLang.toUpperCase();
+        langDropdown?.classList.remove('active');
+        langBtn?.setAttribute('aria-expanded', 'false');
+        applyNativeTranslation(targetLang);
+        window.dispatchEvent(new CustomEvent('aldeia:languagechange', {
+            detail: { language: targetLang }
+        }));
     };
+    window.__aldeiaTranslatorBound = true;
+    }
 
     // ===== GOOEY NAV COMPONENT (ALDEIA STYLE) =====
     function initGooeyNav() {

@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ALDEIA | Agência de Design & Performance Digital</title>
     <!-- FAVICON ALDEIA -->
-    <link rel="icon" type="image/svg+xml" href="assets/logo-tp.svg">
-    <link rel="alternate icon" type="image/webp" href="assets/logo-primaria.webp">
+    <link rel="icon" type="image/svg+xml" href="/assets/logo-isotype.svg">
     <link rel="apple-touch-icon" href="assets/logo-primaria.webp">
     <meta name="description" content="Criação de sites com UI/UX e design de alto padrão. Projetos para empresas exigentes que buscam presença digital diferenciada.">
     <meta name="keywords" content="agência de design, web design, UI UX, design estratégico, performance digital, sites de alta conversão, e-sports design, identidade visual">
@@ -25,15 +24,15 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Fragment+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Inter:wght@300;400;500;600;700;900&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
     <link href="https://api.fontshare.com/v2/css?f[]=clash-display@300,400,500,600,700&display=swap" rel="stylesheet">
 
     <style>html.lenis,html.lenis-smooth{scroll-behavior:auto!important}.lenis-target{scroll-behavior:auto!important}</style>
-    <link rel="stylesheet" href="style.css?v=9">
+    <link rel="stylesheet" href="style.css?v=69">
     <link rel="stylesheet" href="components/LogoLoop.css">
     <link rel="stylesheet" href="components/GradualBlur.css">
     <link rel="stylesheet" href="components/ShinyText.css">
-    <link rel="stylesheet" href="components/ScrollFloat.css">
+    <link rel="stylesheet" href="components/ScrollFloat.css?v=64">
     <link rel="stylesheet" href="components/MetallicPaint.css">
     <!-- JSON-LD Structured Data for SEO -->
     <script type="application/ld+json">
@@ -123,7 +122,7 @@
             <div class="nav-actions">
                 <!-- Seletor de Idioma -->
                 <div class="lang-selector">
-                    <button class="lang-btn" id="lang-btn" aria-label="Mudar Idioma">
+                    <button class="lang-btn" id="lang-btn" aria-label="Mudar idioma" aria-expanded="false" aria-controls="lang-dropdown">
                         <svg class="globe-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
                             <line x1="2" y1="12" x2="22" y2="12"></line>
@@ -137,16 +136,11 @@
                         <button onclick="changeLanguage('en')">English</button>
                         <button onclick="changeLanguage('es')">Español</button>
                         <button onclick="changeLanguage('fr')">Français</button>
-                        <button onclick="changeLanguage('de')">Deutsch</button>
-                        <button onclick="changeLanguage('it')">Italiano</button>
-                        <button onclick="changeLanguage('nl')">Nederlands</button>
-                        <button onclick="changeLanguage('pl')">Polski</button>
-                        <button onclick="changeLanguage('sv')">Svenska</button>
                     </div>
                 </div>
 
                 <!-- Theme Switcher Widget -->
-                <button id="theme-toggle-btn" class="theme-toggle" aria-label="Alternar Tema" style="margin-right: 15px;">
+                <button id="theme-toggle-btn" class="theme-toggle" aria-label="Ativar tema claro" aria-pressed="false">
                     <svg id="theme-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
@@ -186,15 +180,15 @@
             </div>
 
             <!-- Centered Cinematic Content -->
-            <div class="hero-content-centered">
+            <div class="hero-content-centered qma-container">
                 <h1 class="hero-title-cinematic">
-                    <span class="line-1 reveal-line shiny-text" style="--color: #a8a8a8; --shine-color: #ffffff;" id="hero-title-l1">PROJETOS ÚNICOS</span>
-                    <span class="line-2 reveal-line shiny-text" style="--color: #a8a8a8; --shine-color: #ffffff;" id="hero-title-l2">PRECISAM DE UMA</span>
-                    <span class="line-3"><span id="typewriter-text" class="shiny-text" style="--color: #a8a8a8; --shine-color: #ffffff;">AGÊNCIA ÚNICA</span><span class="typewriter-cursor">|</span></span>
+                    <span class="line-1 reveal-line shiny-text" style="--color: rgba(255, 255, 255, 0.7); --shine-color: rgba(255, 255, 255, 0.9);" id="hero-title-l1">PROJETOS ÚNICOS</span>
+                    <span class="line-2 reveal-line shiny-text" style="--color: rgba(255, 255, 255, 0.7); --shine-color: rgba(255, 255, 255, 0.9);" id="hero-title-l2">PRECISAM DE UMA</span>
+                    <span class="line-3"><span id="typewriter-text" class="shiny-text" style="--color: rgba(255, 255, 255, 0.7); --shine-color: rgba(255, 255, 255, 0.9);">AGÊNCIA ÚNICA</span><span class="typewriter-cursor">|</span></span>
                 </h1>
                 
                 <p class="hero-subtitle-cinematic" id="hero-subtitle">
-                    Vc está no site da agência que trabalhou com grandes nomes no cenário de e-sports FURY (FREE FIRE), INFURIOUS (CALL OF COD), STRESSED GAMING (FREE FIRE), POCOYO EVENTS (ORGANIZAÇÃO DE EVENTOS - FREE FIRE), VIKINGS (FREE FIRE) e dentre outros nomes
+                    Design estratégico e experiências digitais para marcas que querem ocupar um lugar único — com a confiança de grandes nomes do cenário competitivo no Brasil e no exterior.
                 </p>
                 
                 <div class="hero-scroll-cinematic">
@@ -480,7 +474,7 @@
                 <video preload="none" autoplay muted loop playsinline><source src="assets/hero-bg.mp4" type="video/mp4"></video>
                 <div class="cta-overlay"></div>
             </div>
-            <div class="cta-inner">
+            <div class="cta-inner qma-container" id="orcamento">
                 <div class="logo-contact-wrap reveal-up">
                     <div class="logo-contact-circle">
                         <img src="assets/logo-isotype.svg" class="logo-contact" alt="ALDEIA Icon">
@@ -489,7 +483,7 @@
                 <div class="cta-left reveal-up" data-delay="0.1">
                     <p>Vamos <strong>tirar isso do rascunho</strong> e levar para...</p>
                 </div>
-                <a href="javascript:void(0)" onclick="openBudgetModal()" class="btn-cta reveal-up" data-delay="0.2">Faça um orçamento<span class="btn-arrow-icon">→</span></a>
+                <a href="#orcamento" class="btn-cta reveal-up" data-budget-trigger data-delay="0.2" aria-controls="budget-modal">Faça um orçamento<span class="btn-arrow-icon">→</span></a>
             </div>
         </section>
 
@@ -535,7 +529,7 @@
                     <img src="assets/logo-tp.svg" class="logo-footer" alt="ALDEIA Logo">
                 </div>
                 <p id="footer-desc">Buscando algo <strong>fora do padrão?</strong><br>Vamos conversar.</p>
-                <a href="javascript:void(0)" onclick="openBudgetModal()" class="btn-cta btn-cta-sm">Faça um orçamento<span class="btn-arrow-icon">→</span></a>
+                <a href="#orcamento" class="btn-cta btn-cta-sm" data-budget-trigger aria-controls="budget-modal">Faça um orçamento<span class="btn-arrow-icon">→</span></a>
             </div>
             <div class="footer-col">
                 <h4>Navegação</h4>
@@ -579,23 +573,12 @@
         </defs>
     </svg>
 
-    <!-- GOOGLE TRANSLATE ELEMENT -->
-    <div id="google_translate_element" style="display:none;"></div>
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-                pageLanguage: 'pt',
-                autoDisplay: false
-            }, 'google_translate_element');
-        }
-    </script>
-    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="assets/tracker.js"></script>
-    <script src="app.js"></script>
+    <script src="assets/translator.js?v=71"></script>
+    <script src="app.js?v=72"></script>
     <script>setTimeout(function(){var p=document.getElementById('preloader');if(p&&!p.classList.contains('loaded')){p.classList.add('loaded');setTimeout(function(){p.style.display='none';if(window.lenis)window.lenis.start()},800)}},3000);</script>
 
     <!-- MODAL ORÇAMENTO -->
@@ -804,6 +787,7 @@
         })();
 
         function openBudgetModal() {
+            document.getElementById('orcamento')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             const modal = document.getElementById('budget-modal');
             const formScreen = document.getElementById('modal-form-screen');
             const successScreen = document.getElementById('modal-success-screen');
@@ -815,6 +799,7 @@
             modal.style.display = 'flex';
             setTimeout(() => {
                 modal.classList.add('active');
+                document.getElementById('m-nome')?.focus({ preventScroll: true });
             }, 10);
             
             if (window.lenis) window.lenis.stop();
@@ -845,6 +830,7 @@
         const modalSubmitBtn = document.getElementById('m-btn-envio');
         const modalBtnText = document.getElementById('m-btn-text');
         
+        modalForm.dataset.submitBound = 'true';
         modalForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -1281,6 +1267,9 @@
         const moonSvgHtml = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
 
         function updateThemeUI(isLight) {
+            document.documentElement.classList.toggle('dark', !isLight);
+            document.body.classList.toggle('dark', !isLight);
+            document.documentElement.classList.toggle('light', isLight);
             if (isLight) {
                 document.body.classList.add('light-theme');
                 if (themeIcon) themeIcon.innerHTML = sunSvgHtml;
@@ -1288,24 +1277,26 @@
                 document.body.classList.remove('light-theme');
                 if (themeIcon) themeIcon.innerHTML = moonSvgHtml;
             }
+            if (themeToggleBtn) {
+                themeToggleBtn.setAttribute('aria-pressed', String(isLight));
+                themeToggleBtn.setAttribute('aria-label', isLight ? 'Ativar tema escuro' : 'Ativar tema claro');
+            }
         }
 
-        // Check saved preference
         const savedTheme = localStorage.getItem('aldeia_theme');
-        updateThemeUI(savedTheme === 'light');
+        const prefersLight = window.matchMedia?.('(prefers-color-scheme: light)').matches;
+        updateThemeUI(savedTheme ? savedTheme === 'light' : prefersLight);
 
-        if (themeToggleBtn) {
-            themeToggleBtn.addEventListener('click', () => {
-                const isLight = document.body.classList.toggle('light-theme');
-                localStorage.setItem('aldeia_theme', isLight ? 'light' : 'dark');
-                updateThemeUI(isLight);
-            });
-        }
+        themeToggleBtn?.addEventListener('click', () => {
+            const nextIsLight = !document.body.classList.contains('light-theme');
+            localStorage.setItem('aldeia_theme', nextIsLight ? 'light' : 'dark');
+            updateThemeUI(nextIsLight);
+        });
     </script>
 
 
     <!-- FLOATING WIDGETS -->
-    <a href="javascript:void(0)" onclick="openBudgetModal()" id="floating-whatsapp-widget" class="floating-cta" aria-label="Fazer Orçamento">
+    <a href="#orcamento" id="floating-whatsapp-widget" class="floating-cta" data-budget-trigger aria-label="Fazer Orçamento" aria-controls="budget-modal">
         <svg class="silver-svg" viewBox="0 0 24 24" width="34" height="34">
             <defs>
                 <linearGradient id="silverGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -1385,7 +1376,7 @@
 
             // 3. Form Submission Integration
             const cForm = document.getElementById('modal-cadastro-form');
-            if (cForm) {
+            if (cForm && cForm.dataset.submitBound !== 'true') {
                 cForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const submitBtn = cForm.querySelector('button[type="submit"]');

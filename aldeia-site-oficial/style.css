@@ -631,7 +631,7 @@ body.preloader-done #main-nav.hide-nav {
     font-family: var(--font-h);
     font-weight: 700;
     font-size: clamp(3rem, 10vw, 7rem);
-    line-height: 0.95;
+    line-height: 1.1;
     letter-spacing: -0.02em;
     text-transform: uppercase;
 }
@@ -718,7 +718,7 @@ body.preloader-done #main-nav.hide-nav {
     font-family: var(--font-h);
     font-weight: 700;
     font-size: clamp(2.5rem, 6.2vw, 5.8rem);
-    line-height: 1; /* Tighter for premium look */
+    line-height: 1.1;
     text-transform: uppercase;
     letter-spacing: -0.01em;
     display: flex;
@@ -1706,7 +1706,7 @@ body.dg-scroll-lock {
     font-family: var(--font-h);
     font-weight: 800;
     font-size: clamp(3.5rem, 11vw, 9rem);
-    line-height: 0.85;
+    line-height: 1.1;
     letter-spacing: -0.03em;
 }
 
@@ -3183,7 +3183,8 @@ footer {
 .lang-dropdown {
     position: absolute;
     top: calc(100% + 8px);
-    right: 0;
+    right: auto;
+    left: 0;
     width: 140px;
     background: rgba(10, 10, 10, 0.85);
     backdrop-filter: blur(20px);
@@ -4272,4 +4273,346 @@ body.light-theme .scroll-to-top:hover {
     height: 100%;
     object-fit: cover;
     display: block;
+}
+
+/* =========================================================
+   QMA LANDING REFINEMENT — PUBLIC SITE ONLY
+   ========================================================= */
+:root {
+    --bg: #050505;
+    --bg2: #0a0a0a;
+    --bg-card: #0a0a0a;
+    --text: rgba(255, 255, 255, 0.9);
+    --text-muted: rgba(255, 255, 255, 0.7);
+    --text-dim: rgba(255, 255, 255, 0.5);
+    --border: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.2);
+    --qma-container: 1280px;
+    --font-display-heavy: 'Sora', 'Clash Display', sans-serif;
+}
+
+html,
+body {
+    background: #050505;
+}
+
+body {
+    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: normal;
+}
+
+.qma-container,
+.section-container,
+.cta-inner {
+    width: 100%;
+    max-width: var(--qma-container);
+    margin-inline: auto;
+    padding-inline: 24px;
+}
+
+main > section:not(.hero-section) {
+    position: relative;
+    padding-block: 128px;
+}
+
+main > section,
+.hero-video-bg,
+.hero-marquee-wrapper-dual,
+.logoloop,
+.portfolio-banner-container,
+.portfolio-banner-link,
+.cta-banner,
+.cta-video-bg {
+    overflow: hidden;
+}
+
+.hero-section {
+    min-height: 100dvh;
+    background: #050505;
+}
+
+.hero-content-centered {
+    max-width: var(--qma-container);
+    align-items: center;
+    text-align: center;
+}
+
+.hero-title-cinematic {
+    font-family: var(--font-display-heavy);
+    max-width: 960px;
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-weight: 800;
+    letter-spacing: -0.06em;
+    line-height: 1.15;
+    padding-block: 12px;
+    overflow: visible;
+    text-wrap: balance;
+    margin-inline: auto;
+}
+
+main h1,
+main h2 {
+    color: rgba(255, 255, 255, 0.9);
+    font-family: var(--font-display-heavy);
+    font-weight: 800;
+    letter-spacing: -0.06em;
+    line-height: 1.15;
+    text-wrap: balance;
+}
+
+.hero-subtitle-cinematic {
+    max-width: 640px;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: normal;
+    margin-inline: auto;
+    text-align: center;
+}
+
+.hero-scroll-cinematic {
+    align-self: center;
+    text-align: center;
+}
+
+.mega-title,
+.logos-section-title,
+.portfolio-banner-content h3,
+.future-title-wrapper {
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+}
+
+.mega-title {
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.logos-section-title,
+.portfolio-banner-content h3 {
+    font-family: var(--font-display-heavy);
+    font-weight: 800;
+    line-height: 1.15;
+    padding-block: 12px;
+}
+
+.hero-title-cinematic > span,
+.hero-title-cinematic .shiny-text,
+.scroll-float-text,
+.scroll-float-text .char {
+    line-height: 1.15;
+    padding-block: 4px;
+    overflow: visible;
+}
+
+body.light-theme {
+    --bg: #f5f5f4;
+    --bg2: #e7e5e4;
+    --bg-card: #ffffff;
+    --text: rgba(5, 5, 5, 0.9);
+    --text-muted: rgba(5, 5, 5, 0.7);
+    --text-dim: rgba(5, 5, 5, 0.5);
+    --border: rgba(5, 5, 5, 0.1);
+    --border-hover: rgba(5, 5, 5, 0.2);
+    background: #f5f5f4;
+    color: rgba(5, 5, 5, 0.9);
+}
+
+body.light-theme main,
+body.light-theme main > section:not(.hero-section),
+body.light-theme footer {
+    background-color: #f5f5f4;
+}
+
+body.light-theme main h1,
+body.light-theme main h2,
+body.light-theme .section-desc,
+body.light-theme .faq-desc,
+body.light-theme .about-card p,
+body.light-theme .future-text,
+body.light-theme footer p {
+    color: rgba(5, 5, 5, 0.9);
+}
+
+body.light-theme .about-card,
+body.light-theme .portfolio-banner-container {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(5, 5, 5, 0.1);
+}
+
+body.light-theme :not(.btn-cta):not(.floating-cta):not(.btn-convert) {
+    --accent: rgba(5, 5, 5, 0.9);
+}
+
+.section-desc,
+.faq-desc,
+.about-card p,
+.future-text,
+footer p {
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: normal;
+}
+
+.section-label,
+.project-category,
+.portfolio-card-category,
+footer h4 {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.about-card,
+.portfolio-banner-container {
+    background: #0a0a0a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.services-accordion,
+.faq-list {
+    gap: 16px;
+    background: transparent;
+    border: 0;
+}
+
+.svc-item,
+.faq-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    overflow: hidden;
+    transition: transform 300ms var(--ease), background-color 300ms var(--ease), border-color 300ms var(--ease);
+}
+
+.svc-item:last-child {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.svc-item:hover,
+.svc-item.active,
+.faq-item:hover,
+.faq-item.active {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.svc-header {
+    padding-inline: 24px;
+}
+
+.svc-item.active .svc-body {
+    padding: 0 24px 24px;
+}
+
+.faq-item.active .faq-answer {
+    padding: 0 24px 24px 80px;
+}
+
+.faq-item.active .faq-answer > * {
+    padding: 0;
+}
+
+body.light-theme .services-accordion,
+body.light-theme .faq-list {
+    background: transparent;
+    border: 0;
+}
+
+body.light-theme .svc-item,
+body.light-theme .faq-item {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(5, 5, 5, 0.1);
+}
+
+.about-card,
+.portfolio-banner-container {
+    transition: transform 300ms var(--ease), background-color 300ms var(--ease), border-color 300ms var(--ease), box-shadow 300ms var(--ease);
+}
+
+:where(a, button, [role="button"], .service-item, .faq-item) {
+    transition: transform 300ms var(--ease), background-color 300ms var(--ease), border-color 300ms var(--ease), color 300ms var(--ease), opacity 300ms var(--ease);
+}
+
+:where(a, button, [role="button"]):active {
+    transform: scale(0.95);
+}
+
+:where(.btn-vamos, .btn-cta, .pc-contact-btn, .lang-btn, .faq-btn, .floating-cta):hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.about-card:hover,
+.portfolio-banner-container:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(255, 255, 255, 0.05);
+}
+
+.portfolio-banner-img img,
+.pc-card .avatar {
+    transition: transform 600ms var(--ease), opacity 300ms var(--ease);
+}
+
+.portfolio-banner-link:hover .portfolio-banner-img img {
+    transform: scale(1.04);
+}
+
+@media (min-width: 1024px) {
+    .qma-container,
+    .section-container,
+    .cta-inner {
+        padding-inline: 48px;
+    }
+}
+
+@media (max-width: 768px) {
+    main > section:not(.hero-section) {
+        padding-block: 96px;
+    }
+
+    .hero-content-centered {
+        align-items: center;
+        text-align: center;
+    }
+
+    .hero-title-cinematic {
+        font-size: clamp(2.5rem, 12vw, 4rem);
+    }
+
+    .mega-title {
+        font-size: clamp(2.5rem, 12vw, 4rem);
+    }
+
+    .faq-item.active .faq-answer {
+        padding: 0 24px 24px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* HERO — preserva acentos e mantém o título sempre completo. */
+.hero-content-centered {
+    padding-block: 16px;
+}
+
+.hero-title-cinematic {
+    line-height: 1.2;
+    padding-block: 16px;
+}
+
+.hero-title-cinematic > span,
+.hero-title-cinematic .shiny-text {
+    padding-block: 6px;
+    overflow: visible;
+}
+
+.typewriter-cursor {
+    display: none;
 }
