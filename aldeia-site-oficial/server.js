@@ -705,7 +705,13 @@ const upload = multer({
 // ===== MIDDLEWARES =====
 app.set('trust proxy', 1);
 
-const defaultOrigins = ['https://aldeiadesign.com.br', 'https://www.aldeiadesign.com.br'];
+const renderExternalHostname = String(process.env.RENDER_EXTERNAL_HOSTNAME || '').trim();
+const defaultOrigins = [
+    'https://aldeiadesign.com.br',
+    'https://www.aldeiadesign.com.br',
+    'https://aldeia-agencia-oficial.onrender.com'
+];
+if (renderExternalHostname) defaultOrigins.push(`https://${renderExternalHostname}`);
 if (process.env.NODE_ENV !== 'production') {
     defaultOrigins.push('http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001');
 }
