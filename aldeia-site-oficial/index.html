@@ -31,8 +31,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://api.fontshare.com">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="preconnect" href="https://unpkg.com">
     <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Inter:wght@300;400;500;600;700;900&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
     <link href="https://api.fontshare.com/v2/css?f[]=clash-display@300,400,500,600,700&display=swap" rel="stylesheet">
 
@@ -97,7 +95,7 @@
         <canvas id="preloader-grain"></canvas>
         <div class="preloader-content">
             <div class="preloader-logo-wrap">
-                <img src="assets/logo-tp.svg" class="preloader-logo" id="preloader-text" alt="ALDEIA">
+                <img src="assets/logo-tp.svg" class="preloader-logo" id="preloader-text" alt="ALDEIA" width="1993" height="393">
             </div>
         </div>
         <div class="preloader-panel left-panel"></div>
@@ -114,7 +112,7 @@
         <div class="gradual-blur" data-position="top" data-strength="3" data-div-count="8" data-curve="ease-out" style="position: absolute; inset: 0; height: 100%; z-index: -1;"></div>
         <div class="nav-inner">
             <a href="#inicio" class="nav-logo" aria-label="Agência Aldeia — voltar ao início">
-                <img src="assets/logo-tp.svg" class="logo-nav" alt="Logotipo da Agência Aldeia">
+                <img src="assets/logo-tp.svg" class="logo-nav" alt="Logotipo da Agência Aldeia" width="1993" height="393">
             </a>
 
             <div class="nav-center">
@@ -186,8 +184,7 @@
         <section id="inicio" class="hero-section">
             <!-- Background Video Fullscreen in Grayscale -->
             <div class="hero-video-bg" aria-hidden="true">
-                <video muted loop playsinline id="hero-video" preload="metadata" poster="assets/portfolio/1.webp">
-                    <source src="assets/hero-bg.mp4" type="video/mp4">
+                <video muted loop playsinline id="hero-video" preload="none" data-src="assets/hero-bg.mp4" poster="assets/portfolio/1.webp">
                     <track kind="captions" srclang="pt-BR" label="Português" src="assets/captions-pt-br.vtt" default>
                 </video>
                 <div class="hero-video-overlay"></div>
@@ -492,7 +489,9 @@
         <!-- ===== CTA BANNER ===== -->
         <section id="contato" class="cta-banner">
             <div class="cta-video-bg">
-                <video preload="none" autoplay muted loop playsinline><source src="assets/hero-bg.mp4" type="video/mp4"></video>
+                <video id="cta-video" preload="none" muted loop playsinline aria-hidden="true" data-src="assets/hero-bg.mp4">
+                    <track kind="captions" srclang="pt-BR" label="Português" src="assets/captions-pt-br.vtt" default>
+                </video>
                 <div class="cta-overlay"></div>
             </div>
             <div class="cta-inner qma-container" id="orcamento">

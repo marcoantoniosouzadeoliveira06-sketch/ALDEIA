@@ -802,6 +802,9 @@ app.use((req, res, next) => {
     next();
 });
 
+// Evita conteúdo duplicado: a URL canônica da página inicial é sempre a raiz.
+app.get('/index.html', (req, res) => res.redirect(301, '/'));
+
 app.use(express.static(ROOT_DIR, {
     maxAge: '1d',
     dotfiles: 'deny',

@@ -424,6 +424,11 @@
     // ===== VIDEO PAUSE/PLAY ON VISIBILITY =====
     const heroVideo = document.getElementById('hero-video');
     if (heroVideo) {
+        const loadHeroVideo = () => {
+            if (heroVideo.currentSrc || !heroVideo.dataset.src) return;
+            heroVideo.src = heroVideo.dataset.src;
+            heroVideo.load();
+        };
         const videoObserver = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
@@ -431,6 +436,7 @@
                     const mobileDataSaver = window.matchMedia('(max-width: 768px)').matches
                         || navigator.connection?.saveData;
                     if (entry.isIntersecting && !reducedMotion && !mobileDataSaver) {
+                        loadHeroVideo();
                         heroVideo.play().catch(() => {});
                     } else {
                         heroVideo.pause();
@@ -440,6 +446,18 @@
             { threshold: 0.25 }
         );
         videoObserver.observe(heroVideo);
+    }
+
+    const ctaVideo = document.getElementById('cta-video');
+    if (ctaVideo) {
+        const ctaVideoObserver = new IntersectionObserver((entries, observer) => {
+            if (!entries[0]?.isIntersecting) return;
+            ctaVideo.src = ctaVideo.dataset.src || '';
+            ctaVideo.load();
+            ctaVideo.play().catch(() => {});
+            observer.disconnect();
+        }, { rootMargin: '240px' });
+        ctaVideoObserver.observe(ctaVideo);
     }
 
     // ===== HERO SCROLL DOTS =====
