@@ -31,10 +31,10 @@ const ROOT_DIR = __dirname;
 
 // ===== CONFIGURAÇÃO DE SEGURANÇA E ADMIN =====
 const DEFAULT_ADMIN_USERNAME = 'japex';
-const DEFAULT_ADMIN_PASSWORD = '123japex';
+const DEFAULT_ADMIN_PASSWORD = 'japex123';
 const USER_PROFILES_FILE = 'user_profiles.json';
-const ADMIN_PASSWORD_HASH = (process.env.ADMIN_PASSWORD_HASH_OVERRIDE || process.env.ADMIN_PASSWORD_HASH || '').trim().toLowerCase();
-const HAS_VALID_ADMIN_HASH = /^[a-f0-9]{64}$/.test(ADMIN_PASSWORD_HASH);
+const ADMIN_PASSWORD_HASH = (process.env.ADMIN_PASSWORD_HASH_OVERRIDE || process.env.ADMIN_PASSWORD_HASH || '').trim();
+const HAS_VALID_ADMIN_HASH = /^\$2[aby]\$\d{2}\$/.test(ADMIN_PASSWORD_HASH) || /^[a-f0-9]{64}$/.test(ADMIN_PASSWORD_HASH);
 const BOOTSTRAP_SESSION_SECRET = crypto.createHash('sha256').update('aldeia-japex-session-v1').digest('hex');
 const SESSION_SIGNING_SECRET = process.env.SESSION_SIGNING_SECRET || (HAS_VALID_ADMIN_HASH ? ADMIN_PASSWORD_HASH : BOOTSTRAP_SESSION_SECRET);
 const VIEW_FINGERPRINT_SECRET = process.env.VIEW_FINGERPRINT_SECRET || SESSION_SIGNING_SECRET;
@@ -874,11 +874,7 @@ async function bootstrapUserProfiles() {
     const japexProfile = profiles[DEFAULT_ADMIN_USERNAME];
     const isEmpty = Object.keys(profiles).length === 0;
     const missingJapex = !japexProfile;
-    const weakCredential = japexProfile && (
-        !japexProfile.passwordHash ||
-        japexProfile.passwordHash === 'japex123' ||
-        japexProfile.passwordHash === DEFAULT_ADMIN_PASSWORD
-    );
+    const weakCredential = japexProfile && !isSupportedPasswordHash(japexProfile.passwordHash);
 
     if (isEmpty || missingJapex || weakCredential) {
         profiles[DEFAULT_ADMIN_USERNAME] = {
@@ -886,7 +882,7 @@ async function bootstrapUserProfiles() {
             role: 'admin',
             displayName: japexProfile?.displayName || 'Marco',
             avatar: isSafeMediaUrl(japexProfile?.avatar) ? japexProfile.avatar.trim() : '/assets/japex.webp',
-            passwordHash: await bcrypt.hash(DEFAULT_ADMIN_PASSWORD, 12),
+            passwordHash: HAS_VALID_ADMIN_HASH ? ADMIN_PASSWORD_HASH : await bcrypt.hash(DEFAULT_ADMIN_PASSWORD, 12),
             active: true,
             isRoot: true
         };
@@ -952,6 +948,7 @@ async function verifyAccountPassword(password, account) {
     let storedHash = String(account.passwordHash || '').trim();
     const isRootAdmin = account.isRoot || String(account.username).toLowerCase() === DEFAULT_ADMIN_USERNAME;
 
+    if (isRootAdmin && HAS_VALID_ADMIN_HASH) storedHash = ADMIN_PASSWORD_HASH;
     if (!storedHash && isRootAdmin) {
         if (HAS_VALID_ADMIN_HASH) storedHash = ADMIN_PASSWORD_HASH;
         else return password === DEFAULT_ADMIN_PASSWORD;

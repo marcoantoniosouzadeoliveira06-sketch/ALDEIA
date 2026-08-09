@@ -7,3 +7,9 @@ services:
     envVars:
       - key: PORT
         value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SIGNING_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD_HASH
+        sync: false

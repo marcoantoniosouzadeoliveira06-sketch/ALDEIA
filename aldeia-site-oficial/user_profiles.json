@@ -4,7 +4,7 @@
     "role": "admin",
     "displayName": "Marco",
     "avatar": "https://res.cloudinary.com/iszvbnc9/image/upload/v1786195627/aldeia_uploads/xinune4wfjnhsny3szzg.webp",
-    "passwordHash": "123japex",
+    "passwordHash": "$2b$12$7ktsRxYKeIM8t5/RTFVX4uhMKBq2kkxYXE0/MRqqr5FlkQzumYOXy",
     "active": true,
     "isRoot": true
   }
