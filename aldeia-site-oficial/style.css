@@ -984,15 +984,17 @@ body.preloader-done #main-nav.hide-nav {
 .btn-cta {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    background: var(--accent);
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 20px;
+    background: #ffffff;
     color: #000000;
     font-size: 0.85rem;
-    font-weight: 600;
-    border-radius: 8px;
-    transition: all 0.3s var(--ease);
-    border: none;
+    font-weight: 700;
+    border-radius: 999px;
+    letter-spacing: 0.01em;
+    transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), background 0.3s var(--ease);
+    border: 1px solid rgba(255, 255, 255, 0.55);
     white-space: nowrap;
 }
 
@@ -1004,7 +1006,8 @@ body.preloader-done #main-nav.hide-nav {
 }
 
 .btn-cta-sm {
-    padding: 10px 18px;
+    min-height: 40px;
+    padding: 0 16px;
     font-size: 0.8rem;
 }
 
@@ -3645,8 +3648,8 @@ body.light-theme .scroll-to-top:hover {
    ========================================= */
 .portfolio-banner-container {
     width: 100%;
-    margin-top: 40px;
-    border-radius: 20px;
+    margin-top: 24px;
+    border-radius: 32px;
     overflow: hidden;
     position: relative;
 }
@@ -3656,7 +3659,7 @@ body.light-theme .scroll-to-top:hover {
     position: relative;
     width: 100%;
     aspect-ratio: 21/9;
-    min-height: 400px;
+    min-height: 340px;
     background: #111;
     overflow: hidden;
     text-decoration: none;
@@ -3683,7 +3686,7 @@ body.light-theme .scroll-to-top:hover {
 .portfolio-banner-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 100%);
+    background: linear-gradient(115deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 62%, rgba(0,0,0,0.5) 100%);
     z-index: 1;
 }
 
@@ -3693,10 +3696,10 @@ body.light-theme .scroll-to-top:hover {
     z-index: 2;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 40px;
+    justify-content: flex-end;
+    align-items: flex-start;
+    text-align: left;
+    padding: 28px;
 }
 
 .portfolio-banner-content h3 {
@@ -3711,14 +3714,37 @@ body.light-theme .scroll-to-top:hover {
 }
 
 .banner-btn {
-    padding: 18px 40px;
-    font-size: 1.1rem;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--color-white);
-    transition: all 0.4s ease;
-    transform: translateY(20px);
+    min-height: 48px;
+    padding: 0 16px 0 20px;
+    font-size: 0.82rem;
+    background: rgba(255, 255, 255, 0.96);
+    color: #050505;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+    animation: portfolio-cta-breathe 3.4s ease-in-out infinite;
+}
+
+.banner-btn::after {
+    content: '↗';
+    display: grid;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    border-radius: 50%;
+    background: #090909;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: transform 0.3s var(--ease), background 0.3s var(--ease);
+}
+
+.portfolio-banner-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.15) 50%, transparent 62%);
+    transform: translateX(-120%);
+    animation: portfolio-banner-sweep 7s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 .portfolio-banner-link:hover .portfolio-banner-img {
@@ -3730,22 +3756,39 @@ body.light-theme .scroll-to-top:hover {
 }
 
 .portfolio-banner-link:hover .banner-btn {
-    background: var(--color-white);
-    color: var(--color-black);
-    transform: translateY(20px) scale(1.05);
+    background: #ffffff;
+    color: #000000;
+    transform: translateY(-3px) scale(1.02);
+    animation-play-state: paused;
+}
+
+.portfolio-banner-link:hover .banner-btn::after {
+    transform: translate(2px, -2px) rotate(8deg);
+    background: var(--accent);
+}
+
+@keyframes portfolio-cta-breathe {
+    0%, 100% { transform: translateY(0); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28); }
+    50% { transform: translateY(-4px); box-shadow: 0 18px 38px rgba(0, 0, 0, 0.38); }
+}
+
+@keyframes portfolio-banner-sweep {
+    0%, 55% { transform: translateX(-120%); }
+    76%, 100% { transform: translateX(120%); }
 }
 
 @media (max-width: 768px) {
     .portfolio-banner-link {
         aspect-ratio: 1/1;
-        min-height: 350px;
+        min-height: 310px;
     }
     .portfolio-banner-content h3 {
         font-size: 2.2rem;
     }
     .banner-btn {
-        font-size: 0.95rem;
-        padding: 14px 28px;
+        font-size: 0.76rem;
+        min-height: 44px;
+        padding: 0 14px 0 18px;
     }
 }
 
@@ -4636,7 +4679,7 @@ body.light-theme .faq-item {
     gap: 20px;
     padding: 28px;
     overflow: hidden;
-    border-radius: 20px;
+    border-radius: 32px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
 }
 
