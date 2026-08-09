@@ -461,6 +461,12 @@ body.preloader-done #main-nav.hide-nav {
     transition: transform 0.3s var(--ease);
 }
 
+.btn-arrow svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+}
+
 .btn-vamos:hover .btn-arrow {
     transform: translateX(3px);
 }
@@ -4609,19 +4615,6 @@ body.light-theme .faq-item {
     max-width: 1100px;
     padding-left: 32px;
     border-left: 1px solid rgba(255, 255, 255, 0.22);
-}
-
-.about-big-text::before {
-    content: 'ALDEIA / 01';
-    position: absolute;
-    left: -9px;
-    top: -24px;
-    padding: 0 8px;
-    background: var(--bg);
-    color: rgba(255, 255, 255, 0.48);
-    font-family: var(--font-m);
-    font-size: 0.62rem;
-    letter-spacing: 0.14em;
 }
 
 .about-big-text p {
