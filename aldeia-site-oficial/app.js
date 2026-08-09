@@ -7,7 +7,7 @@
 
     // ===== LENIS SMOOTH SCROLL =====
     let lenis;
-    try {
+    if (typeof window.Lenis === 'function' && window.matchMedia('(pointer: fine)').matches) try {
         lenis = new Lenis({
             duration: 1.2,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -27,9 +27,7 @@
 
         // Stop during preloader
         lenis.stop();
-    } catch (e) {
-        console.warn('Lenis not loaded:', e);
-    }
+    } catch (_) {}
 
     // ===== PRELOADER =====
     const preloader = document.getElementById('preloader');
@@ -58,14 +56,14 @@
                         if (typeof startHeroAnimations === 'function') {
                             startHeroAnimations();
                         }
-                    }, 400);
+                    }, 180);
                     
                     // Step 5: Clean up preloader display
                     setTimeout(() => {
                         preloader.style.display = 'none';
-                    }, 800);
-                }, 400);
-            }, 1200);
+                    }, 360);
+                }, 240);
+            }, 420);
         } else {
             // Fallback rápido se não houver conteúdo do preloader
             preloader.classList.add('loaded');
@@ -81,26 +79,19 @@
 
     // ===== GRAIN CANVAS =====
     function initGrain(canvasId, parentEl) {
+        if (window.matchMedia('(max-width: 768px)').matches) return;
         const canvas = document.getElementById(canvasId);
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
         const parent = parentEl || canvas.parentElement;
 
-        function resize() {
-            canvas.width = parent.offsetWidth;
-            canvas.height = parent.offsetHeight;
-        }
-        resize();
-        window.addEventListener('resize', resize);
-
         function renderGrain() {
+            const scale = 0.5;
+            canvas.width = Math.max(1, Math.floor(parent.offsetWidth * scale));
+            canvas.height = Math.max(1, Math.floor(parent.offsetHeight * scale));
             const w = canvas.width;
             const h = canvas.height;
-            if (w === 0 || h === 0) {
-                requestAnimationFrame(renderGrain);
-                return;
-            }
             const imageData = ctx.createImageData(w, h);
             const data = imageData.data;
 
@@ -113,9 +104,9 @@
             }
 
             ctx.putImageData(imageData, 0, 0);
-            requestAnimationFrame(renderGrain);
         }
         renderGrain();
+        window.addEventListener('resize', () => requestAnimationFrame(renderGrain), { passive: true });
     }
 
     initGrain('preloader-grain');
@@ -436,7 +427,10 @@
         const videoObserver = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
+                    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    const mobileDataSaver = window.matchMedia('(max-width: 768px)').matches
+                        || navigator.connection?.saveData;
+                    if (entry.isIntersecting && !reducedMotion && !mobileDataSaver) {
                         heroVideo.play().catch(() => {});
                     } else {
                         heroVideo.pause();
@@ -1218,10 +1212,7 @@
 
     // 3. ScrollFloat Initialization
     function initScrollFloat() {
-        if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
-            console.warn('GSAP or ScrollTrigger not loaded for ScrollFloat');
-            return;
-        }
+        if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
         gsap.registerPlugin(ScrollTrigger);
 
         const floaters = document.querySelectorAll('.scroll-float');
@@ -1776,7 +1767,15 @@
 
     try { if (typeof initGradualBlur === 'function') initGradualBlur(); } catch (e) {}
     try { if (typeof initScrollFloat === 'function') initScrollFloat(); } catch (e) {}
-    try { if (typeof initMetallicPaint === 'function') initMetallicPaint(); } catch (e) {}
+    const metallicPaintTarget = document.querySelector('.metallic-paint');
+    if (metallicPaintTarget && typeof initMetallicPaint === 'function') {
+        const metallicObserver = new IntersectionObserver((entries, observer) => {
+            if (!entries.some(entry => entry.isIntersecting)) return;
+            try { initMetallicPaint(); } catch (_) {}
+            observer.disconnect();
+        }, { rootMargin: '240px 0px' });
+        metallicObserver.observe(metallicPaintTarget);
+    }
     try { if (typeof initGooeyNav === 'function') initGooeyNav(); } catch (e) {}
 
     loadDynamicCMSContent();

@@ -4826,6 +4826,17 @@ body.light-theme .faq-item {
     border: 0;
 }
 
+@media (max-width: 768px) {
+    #preloader-grain,
+    #hero-grain {
+        display: none;
+    }
+
+    .hero-video-bg {
+        background: #050505 center / cover no-repeat url('assets/portfolio/1.webp');
+    }
+}
+
 /* PORTFOLIO — mesma linguagem de vidro e pílulas da navegação. */
 .portfolio-gallery-section {
     padding: 72px 20px 104px;

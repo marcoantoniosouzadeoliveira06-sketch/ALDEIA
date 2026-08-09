@@ -808,8 +808,11 @@ app.use(express.static(ROOT_DIR, {
     index: false,
     setHeaders: (res, filePath) => {
         res.setHeader('X-Content-Type-Options', 'nosniff');
-        if (path.extname(filePath).toLowerCase() === '.html') {
+        const extension = path.extname(filePath).toLowerCase();
+        if (extension === '.html') {
             res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        } else if (['.css', '.js', '.svg', '.webp', '.jpg', '.jpeg', '.png', '.mp4', '.woff2'].includes(extension)) {
+            res.setHeader('Cache-Control', 'public, max-age=604800, stale-while-revalidate=86400');
         }
     }
 }));
