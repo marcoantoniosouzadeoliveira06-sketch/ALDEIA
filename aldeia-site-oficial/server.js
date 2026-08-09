@@ -1858,8 +1858,12 @@ app.post('/api/cadastro', async (req, res) => {
     
     let geo = { city: 'Desconhecida', region: 'Desconhecida', country: 'Desconhecido', org: 'Desconhecido', lat: 0, lon: 0 };
     try {
-        if (clientIP !== '127.0.0.1' && clientIP !== '::1' && typeof fetch !== 'undefined') {
-            const geoRes = await fetch(`https://ipapi.co/${clientIP}/json/`);
+        // Geo enrichment is optional. It must never delay a visitor's contact request:
+        // third-party geo services can be slow or unavailable on hosted instances.
+        if (process.env.ENABLE_GEO_LOOKUP === 'true' && clientIP !== '127.0.0.1' && clientIP !== '::1' && typeof fetch !== 'undefined') {
+            const geoRes = await fetch(`https://ipapi.co/${clientIP}/json/`, {
+                signal: AbortSignal.timeout(1500)
+            });
             if (geoRes.ok) {
                 const geoData = await geoRes.json();
                 if (!geoData.error) {

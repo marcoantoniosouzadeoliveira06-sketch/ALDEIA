@@ -589,13 +589,17 @@
                 ...trackingData
             };
 
+            const requestController = new AbortController();
+            const requestTimeout = window.setTimeout(() => requestController.abort(), 12000);
+
             try {
                 const response = await fetch('/api/cadastro', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(data),
+                    signal: requestController.signal
                 });
 
                 if (response.ok) {
@@ -638,8 +642,11 @@
                 }
             } catch (err) {
                 console.error(err);
-                alert('Erro na conexão com o servidor.');
+                alert(err?.name === 'AbortError'
+                    ? 'O envio demorou mais que o esperado. Tente novamente.'
+                    : 'Erro na conexão com o servidor.');
             } finally {
+                window.clearTimeout(requestTimeout);
                 modalSubmitBtn.disabled = false;
                 modalBtnText.textContent = 'Enviar Proposta';
             }
