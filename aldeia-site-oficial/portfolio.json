@@ -13,45 +13,6 @@
     ]
   },
   {
-    "id": "p17",
-    "title": "Rebrand Red Canids",
-    "category": "identidade",
-    "categoryLabel": "Identidade Visual",
-    "cover": "assets/portfolio/17.webp",
-    "assets": [
-      {
-        "type": "image",
-        "src": "assets/portfolio/17.webp"
-      }
-    ]
-  },
-  {
-    "id": "p18",
-    "title": "Promo Trailer 4K",
-    "category": "videos",
-    "categoryLabel": "Vídeos",
-    "cover": "assets/portfolio/18.webp",
-    "assets": [
-      {
-        "type": "video",
-        "src": "assets/hero-bg.mp4"
-      }
-    ]
-  },
-  {
-    "id": "p19",
-    "title": "Stories Interactive Pack",
-    "category": "social",
-    "categoryLabel": "Social Media",
-    "cover": "assets/portfolio/19.webp",
-    "assets": [
-      {
-        "type": "image",
-        "src": "assets/portfolio/19.webp"
-      }
-    ]
-  },
-  {
     "id": "p20",
     "title": "Digital Painting Series",
     "category": "artes",
@@ -63,33 +24,5 @@
         "src": "assets/portfolio/20.webp"
       }
     ]
-  },
-  {
-    "id": "p21",
-    "title": "Special Edition Poster",
-    "category": "artes",
-    "categoryLabel": "Artes Avulsas",
-    "cover": "assets/portfolio/21.webp",
-    "assets": [
-      {
-        "type": "image",
-        "src": "assets/portfolio/21.webp",
-        "title": ""
-      }
-    ],
-    "format": "post",
-    "aspectRatio": "1:1",
-    "accentColor": "#3b82f6"
-  },
-  {
-    "id": "p1785921692563",
-    "title": "KK",
-    "category": "Artes Avulsas",
-    "categoryLabel": "Artes Avulsas",
-    "format": "post",
-    "aspectRatio": "1:1",
-    "accentColor": "#ffffff",
-    "cover": "",
-    "assets": []
   }
 ]
