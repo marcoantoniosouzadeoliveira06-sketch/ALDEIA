@@ -4562,6 +4562,125 @@ body.light-theme .faq-item {
     box-shadow: 0 8px 32px rgba(255, 255, 255, 0.05);
 }
 
+/* Sobre — editorial glass treatment */
+.about-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.about-section::before {
+    content: '';
+    position: absolute;
+    width: 560px;
+    height: 560px;
+    right: -260px;
+    top: 40px;
+    pointer-events: none;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.07), transparent 68%);
+    filter: blur(12px);
+}
+
+.about-big-text {
+    position: relative;
+    max-width: 1100px;
+    padding-left: 32px;
+    border-left: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.about-big-text::before {
+    content: 'ALDEIA / 01';
+    position: absolute;
+    left: -9px;
+    top: -24px;
+    padding: 0 8px;
+    background: var(--bg);
+    color: rgba(255, 255, 255, 0.48);
+    font-family: var(--font-m);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+}
+
+.about-big-text p {
+    font-weight: 500;
+    line-height: 1.42;
+    letter-spacing: -0.025em;
+}
+
+.about-cards {
+    position: relative;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 24px;
+    border-top: 0;
+}
+
+.about-card {
+    position: relative;
+    min-height: 188px;
+    gap: 20px;
+    padding: 28px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
+}
+
+.about-card::after {
+    content: '';
+    position: absolute;
+    inset: auto -32px -56px auto;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.055);
+    filter: blur(16px);
+}
+
+.about-card .card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #fff;
+}
+
+.about-card-copy {
+    position: relative;
+    z-index: 1;
+}
+
+.about-card-kicker {
+    display: block;
+    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: var(--font-m);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.about-card p {
+    max-width: 440px;
+    font-size: 0.98rem;
+    line-height: 1.65;
+}
+
+@media (max-width: 768px) {
+    .about-big-text {
+        padding-left: 20px;
+    }
+
+    .about-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .about-card {
+        min-height: 0;
+        padding: 24px;
+    }
+}
+
 .portfolio-banner-img img,
 .pc-card .avatar {
     transition: transform 600ms var(--ease), opacity 300ms var(--ease);
