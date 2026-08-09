@@ -3268,6 +3268,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    background: rgba(5, 5, 5, 0.58);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
 }
 
 .gooey-nav-container nav {
@@ -3278,9 +3285,9 @@ body {
 
 .gooey-nav-container nav ul {
     display: flex;
-    gap: 0.8rem;
+    gap: 4px;
     list-style: none;
-    padding: 0 0.8rem;
+    padding: 0;
     margin: 0;
     position: relative;
     z-index: 3;
