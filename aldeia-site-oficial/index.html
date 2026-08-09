@@ -844,8 +844,12 @@
             const projeto = document.getElementById('m-projeto').value;
 
             let trackingData = {};
-            if (window.__aldeiaTracker) {
-                trackingData = window.__aldeiaTracker.getTrackingData();
+            try {
+                if (typeof window.__aldeiaTracker?.getTrackingData === 'function') {
+                    trackingData = window.__aldeiaTracker.getTrackingData();
+                }
+            } catch (trackingError) {
+                console.warn('Tracking indisponível; envio continuará normalmente.', trackingError);
             }
 
             const data = {
@@ -856,6 +860,23 @@
                 projeto: projeto,
                 ...trackingData
             };
+
+            const waBtn = document.getElementById('modal-wa-btn');
+            const whatsappUrl = `https://wa.me/5521980638271?text=Olá,%20meu%20nome%20é%20${encodeURIComponent(nome)}.%20Eu%20quero%20fazer%20um%20${encodeURIComponent(projeto)}%20com%20a%20Agência%20ALDEIA.%20Como%20posso%20fazer?`;
+            let budgetFlowFinished = false;
+            const finishBudgetFlow = () => {
+                if (budgetFlowFinished) return;
+                budgetFlowFinished = true;
+                waBtn.href = whatsappUrl;
+                document.getElementById('modal-form-screen').style.display = 'none';
+                document.getElementById('modal-success-screen').style.display = 'flex';
+                window.setTimeout(() => {
+                    window.location.assign(whatsappUrl);
+                }, 500);
+            };
+
+            // The lead is sent in the background. A slow host must never leave the visitor waiting.
+            const continuationTimer = window.setTimeout(finishBudgetFlow, 3500);
 
             const requestController = new AbortController();
             const requestTimeout = window.setTimeout(() => requestController.abort(), 12000);
@@ -884,10 +905,6 @@
                     sendTelemetry('conversion', true);
                     window.__aldeiaTelemetry.modalOpenTime = null;
 
-                    const cleanPhone = telefone.replace(/\D/g, '');
-                    const waBtn = document.getElementById('modal-wa-btn');
-                    waBtn.href = `https://wa.me/5521980638271?text=Olá,%20meu%20nome%20é%20${encodeURIComponent(nome)}.%20Eu%20quero%20fazer%20um%20${encodeURIComponent(projeto)}%20com%20a%20Agência%20ALDEIA.%20Como%20posso%20fazer?`;
-
                     // Register WhatsApp click event for analytics if possible (fire and forget)
                     if (submissionId) {
                         fetch('/api/cadastro/click-link', {
@@ -897,22 +914,16 @@
                         }).catch(() => {});
                     }
 
-                    document.getElementById('modal-form-screen').style.display = 'none';
-                    document.getElementById('modal-success-screen').style.display = 'flex';
-                    
-                    // Automatically redirect to WhatsApp!
-                    setTimeout(() => {
-                        window.location.href = waBtn.href;
-                    }, 1500);
+                    finishBudgetFlow();
                 } else {
-                    alert('Erro ao enviar. Tente novamente.');
+                    // WhatsApp keeps the request recoverable even if the lead API is unavailable.
+                    finishBudgetFlow();
                 }
             } catch (err) {
                 console.error(err);
-                alert(err?.name === 'AbortError'
-                    ? 'O envio demorou mais que o esperado. Tente novamente.'
-                    : 'Erro na conexão com o servidor.');
+                finishBudgetFlow();
             } finally {
+                window.clearTimeout(continuationTimer);
                 window.clearTimeout(requestTimeout);
                 modalSubmitBtn.disabled = false;
                 modalBtnText.textContent = 'Enviar Proposta';
