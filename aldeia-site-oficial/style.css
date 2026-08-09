@@ -3658,8 +3658,8 @@ body.light-theme .scroll-to-top:hover {
     display: block;
     position: relative;
     width: 100%;
-    aspect-ratio: 21/9;
-    min-height: 340px;
+    aspect-ratio: 24/9;
+    min-height: 280px;
     background: #111;
     overflow: hidden;
     text-decoration: none;
@@ -3696,10 +3696,10 @@ body.light-theme .scroll-to-top:hover {
     z-index: 2;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    align-items: flex-start;
-    text-align: left;
-    padding: 28px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 24px;
 }
 
 .portfolio-banner-content h3 {
@@ -3714,12 +3714,15 @@ body.light-theme .scroll-to-top:hover {
 }
 
 .banner-btn {
-    min-height: 48px;
-    padding: 0 16px 0 20px;
+    min-height: 50px;
+    padding: 0 16px 0 22px;
     font-size: 0.82rem;
-    background: rgba(255, 255, 255, 0.96);
-    color: #050505;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+    background: rgba(10, 10, 10, 0.38);
+    border-color: rgba(255, 255, 255, 0.32);
+    color: #ffffff;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     animation: portfolio-cta-breathe 3.4s ease-in-out infinite;
 }
 
@@ -3756,8 +3759,8 @@ body.light-theme .scroll-to-top:hover {
 }
 
 .portfolio-banner-link:hover .banner-btn {
-    background: #ffffff;
-    color: #000000;
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
     transform: translateY(-3px) scale(1.02);
     animation-play-state: paused;
 }
@@ -3780,7 +3783,7 @@ body.light-theme .scroll-to-top:hover {
 @media (max-width: 768px) {
     .portfolio-banner-link {
         aspect-ratio: 1/1;
-        min-height: 310px;
+        min-height: 280px;
     }
     .portfolio-banner-content h3 {
         font-size: 2.2rem;
