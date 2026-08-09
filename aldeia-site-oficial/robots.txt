@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://aldeia-agencia-oficial.onrender.com/sitemap.xml
