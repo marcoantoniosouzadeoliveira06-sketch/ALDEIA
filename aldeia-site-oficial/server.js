@@ -796,7 +796,8 @@ app.use((req, res, next) => {
     const requestedPath = decodeURIComponent(req.path);
     const isAllowedStatic = publicRootFiles.has(requestedPath)
         || publicDirectoryPrefixes.some(prefix => requestedPath.startsWith(prefix));
-    if (isAllowedStatic || requestedPath === '/' || requestedPath === '/admin') return next();
+    const isGoogleVerificationFile = /^\/google[a-z0-9_-]+\.html$/i.test(requestedPath);
+    if (isAllowedStatic || isGoogleVerificationFile || requestedPath === '/' || requestedPath === '/admin') return next();
     if (path.extname(requestedPath)) return res.status(404).json({ status: 'error', message: 'Arquivo não encontrado.' });
     next();
 });
