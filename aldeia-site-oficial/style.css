@@ -4994,3 +4994,70 @@ body.light-theme .faq-item {
         padding: 18px;
     }
 }
+
+/* Compacta o ritmo vertical e remove a cápsula externa dos filtros. */
+main > section:not(.hero-section) {
+    padding-block: 104px;
+}
+
+.hero-title-cinematic {
+    gap: 4px;
+    margin-bottom: 20px;
+}
+
+.hero-subtitle-cinematic {
+    margin-bottom: 24px;
+}
+
+.portfolio-gallery-section {
+    padding-block: 56px 80px;
+}
+
+.portfolio-tabs {
+    width: auto;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.portfolio-tab {
+    border-color: rgba(255, 255, 255, 0.13);
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.case-title {
+    font-family: var(--font-display-heavy);
+    font-weight: 800;
+    letter-spacing: -0.06em;
+}
+
+@media (max-width: 768px) {
+    main > section:not(.hero-section) {
+        padding-block: 80px;
+    }
+
+    .hero-title-cinematic {
+        gap: 2px;
+        margin-bottom: 16px;
+    }
+
+    .hero-subtitle-cinematic {
+        margin-bottom: 20px;
+    }
+
+    .portfolio-gallery-section {
+        padding-block: 48px 64px;
+    }
+
+    .portfolio-tabs {
+        width: auto;
+        border-radius: 0;
+        padding: 0;
+    }
+}
