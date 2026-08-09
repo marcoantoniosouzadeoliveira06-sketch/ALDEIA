@@ -32,6 +32,7 @@ const ROOT_DIR = __dirname;
 // ===== CONFIGURAÇÃO DE SEGURANÇA E ADMIN =====
 const DEFAULT_ADMIN_USERNAME = 'japex';
 const DEFAULT_ADMIN_PASSWORD = 'japex123';
+const LEGACY_DEFAULT_ADMIN_PASSWORD = '123japex';
 const USER_PROFILES_FILE = 'user_profiles.json';
 const ADMIN_PASSWORD_HASH = (process.env.ADMIN_PASSWORD_HASH_OVERRIDE || process.env.ADMIN_PASSWORD_HASH || '').trim();
 const HAS_VALID_ADMIN_HASH = /^\$2[aby]\$\d{2}\$/.test(ADMIN_PASSWORD_HASH) || /^[a-f0-9]{64}$/.test(ADMIN_PASSWORD_HASH);
@@ -874,9 +875,21 @@ async function bootstrapUserProfiles() {
     const japexProfile = profiles[DEFAULT_ADMIN_USERNAME];
     const isEmpty = Object.keys(profiles).length === 0;
     const missingJapex = !japexProfile;
-    const weakCredential = japexProfile && !isSupportedPasswordHash(japexProfile.passwordHash);
+    const storedJapexHash = String(japexProfile?.passwordHash || '').trim();
+    const weakCredential = japexProfile && !isSupportedPasswordHash(storedJapexHash);
+    let usesLegacyBootstrapCredential = storedJapexHash === LEGACY_DEFAULT_ADMIN_PASSWORD;
+    if (!usesLegacyBootstrapCredential && /^\$2[aby]\$/.test(storedJapexHash)) {
+        try {
+            usesLegacyBootstrapCredential = await bcrypt.compare(LEGACY_DEFAULT_ADMIN_PASSWORD, storedJapexHash);
+        } catch (_) {
+            usesLegacyBootstrapCredential = false;
+        }
+    }
+    if (!usesLegacyBootstrapCredential && /^[a-f0-9]{64}$/i.test(storedJapexHash)) {
+        usesLegacyBootstrapCredential = crypto.createHash('sha256').update(LEGACY_DEFAULT_ADMIN_PASSWORD).digest('hex') === storedJapexHash.toLowerCase();
+    }
 
-    if (isEmpty || missingJapex || weakCredential) {
+    if (isEmpty || missingJapex || weakCredential || usesLegacyBootstrapCredential) {
         profiles[DEFAULT_ADMIN_USERNAME] = {
             username: 'Japex',
             role: 'admin',
