@@ -4810,6 +4810,47 @@ body.light-theme .faq-item {
     overflow: visible;
 }
 
+/* A mídia continua contida no próprio plano de fundo, mas o texto pode
+   ultrapassar alguns pixels sem cortar acentos como Á, Ã, Ê e Ú. */
+.hero-section {
+    overflow: visible;
+}
+
+.hero-content-centered {
+    padding-block: clamp(20px, 4vh, 40px);
+}
+
+.hero-title-cinematic,
+.hero-title-cinematic > span,
+.hero-title-cinematic .shiny-text {
+    line-height: 1.28;
+    padding-block: clamp(8px, 1.2vh, 16px);
+}
+
+.hero-video-bg {
+    overflow: hidden;
+}
+
+/* Notebook estreito / janela dividida: preserva a margem direita sem reduzir
+   o peso da tipografia nem alterar as animações do Hero. */
+@media (min-width: 769px) and (max-width: 1100px) {
+    .hero-section {
+        padding-inline: 56px;
+    }
+
+    .hero-content-centered,
+    .hero-title-cinematic {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .hero-title-cinematic {
+        font-size: clamp(2.35rem, 5.25vw, 3.9rem);
+        letter-spacing: -0.05em;
+    }
+}
+
 .typewriter-cursor {
     display: none;
 }
@@ -5304,5 +5345,71 @@ main > section:not(.hero-section) {
         min-height: 56px;
         padding: 10px;
         font-size: 0.76rem;
+    }
+}
+
+/* Guarda final do Hero: o brilho de texto usa background-clip e precisa de
+   uma caixa de pintura maior do que a métrica padrão da fonte Sora. */
+.hero-section .hero-title-cinematic {
+    width: min(100%, 960px);
+    max-width: calc(100% - 24px);
+    line-height: 1.36 !important;
+    padding: 0.28em 0.24em 0.38em !important;
+    overflow: visible !important;
+    box-sizing: border-box;
+}
+
+.hero-section .hero-title-cinematic > .line-1,
+.hero-section .hero-title-cinematic > .line-2,
+.hero-section .hero-title-cinematic > .line-3 {
+    min-height: 1.36em;
+    line-height: 1.36 !important;
+    overflow: visible !important;
+}
+
+.hero-section .hero-title-cinematic .shiny-text {
+    line-height: 1.36 !important;
+    padding-block: 0.12em 0.24em !important;
+    overflow: visible !important;
+}
+
+/* Mantém as linhas do título compactas como eram e corrige o corte lateral
+   da mídia quando a janela fica mais estreita que o vídeo. */
+.hero-content-centered {
+    padding-block: 16px;
+}
+
+.hero-section .hero-title-cinematic {
+    line-height: 1.18 !important;
+    padding-block: 8px 10px !important;
+}
+
+.hero-section .hero-title-cinematic > .line-1,
+.hero-section .hero-title-cinematic > .line-2,
+.hero-section .hero-title-cinematic > .line-3,
+.hero-section .hero-title-cinematic .shiny-text {
+    min-height: 0;
+    line-height: 1.18 !important;
+    padding-block: 3px 5px !important;
+}
+
+/* O tracking anterior estava comprimindo as bordas de S e A entre si.
+   Mantém o título pesado, mas devolve espaço lateral para cada glifo. */
+.hero-section .hero-title-cinematic {
+    letter-spacing: -0.02em !important;
+}
+
+@media (min-width: 769px) and (max-width: 1100px) {
+    .hero-section {
+        padding-inline: 32px;
+    }
+
+    .hero-video-bg {
+        background: none;
+    }
+
+    .hero-video-bg video {
+        object-fit: cover;
+        object-position: center;
     }
 }

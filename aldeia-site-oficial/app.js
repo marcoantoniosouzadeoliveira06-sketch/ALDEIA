@@ -5,6 +5,19 @@
 (function () {
     'use strict';
 
+    // Agrupa leituras e escritas ligadas ao scroll em um único frame de pintura.
+    // As animações continuam as mesmas, mas o navegador não recalcula o layout a cada evento nativo.
+    function scheduleFrame(callback) {
+        let frameId = 0;
+        return function scheduledCallback() {
+            if (frameId) return;
+            frameId = requestAnimationFrame(() => {
+                frameId = 0;
+                callback();
+            });
+        };
+    }
+
     // ===== LENIS SMOOTH SCROLL =====
     let lenis;
     if (typeof window.Lenis === 'function' && window.matchMedia('(pointer: fine)').matches) try {
@@ -18,11 +31,20 @@
             touchMultiplier: 2,
         });
 
+        let lenisFrameId = 0;
+        const startLenisLoop = () => {
+            if (!lenisFrameId && !document.hidden) lenisFrameId = requestAnimationFrame(raf);
+        };
+        const stopLenisLoop = () => {
+            if (!lenisFrameId) return;
+            cancelAnimationFrame(lenisFrameId);
+            lenisFrameId = 0;
+        };
         function raf(time) {
             lenis.raf(time);
-            requestAnimationFrame(raf);
+            lenisFrameId = document.hidden ? 0 : requestAnimationFrame(raf);
         }
-        requestAnimationFrame(raf);
+        startLenisLoop();
         window.lenis = lenis;
 
         const restoreScroll = () => {
@@ -30,7 +52,12 @@
         };
         window.addEventListener('pageshow', restoreScroll);
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) restoreScroll();
+            if (document.hidden) {
+                stopLenisLoop();
+                return;
+            }
+            startLenisLoop();
+            restoreScroll();
         });
 
         // Stop during preloader
@@ -95,7 +122,7 @@
         const parent = parentEl || canvas.parentElement;
 
         function renderGrain() {
-            const scale = 0.5;
+            const scale = 0.4;
             canvas.width = Math.max(1, Math.floor(parent.offsetWidth * scale));
             canvas.height = Math.max(1, Math.floor(parent.offsetHeight * scale));
             const w = canvas.width;
@@ -339,8 +366,9 @@
                 }
             }
             
-            window.addEventListener('scroll', updateOpacity);
-            window.addEventListener('resize', updateOpacity);
+            const scheduleOpacityUpdate = scheduleFrame(updateOpacity);
+            window.addEventListener('scroll', scheduleOpacityUpdate, { passive: true });
+            window.addEventListener('resize', scheduleOpacityUpdate, { passive: true });
             updateOpacity();
         });
     }
@@ -454,7 +482,7 @@
         let lastScroll = 0;
         const scrollThreshold = 10; // minimum px delta to trigger hide/show
 
-        window.addEventListener('scroll', () => {
+        const updateNavOnScroll = scheduleFrame(() => {
             const currentScroll = window.scrollY;
             const delta = currentScroll - lastScroll;
 
@@ -478,16 +506,18 @@
 
             lastScroll = currentScroll;
         });
+        window.addEventListener('scroll', updateNavOnScroll, { passive: true });
     }
 
     // ===== PARALLAX HERO WORDMARK =====
     const heroWordmark = document.querySelector('.hero-wordmark');
     if (heroWordmark) {
-        window.addEventListener('scroll', () => {
+        const updateWordmarkParallax = scheduleFrame(() => {
             const scrollY = window.scrollY;
             const speed = 0.3;
             heroWordmark.style.transform = `translate(-50%, calc(-60% + ${scrollY * speed}px))`;
         });
+        window.addEventListener('scroll', updateWordmarkParallax, { passive: true });
     }
 
     // ===== VIDEO PAUSE/PLAY ON VISIBILITY =====
@@ -532,7 +562,7 @@
     // ===== HERO SCROLL DOTS =====
     const dots = document.querySelectorAll('.hero-scroll-dots .dot');
     if (dots.length > 0) {
-        window.addEventListener('scroll', () => {
+        const updateScrollDots = scheduleFrame(() => {
             const scrollY = window.scrollY;
             const height = window.innerHeight;
             const activeIdx = Math.min(dots.length - 1, Math.floor(scrollY / (height * 0.8)));
@@ -889,6 +919,7 @@
         document.querySelectorAll(selector).forEach((element, index) => {
             if (values[index] != null) rememberAndSet(element, values[index], useHtml);
         });
+        window.addEventListener('scroll', updateScrollDots, { passive: true });
     };
 
     const restorePortuguese = () => {

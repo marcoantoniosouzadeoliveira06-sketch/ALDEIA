@@ -1,6 +1,87 @@
 [
   {
     "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T21:44:05.822Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 93,
+    "y": 6,
+    "timestamp": "2026-08-10T21:42:24.895Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T21:41:54.881Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T21:39:35.713Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T21:39:20.636Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T21:37:59.837Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T21:37:44.761Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T21:35:57.348Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T21:35:42.243Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
     "eventType": "click",
     "path": "/",
     "elementId": "portfolio.html",
