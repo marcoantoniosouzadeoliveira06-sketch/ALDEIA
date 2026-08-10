@@ -916,11 +916,13 @@
         .nav-item {
             min-height: 44px;
             transition: transform 300ms var(--qma-spring), opacity 300ms var(--qma-spring), border-color 300ms var(--qma-spring), background-color 300ms var(--qma-spring);
-            will-change: transform;
         }
         button:hover,
         .qma-btn:hover,
         .btn-action:hover { transform: scale(1.02); }
+        button:hover,
+        .qma-btn:hover,
+        .btn-action:hover { will-change: transform; }
         button:active,
         .qma-btn:active,
         .btn-action:active { transform: scale(0.95); transition-duration: 90ms; }
@@ -1190,6 +1192,30 @@
         }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; scroll-behavior: auto !important; }
+        }
+        :root { --qma-radius-card: 16px; --qma-radius-control: 8px; --qma-glass-blur: 16px; }
+        .crm-card, .table-container, .submissions-box, .glass-panel, .qma-modal-panel, .modal-content {
+            border-radius: var(--qma-radius-card);
+        }
+        .btn-action, .qma-btn, .qma-input, .input-control, select, textarea {
+            border-radius: var(--qma-radius-control);
+            backdrop-filter: blur(var(--qma-glass-blur));
+        }
+        #admin-dashboard h2.box-title, #admin-dashboard .qma-admin-title {
+            font-size: clamp(1.25rem, 2vw, 1.5rem);
+            line-height: 1.25;
+            letter-spacing: -0.02em;
+            overflow-wrap: anywhere;
+        }
+        .user-name, .user-info, .project-text, .timestamp-text, .actions-cell, .table-container td {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+        .actions-cell { display: flex; flex-wrap: wrap; gap: 8px; }
+        .table-container { max-width: 100%; }
+        @media (max-width: 768px) {
+            #clients-tab .table-container, #portfolio-tab .table-container, #telemetry-tab .table-container { overflow-x: auto; }
+            #clients-tab table, #portfolio-tab table, #telemetry-tab table { min-width: 620px; }
         }
     </style>
 </head>
@@ -1619,6 +1645,28 @@
 
                 <!-- TAB: TELEMETRY -->
                 <div id="telemetry-tab" class="tab-content">
+                    <div class="grid-cards" style="margin-bottom: 24px;">
+                        <div class="crm-card metric-card">
+                            <span class="crm-card-title">Eventos registrados</span>
+                            <span class="crm-card-value" id="analytics-total-events">—</span>
+                            <span class="metric-caption">Últimos 1.000 eventos</span>
+                        </div>
+                        <div class="crm-card metric-card">
+                            <span class="crm-card-title">Visualizações de página</span>
+                            <span class="crm-card-value" id="analytics-pageviews">—</span>
+                            <span class="metric-caption">Páginas abertas no site</span>
+                        </div>
+                        <div class="crm-card metric-card">
+                            <span class="crm-card-title">Interações</span>
+                            <span class="crm-card-value" id="analytics-clicks">—</span>
+                            <span class="metric-caption">Cliques em links e botões</span>
+                        </div>
+                        <div class="crm-card metric-card">
+                            <span class="crm-card-title">Sessões únicas</span>
+                            <span class="crm-card-value" id="analytics-sessions">—</span>
+                            <span class="metric-caption">Visitantes identificados por sessão</span>
+                        </div>
+                    </div>
                     <div class="crm-card">
                         <span class="crm-card-title">Últimos Eventos de Tráfego</span>
                         <div class="table-container" style="margin-top: 15px; border:none;">
@@ -2380,7 +2428,7 @@
                 'portfolio-tab': window.loadPortfolio,
                 'logins-tab': window.loadLoginLogs,
                 'cms-tab': window.loadSiteContentForEditor,
-                'telemetry-tab': window.loadSecurityStats,
+                'telemetry-tab': window.loadTelemetryData,
                 'dashboard-tab': window.loadDashboardStats,
                 'settings-tab': window.loadAdminSettings
             };
@@ -2489,18 +2537,59 @@
 
             [...items].sort((a, b) => (Number(b?.views) || 0) - (Number(a?.views) || 0)).slice(0, 4).forEach((p, idx) => {
                 const item = document.createElement('div');
-                item.style.cssText = 'display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);';
+                item.style.cssText = 'display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); transition: background .2s ease, border-color .2s ease, transform .2s ease;';
                 item.innerHTML = `
                     <span style="font-size: 0.85rem; font-weight: 700; color: #a1a1aa; width: 20px;">#${idx + 1}</span>
-                    <img src="${p.coverImage || p.cover || 'assets/logo-tp.svg'}" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover; background: #222;">
+                    <img class="portfolio-ranking-cover" alt="" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover; background: #222; flex: 0 0 auto;">
                     <div style="flex: 1; overflow: hidden;">
                         <div style="font-size: 0.85rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(p.title)}</div>
                         <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(p.category || 'Geral')}</div>
                     </div>
                     <span style="font-size: 0.75rem; color: #d4d4d8; font-weight: 600;">${(Number(p?.views) || 0).toLocaleString('pt-BR')} views</span>
                 `;
+
+                const cover = item.querySelector('.portfolio-ranking-cover');
+                if (cover) {
+                    cover.src = resolveAdminAssetPath(p?.coverImage || p?.cover, '/assets/logo-isotype.svg');
+                    cover.addEventListener('error', () => {
+                        if (cover.dataset.fallbackApplied) return;
+                        cover.dataset.fallbackApplied = 'true';
+                        cover.src = '/assets/logo-isotype.svg';
+                    });
+                }
+
+                if (p?.id) {
+                    const openProject = () => window.open(`/projeto.html?id=${encodeURIComponent(String(p.id))}`, '_blank', 'noopener');
+                    item.tabIndex = 0;
+                    item.setAttribute('role', 'link');
+                    item.setAttribute('aria-label', `Abrir projeto ${String(p.title || 'do portfólio')}`);
+                    item.style.cursor = 'pointer';
+                    item.addEventListener('mouseenter', () => {
+                        item.style.background = 'rgba(255,255,255,0.06)';
+                        item.style.borderColor = 'rgba(255,255,255,0.12)';
+                        item.style.transform = 'translateY(-1px)';
+                    });
+                    item.addEventListener('mouseleave', () => {
+                        item.style.background = 'rgba(255,255,255,0.02)';
+                        item.style.borderColor = 'rgba(255,255,255,0.05)';
+                        item.style.transform = '';
+                    });
+                    item.addEventListener('click', openProject);
+                    item.addEventListener('keydown', (event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            openProject();
+                        }
+                    });
+                }
                 container.appendChild(item);
             });
+        }
+
+        function resolveAdminAssetPath(value, fallback = '') {
+            const assetPath = String(value || '').trim();
+            if (!assetPath) return fallback;
+            return assetPath.startsWith('assets/') ? `/${assetPath}` : assetPath;
         }
 
         let rawLeads = [];
@@ -2593,6 +2682,7 @@
                     signal: controller.signal
                 });
                 clearTimeout(timeoutId);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
                 if (response.ok) {
                     rawLeads = await response.json();
@@ -2614,6 +2704,7 @@
 
                     if (rawLeads.length === 0) {
                         listContainer.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Nenhum lead encontrado.</td></tr>';
+                        updateLeadsMap();
                         return;
                     }  
                     
@@ -2631,12 +2722,13 @@
                         const emailLink = `mailto:${sub.email}?subject=Orçamento%20ALDEIA&body=Olá%20${encodeURIComponent(sub.nome)},%20vi%20seu%20contato%20no%20site...`;
 
                         const tr = document.createElement('tr');
+                        tr.dataset.leadId = sub.id;
                         tr.style.cursor = 'pointer';
                         tr.title = 'Clique para ver a localização no mapa';
                         tr.onclick = (e) => {
                             if (e.target.closest('.btn-action') || e.target.tagName === 'A') return;
-                            if (sub.ipCoords && sub.ipCoords !== '0, 0') {
-                                focusMapOnLead(sub.ipCoords);
+                            if (sub.locationConsent && sub.locationCoords) {
+                                focusMapOnLead(sub.locationCoords);
                             } else {
                                 alert('Este lead não possui coordenadas de GPS ativas.');
                             }
@@ -2652,7 +2744,7 @@
                                 <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;">
                                     ${displayLoc ? `<div class="badge-geo" style="margin: 0;" title="Localização">IP: ${escapeHTML(displayLoc)}</div>` : ''}
                                     ${sub.ipISP && sub.ipISP !== 'Desconhecido' ? `<div class="badge-geo" style="background: rgba(228, 228, 231, 0.1); color: #a1a1aa; border: 1px solid rgba(228, 228, 231, 0.2); margin: 0;" title="Provedor de Internet">ISP: ${escapeHTML(sub.ipISP)}</div>` : ''}
-                                    ${sub.ipCoords && sub.ipCoords !== '0, 0' ? `<div class="badge-geo" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); margin: 0;" title="Coordenadas">Geo: ${escapeHTML(sub.ipCoords)}</div>` : ''}
+                                    ${sub.locationConsent && sub.locationCoords ? `<div class="badge-geo" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); margin: 0;" title="Localização aproximada autorizada">Localização compartilhada</div>` : ''}
                                     ${sub.utmSource ? `<div class="badge-geo" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); margin: 0;" title="Origem do Tráfego">Origem: ${escapeHTML(sub.utmSource)} ${sub.utmCampaign ? '('+escapeHTML(sub.utmCampaign)+')' : ''}</div>` : ''}
                                     ${sub.visits ? `<div class="badge-geo" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); margin: 0;" title="Acessos antes da conversão">Visitas: ${escapeHTML(sub.visits)}</div>` : ''}
                                     ${sub.firstVisit ? `<div class="badge-geo" style="background: rgba(236, 72, 153, 0.1); color: #ec4899; border: 1px solid rgba(236, 72, 153, 0.2); margin: 0; width: 100%; max-width: fit-content;" title="Data do 1º Acesso no site">1º Acesso: ${escapeHTML(new Date(sub.firstVisit).toLocaleString('pt-BR'))}</div>` : ''}
@@ -2815,9 +2907,6 @@
                 });
             }
 
-            if (heatPoints.length < 5) {
-                heatPoints = heatPoints.concat(GLOBAL_SAMPLE_HEAT);
-            }
 
             // 1. Radar Meteorológico de Calor
             if ((currentMapMode === 'heat' || currentMapMode === 'both') && typeof L.heatLayer === 'function') {
@@ -2839,15 +2928,14 @@
             // 2. Pinos de Leads
             if ((currentMapMode === 'pins' || currentMapMode === 'both') && typeof rawLeads !== 'undefined') {
                 rawLeads.forEach(sub => {
-                    if (sub.ipCoords && sub.ipCoords !== '0,0' && sub.ipCoords !== '0, 0') {
-                        const parts = sub.ipCoords.split(',').map(parseFloat);
+                    if (sub.locationConsent && sub.locationCoords) {
+                        const parts = sub.locationCoords.split(',').map(parseFloat);
                         if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
                             const marker = L.marker([parts[0], parts[1]]).bindPopup(`
                                 <div style="min-width: 150px; font-family: sans-serif;">
                                     <h4 style="margin: 0 0 6px 0; color: #fff;">${escapeHTML(sub.nome)}</h4>
                                     <p style="margin:2px 0; font-size: 0.8rem; color:#aaa;"><strong>Projeto:</strong> ${escapeHTML(sub.projeto)}</p>
-                                    <p style="margin:2px 0; font-size: 0.8rem; color:#aaa;"><strong>Cidade:</strong> ${escapeHTML(sub.ipCity || sub.cidade || 'Desconhecida')}</p>
-                                    <p style="margin:2px 0; font-size: 0.8rem; color:#a1a1aa;"><strong>ISP:</strong> ${escapeHTML(sub.ipISP || 'Desconhecido')}</p>
+                                    <p style="margin:2px 0; font-size: 0.8rem; color:#a1a1aa;"><strong>Localização:</strong> aproximada e autorizada pelo cliente</p>
                                 </div>
                             `);
                             marker.addTo(leadsMap);
@@ -2861,7 +2949,12 @@
         }
 
         function updateLeadsMap() {
-            renderHeatmap();
+            globalHeatmapData = (Array.isArray(rawLeads) ? rawLeads : []).flatMap((lead) => {
+                if (!lead?.locationConsent || !lead?.locationCoords) return [];
+                const [latitude, longitude] = lead.locationCoords.split(',').map(Number);
+                return Number.isFinite(latitude) && Number.isFinite(longitude) ? [[latitude, longitude, 0.8]] : [];
+            });
+            renderHeatmap(globalHeatmapData);
         }
 
         // Export Leads list as CSV Spreadsheet file
@@ -3021,6 +3114,15 @@
         // Clients Management (Server API + Local Cache Fallback)
         let rawClients = [];
 
+        function readLocalArray(key) {
+            try {
+                const value = JSON.parse(localStorage.getItem(key) || '[]');
+                return Array.isArray(value) ? value : [];
+            } catch {
+                return [];
+            }
+        }
+
         async function loadClients() {
             const listContainer = document.getElementById('clients-list');
             const emptyState = document.getElementById('clients-empty-state');
@@ -3033,14 +3135,15 @@
                     headers: getAuthHeaders()
                 });
                 if (response.ok) {
-                    rawClients = await response.json();
+                    const payload = await response.json();
+                    rawClients = Array.isArray(payload) ? payload : [];
                     localStorage.setItem('aldeia_clients', JSON.stringify(rawClients));
                 } else {
-                    rawClients = JSON.parse(localStorage.getItem('aldeia_clients') || '[]');
+                    rawClients = readLocalArray('aldeia_clients');
                 }
             } catch (err) {
                 console.warn('Erro ao buscar clientes do servidor, usando cache local:', err);
-                rawClients = JSON.parse(localStorage.getItem('aldeia_clients') || '[]');
+                rawClients = readLocalArray('aldeia_clients');
             }
 
             if (table) table.style.display = 'table';
@@ -3118,8 +3221,14 @@
                     body: JSON.stringify(newClientData)
                 });
                 if (response.ok) {
-                    await loadClients();
+                    rawClients = [newClientData, ...rawClients];
+                    rawLeads = rawLeads.filter((item) => item.id !== leadId);
+                    document.querySelector(`[data-lead-id="${CSS.escape(leadId)}"]`)?.remove();
+                    const leadCount = document.getElementById('stat-total');
+                    if (leadCount) leadCount.textContent = String(rawLeads.length);
+                    updateLeadsMap();
                     switchTab('clients-tab');
+                    loadClients();
                 } else {
                     alert('Aviso: Erro ao salvar cliente no servidor.');
                 }
@@ -3812,7 +3921,7 @@
                 loadClients();
                 loadLoginLogs();
                 loadSiteContentForEditor();
-                if (typeof loadTelemetryData === 'function') loadTelemetryData();
+                if (typeof window.loadTelemetryData === 'function') window.loadTelemetryData();
             }
             routeAdminFromPath();
         }
@@ -4031,6 +4140,55 @@
             if (modal) modal.style.display = 'none';
         }
 
+        // Fonte única do Analytics: o mesmo servidor do CRM, protegido pela sessão do administrador.
+        window.loadTelemetryData = async function loadAdminAnalytics() {
+            const tableBody = document.getElementById('telemetry-logs-body');
+            if (!tableBody) return;
+
+            try {
+                const response = await fetch('/api/analytics/dashboard', { headers: getAuthHeaders() });
+                if (!response.ok) throw new Error('Falha ao buscar os eventos.');
+
+                const dashboard = await response.json();
+                const safeEvents = Array.isArray(dashboard?.events) ? dashboard.events : [];
+                const serverMetrics = dashboard?.metrics || {};
+                const metrics = {
+                    'analytics-total-events': Number(serverMetrics.totalEvents) || 0,
+                    'analytics-pageviews': Number(serverMetrics.pageviews) || 0,
+                    'analytics-clicks': Number(serverMetrics.clicks) || 0,
+                    'analytics-sessions': Number(serverMetrics.sessions) || 0
+                };
+
+                Object.entries(metrics).forEach(([id, value]) => {
+                    const element = document.getElementById(id);
+                    if (element) element.textContent = String(value);
+                });
+
+                if (safeEvents.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:28px;">Ainda não há eventos registrados. As visitas e cliques do site aparecerão aqui automaticamente.</td></tr>';
+                    return;
+                }
+
+                tableBody.innerHTML = safeEvents.slice(0, 100).map((event) => {
+                    const timestamp = new Date(event?.timestamp);
+                    const dateLabel = Number.isNaN(timestamp.getTime())
+                        ? 'Sem horário'
+                        : timestamp.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+                    const sessionLabel = String(event?.sessionId || 'Sem sessão').slice(0, 16);
+                    const type = event?.eventType === 'pageview' ? 'Página vista' : event?.eventType === 'click' ? 'Clique' : String(event?.eventType || 'Evento');
+                    const detail = event?.elementId || event?.path || '/';
+                    return `<tr><td>${escapeHTML(dateLabel)}</td><td><span style="font-family:var(--font-m); font-size:.8rem;">${escapeHTML(sessionLabel)}</span></td><td>${escapeHTML(type)}</td><td>${escapeHTML(String(detail))}</td></tr>`;
+                }).join('');
+            } catch (error) {
+                console.warn('[Analytics] Falha ao carregar:', error.message);
+                ['analytics-total-events', 'analytics-pageviews', 'analytics-clicks', 'analytics-sessions'].forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) element.textContent = '—';
+                });
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:28px;">Não foi possível carregar o Analytics agora. Atualize a página ou entre novamente.</td></tr>';
+            }
+        };
+
         // Fetch and load security stats (Rate Limiter)
         async function loadSecurityStats() {
             const container = document.getElementById('security-stats-list');
@@ -4103,8 +4261,10 @@
             
             try {
                 const res = await fetch('/api/portfolio?t=' + Date.now());
-                if (res.ok) {
-                    rawPortfolioProjects = await res.json();
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                {
+                    const payload = await res.json();
+                    rawPortfolioProjects = Array.isArray(payload) ? payload : [];
                     listEl.innerHTML = '';
                     if (rawPortfolioProjects.length === 0) {
                         listEl.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum projeto cadastrado.</td></tr>';

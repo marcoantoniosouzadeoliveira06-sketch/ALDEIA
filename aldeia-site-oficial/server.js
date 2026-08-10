@@ -164,7 +164,9 @@ const submissionSchema = new mongoose.Schema({
     ipRegion: { type: String, default: '' },
     ipCity: { type: String, default: '' },
     ipISP: { type: String, default: '' },
-    ipCoords: { type: String, default: '' }
+    ipCoords: { type: String, default: '' },
+    locationConsent: { type: Boolean, default: false },
+    locationCoords: { type: String, default: '' }
 }, { timestamps: true });
 
 const siteContentSchema = new mongoose.Schema({
@@ -387,7 +389,12 @@ const leadPayloadSchema = z.object({
     utmMedium: plainText(120).optional().default(''),
     utmCampaign: plainText(180).optional().default(''),
     visits: z.coerce.number().int().min(1).max(100000).optional().default(1),
-    firstVisit: plainText(100).optional().default('')
+    firstVisit: plainText(100).optional().default(''),
+    locationConsent: z.boolean().optional().default(false),
+    location: z.object({
+        latitude: z.coerce.number().min(-90).max(90),
+        longitude: z.coerce.number().min(-180).max(180)
+    }).optional()
 }).strip();
 const cmsContentSchema = z.record(z.string().regex(/^[A-Za-z][A-Za-z0-9_-]{0,99}$/), z.unknown())
     .transform(sanitizeCmsContent);
@@ -401,6 +408,13 @@ const analyticsPayloadSchema = z.object({
         y: z.coerce.number().min(0).max(100).optional().default(0),
         timestamp: z.string().datetime({ offset: true }).optional()
     }).strip()).min(1).max(50)
+}).strip();
+const telemetryPayloadSchema = z.object({
+    session_id: z.string().trim().regex(SAFE_ID).max(100),
+    event_type: z.enum(['conversion', 'abandonment']),
+    converted: z.boolean().optional().default(false),
+    dwell_time: z.coerce.number().min(0).max(3600),
+    page_url: plainText(500).optional().default('/')
 }).strip();
 
 function validate(schema, source = 'body') {
@@ -469,7 +483,9 @@ function sanitizeLeadResponse(lead) {
         ipRegion: sanitizePlainText(value.ipRegion || ''),
         ipCity: sanitizePlainText(value.ipCity || ''),
         ipISP: sanitizePlainText(value.ipISP || ''),
-        ipCoords: sanitizePlainText(value.ipCoords || '')
+        ipCoords: sanitizePlainText(value.ipCoords || ''),
+        locationConsent: value.locationConsent === true,
+        locationCoords: sanitizePlainText(value.locationCoords || '')
     };
 }
 
@@ -753,6 +769,22 @@ const apiLimiter = rateLimit({
 
 app.use(globalLimiter);
 app.use('/api', apiLimiter);
+
+const analyticsEventLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { status: 'error', message: 'Muitos eventos em pouco tempo. Tente novamente em instantes.' }
+});
+
+const projectViewLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { status: 'error', message: 'Muitas visualizações em pouco tempo.' }
+});
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -1389,7 +1421,7 @@ app.get('/api/portfolio', async (req, res) => {
     res.json(portfolio.map(sanitizeProjectResponse));
 });
 
-app.get('/api/projects/:id', validate(idParamsSchema, 'params'), async (req, res) => {
+app.get('/api/projects/:id', projectViewLimiter, validate(idParamsSchema, 'params'), async (req, res) => {
     const projectId = req.validatedParams.id;
     let project = null;
     if (isMongoConnected) {
@@ -1566,6 +1598,14 @@ app.post('/api/clients', requireAuth, requireRole(['admin']), validate(clientPay
         let clients = safeReadJSON('clients.json', []);
         clients.push(newClient);
         safeWriteJSON('clients.json', clients);
+        if (leadId) {
+            if (isMongoConnected) {
+                try { await SubmissionModel.deleteOne({ id: leadId }); }
+                catch (error) { console.error('[CLIENT CONVERSION LEAD DELETE]', error.message); }
+            }
+            const submissions = safeReadJSON('submissions.json', []).filter((submission) => submission.id !== leadId);
+            safeWriteJSON('submissions.json', submissions);
+        }
         resultClients = clients;
     }
 
@@ -1853,33 +1893,6 @@ app.post('/api/upload', requireAuth, (req, res) => {
 
 // ===== ROTAS DE LEADS / FORMULÁRIO DE CONTATO =====
 app.post('/api/cadastro', async (req, res) => {
-    let clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-    if (clientIP.includes(',')) clientIP = clientIP.split(',')[0].trim();
-    
-    let geo = { city: 'Desconhecida', region: 'Desconhecida', country: 'Desconhecido', org: 'Desconhecido', lat: 0, lon: 0 };
-    try {
-        // Geo enrichment is optional. It must never delay a visitor's contact request:
-        // third-party geo services can be slow or unavailable on hosted instances.
-        if (process.env.ENABLE_GEO_LOOKUP === 'true' && clientIP !== '127.0.0.1' && clientIP !== '::1' && typeof fetch !== 'undefined') {
-            const geoRes = await fetch(`https://ipapi.co/${clientIP}/json/`, {
-                signal: AbortSignal.timeout(1500)
-            });
-            if (geoRes.ok) {
-                const geoData = await geoRes.json();
-                if (!geoData.error) {
-                    geo.city = geoData.city || geo.city;
-                    geo.region = geoData.region || geo.region;
-                    geo.country = geoData.country_name || geo.country;
-                    geo.org = geoData.org || geoData.asn || geo.org;
-                    geo.lat = geoData.latitude || geo.lat;
-                    geo.lon = geoData.longitude || geo.lon;
-                }
-            }
-        }
-    } catch (err) {
-        console.error('[GEO] Erro:', err.message);
-    }
-
     const body = scrubNoSql(req.body || {});
     let projeto = body.projeto || '';
     if (!projeto) {
@@ -1898,12 +1911,17 @@ app.post('/api/cadastro', async (req, res) => {
         utmMedium: body.utmMedium,
         utmCampaign: body.utmCampaign,
         visits: body.visits,
-        firstVisit: body.firstVisit
+        firstVisit: body.firstVisit,
+        locationConsent: body.locationConsent,
+        location: body.location
     });
     if (!leadResult.success) {
         return res.status(400).json({ status: 'error', message: 'Dados de contato inválidos.' });
     }
-    const { nome, email, telefone, instagram, projeto: projetoSeguro, utmSource, utmMedium, utmCampaign, visits, firstVisit } = leadResult.data;
+    const { nome, email, telefone, instagram, projeto: projetoSeguro, utmSource, utmMedium, utmCampaign, visits, firstVisit, locationConsent, location } = leadResult.data;
+    const locationCoords = locationConsent && location
+        ? `${Number(location.latitude).toFixed(2)}, ${Number(location.longitude).toFixed(2)}`
+        : '';
 
     const newSubmission = {
         id: crypto.randomUUID(),
@@ -1919,11 +1937,13 @@ app.post('/api/cadastro', async (req, res) => {
         utmCampaign: utmCampaign || '',
         visits: visits || 1,
         firstVisit: firstVisit || '',
-        ipCountry: geo.country,
-        ipRegion: geo.region,
-        ipCity: geo.city,
-        ipISP: geo.org,
-        ipCoords: `${geo.lat}, ${geo.lon}`
+        ipCountry: '',
+        ipRegion: '',
+        ipCity: '',
+        ipISP: '',
+        ipCoords: '',
+        locationConsent,
+        locationCoords
     };
 
     if (isMongoConnected) {
@@ -1971,43 +1991,130 @@ app.post('/api/cadastro/click-link', validate(z.object({ id: z.string().trim().r
 // ==========================================
 // ANALYTICS & TRACKER API
 // ==========================================
-app.post('/api/analytics', validate(analyticsPayloadSchema), async (req, res) => {
-    const { events } = req.validatedBody;
-    
+function parseAnalyticsBeacon(req, res, next) {
+    if (typeof req.body !== 'string') return next();
+    try {
+        req.body = JSON.parse(req.body);
+        return next();
+    } catch {
+        return res.status(400).json({ status: 'error', message: 'Eventos inválidos.' });
+    }
+}
+
+const analyticsDeduplication = new Map();
+function pruneAnalyticsDeduplication(now = Date.now()) {
+    const cutoff = now - 5000;
+    for (const [key, createdAt] of analyticsDeduplication) {
+        if (createdAt < cutoff) analyticsDeduplication.delete(key);
+    }
+}
+function removeDuplicateAnalyticsEvents(req, res, next) {
+    const now = Date.now();
+    pruneAnalyticsDeduplication(now);
+
+    const accepted = req.validatedBody.events.filter((event) => {
+        const key = `${event.sessionId}|${event.eventType}|${event.path}|${event.elementId}`;
+        if (analyticsDeduplication.has(key)) return false;
+        analyticsDeduplication.set(key, now);
+        return true;
+    });
+
+    if (accepted.length === 0) return res.status(202).json({ status: 'duplicate_ignored' });
+    req.validatedBody.events = accepted;
+    return next();
+}
+
+async function persistAnalyticsEvents(events) {
+    const normalizedEvents = events.map((event) => ({ ...event, timestamp: new Date().toISOString() }));
+    if (isMongoConnected) {
+        await AnalyticsModel.insertMany(normalizedEvents);
+        return { storage: 'mongo', events: normalizedEvents };
+    }
+    const storedEvents = safeReadJSON('analytics.json', []);
+    safeWriteJSON('analytics.json', [...normalizedEvents, ...storedEvents].slice(0, 1000));
+    return { storage: 'local', events: normalizedEvents };
+}
+
+async function readAnalyticsEvents() {
     if (isMongoConnected) {
         try {
-            await AnalyticsModel.insertMany(events);
-            return res.json({ status: 'success' });
-        } catch (e) {
-            console.error('[ANALYTICS POST MONGO]', e.message);
-            return res.status(500).json({ status: 'error' });
+            return await AnalyticsModel.find().sort({ timestamp: -1 }).limit(1000).lean();
+        } catch (error) {
+            console.error('[ANALYTICS GET MONGO]', error.message);
         }
     }
-    // Fallback: don't store in JSON to avoid huge file, just ignore
-    res.json({ status: 'fallback_ignored' });
+    return safeReadJSON('analytics.json', []).slice(0, 1000);
+}
+
+app.post('/api/analytics', analyticsEventLimiter, parseAnalyticsBeacon, validate(analyticsPayloadSchema), removeDuplicateAnalyticsEvents, async (req, res) => {
+    try {
+        const result = await persistAnalyticsEvents(req.validatedBody.events);
+        return res.json({ status: 'success', storage: result.storage, accepted: result.events.length });
+    } catch (error) {
+        console.error('[ANALYTICS POST]', error.message);
+        return res.status(500).json({ status: 'error' });
+    }
+    // Fallback local: mantém um histórico limitado para o Analytics continuar útil sem MongoDB.
 });
 
 app.get('/api/analytics', requireAuth, requireRole(['admin']), async (req, res) => {
-    if (isMongoConnected) {
-        try {
-            const data = await AnalyticsModel.find().sort({ timestamp: -1 }).limit(1000).lean();
-            return res.json(data);
-        } catch (e) {
-            console.error('[ANALYTICS GET MONGO]', e.message);
-        }
-    }
-    res.json([]);
+    return res.json(await readAnalyticsEvents());
 });
+
+app.get('/api/analytics/dashboard', requireAuth, requireRole(['admin']), async (req, res) => {
+    const events = await readAnalyticsEvents();
+    const pageviews = events.filter((event) => event?.eventType === 'pageview').length;
+    const clicks = events.filter((event) => event?.eventType === 'click').length;
+    const sessions = new Set(events.map((event) => event?.sessionId).filter(Boolean)).size;
+    return res.json({
+        metrics: { totalEvents: events.length, pageviews, clicks, sessions },
+        events: events.slice(0, 100)
+    });
+});
+
+app.post('/api/telemetry', analyticsEventLimiter, parseAnalyticsBeacon, validate(telemetryPayloadSchema), async (req, res) => {
+    const telemetry = req.validatedBody;
+    const event = {
+        sessionId: telemetry.session_id,
+        eventType: telemetry.event_type,
+        path: telemetry.page_url,
+        elementId: telemetry.converted ? 'converted' : 'abandoned',
+        x: 0,
+        y: 0
+    };
+    pruneAnalyticsDeduplication();
+    const key = `${event.sessionId}|${event.eventType}|${event.path}|${event.elementId}`;
+    if (analyticsDeduplication.has(key)) return res.status(202).json({ status: 'duplicate_ignored' });
+    analyticsDeduplication.set(key, Date.now());
+    try {
+        const result = await persistAnalyticsEvents([event]);
+        return res.json({ status: 'success', storage: result.storage });
+    } catch (error) {
+        console.error('[TELEMETRY POST]', error.message);
+        return res.status(500).json({ status: 'error' });
+    }
+});
+
+function serializeLeadsForRole(leads, role) {
+    return leads.map((lead) => {
+        const safeLead = sanitizeLeadResponse(lead);
+        if (role !== 'admin') {
+            safeLead.locationConsent = false;
+            safeLead.locationCoords = '';
+        }
+        return safeLead;
+    });
+}
 
 app.get('/api/submissions', requireAuth, async (req, res) => {
     if (isMongoConnected) {
         try {
             const subs = await SubmissionModel.find().sort({ createdAt: -1 }).lean();
-            return res.json(subs.map(sanitizeLeadResponse));
+            return res.json(serializeLeadsForRole(subs, req.user.role));
         } catch (e) { console.error('[SUBMISSIONS GET MONGO]', e.message); }
     }
     const submissions = safeReadJSON('submissions.json', []);
-    res.json(submissions.map(sanitizeLeadResponse));
+    res.json(serializeLeadsForRole(submissions, req.user.role));
 });
 
 // ===== EXPORTAÇÕES (SQL & CSV) =====

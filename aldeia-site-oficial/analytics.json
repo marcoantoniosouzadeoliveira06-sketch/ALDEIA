@@ -1,0 +1,56 @@
+[
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "portfolio.html",
+    "x": 50,
+    "y": 41,
+    "timestamp": "2026-08-10T19:52:17.566Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T19:52:16.138Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "#orcamento",
+    "x": 88,
+    "y": 85,
+    "timestamp": "2026-08-10T19:52:16.138Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "modal-close",
+    "x": 63,
+    "y": 81,
+    "timestamp": "2026-08-10T19:52:16.138Z"
+  },
+  {
+    "sessionId": "812a5c658982eb91baf8c325e0068432",
+    "eventType": "abandonment",
+    "path": "/",
+    "elementId": "abandoned",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T19:52:14.825Z"
+  },
+  {
+    "sessionId": "qa-session-20260810",
+    "eventType": "click",
+    "path": "/qa",
+    "elementId": "qa-button",
+    "x": 10,
+    "y": 20,
+    "timestamp": "2026-08-10T19:49:29.818Z"
+  }
+]

@@ -22,14 +22,17 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadProject() {
         let project = null;
         try {
-            let res = await fetch('/api/portfolio?t=' + Date.now());
-            if (!res.ok) {
-                res = await fetch('portfolio.json?t=' + Date.now());
+            if (projectId) {
+                const detailResponse = await fetch('/api/projects/' + encodeURIComponent(projectId) + '?t=' + Date.now());
+                if (detailResponse.ok) project = await detailResponse.json();
             }
-            if (res.ok) {
-                const projects = await res.json();
-                if (Array.isArray(projects)) {
-                    project = projects.find(p => p.id === projectId);
+
+            if (!project) {
+                let res = await fetch('/api/portfolio?t=' + Date.now());
+                if (!res.ok) res = await fetch('portfolio.json?t=' + Date.now());
+                if (res.ok) {
+                    const projects = await res.json();
+                    if (Array.isArray(projects)) project = projects.find(p => p.id === projectId);
                 }
             }
         } catch (e) {
