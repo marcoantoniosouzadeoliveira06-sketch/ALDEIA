@@ -9,7 +9,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Leaflet CSS & JS + Leaflet Heat plugin -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1265,6 +1265,10 @@
             <main class="main-content">
                 <header class="topbar">
                     <h1 class="page-title" id="current-page-title">Dashboard</h1>
+                    <label class="admin-global-search" for="admin-global-search-input">
+                        <span aria-hidden="true">⌕</span>
+                        <input id="admin-global-search-input" type="search" placeholder="Buscar no ecossistema…" autocomplete="off" aria-label="Buscar na aba atual do CRM" oninput="filterAdminWorkspace(this.value)">
+                    </label>
                     <div class="user-profile">
                         <div class="user-greeting">Welcome, <span id="auth-username" class="user-name">User</span></div>
                         <img src="assets/favicon.png" id="auth-avatar" class="user-avatar" alt="Avatar">
@@ -2330,6 +2334,19 @@
             });
         }
 
+        // Busca contextual: filtra a aba ativa sem chamar a API ou alterar dados.
+        function filterAdminWorkspace(rawQuery) {
+            const query = String(rawQuery || '').trim().toLocaleLowerCase('pt-BR');
+            const activeTab = document.querySelector('.tab-content.active');
+            if (!activeTab) return;
+
+            const searchableNodes = activeTab.querySelectorAll('tbody tr, .trello-card, .client-card, .portfolio-card, .submission-card, .qma-team-row');
+            searchableNodes.forEach((node) => {
+                const content = (node.textContent || '').toLocaleLowerCase('pt-BR');
+                node.hidden = Boolean(query) && !content.includes(query);
+            });
+        }
+
         // Tab System
         function switchTab(tabId, element, options = {}) {
             if (currentAdminUser?.role !== 'admin' && ADMIN_ONLY_TABS.has(tabId)) {
@@ -2355,6 +2372,12 @@
             } else {
                 const navItem = document.querySelector(`.nav-item[onclick*="${tabId}"]`);
                 if (navItem) navItem.classList.add('active');
+            }
+
+            const globalSearch = document.getElementById('admin-global-search-input');
+            if (globalSearch?.value) {
+                globalSearch.value = '';
+                filterAdminWorkspace('');
             }
 
             const titleMap = {

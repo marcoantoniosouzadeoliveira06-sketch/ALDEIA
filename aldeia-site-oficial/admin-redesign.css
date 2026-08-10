@@ -277,3 +277,243 @@ body {
   #admin-dashboard .qma-profile-panel,
   #admin-dashboard .table-container { border-radius: 20px; }
 }
+
+/* Stitch reference: CRM Aldeia v3.1 — visual only; the existing DOM and APIs remain authoritative. */
+#admin-dashboard {
+  background: #121317;
+}
+
+#admin-dashboard .crm-wrapper,
+#admin-dashboard .main-content {
+  background:
+    radial-gradient(circle at 82% 12%, rgba(255, 255, 255, 0.035), transparent 26rem),
+    #121317;
+}
+
+@media (min-width: 769px) {
+  #admin-dashboard .sidebar {
+    inset: 0 auto 0 0;
+    width: 280px;
+    padding: 24px 16px;
+    border: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0;
+    background: rgba(8, 9, 11, 0.88);
+    box-shadow: none;
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+  }
+
+  #admin-dashboard .main-content {
+    width: calc(100% - 280px);
+    margin-left: 280px;
+    padding: 96px 32px 32px;
+  }
+
+  #admin-dashboard .topbar {
+    inset: 0 0 auto 280px;
+    min-height: 64px;
+    padding: 10px 32px;
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0;
+    background: rgba(8, 9, 11, 0.72);
+    box-shadow: none;
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+  }
+}
+
+#admin-dashboard .sidebar-logo {
+  min-height: 48px;
+  margin-bottom: 28px;
+  padding: 0 8px;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+#admin-dashboard .sidebar-logo::after {
+  content: 'Admin Command Center';
+  display: block;
+  margin-left: 4px;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+
+#admin-dashboard .sidebar-logo svg {
+  width: 34px;
+  height: 34px;
+  padding: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+#admin-dashboard .sidebar-nav { gap: 4px; }
+
+#admin-dashboard .nav-item {
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.60);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+#admin-dashboard .nav-item:hover,
+#admin-dashboard .nav-item:focus-visible {
+  transform: none;
+  color: rgba(255, 255, 255, 0.96);
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+#admin-dashboard .nav-item.active {
+  color: rgba(255, 255, 255, 0.98);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+#admin-dashboard .nav-item.active svg { stroke: currentColor; }
+
+#admin-dashboard .topbar { align-items: center; }
+#admin-dashboard .page-title {
+  font-size: clamp(1.25rem, 2.1vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+}
+
+#admin-dashboard .admin-global-search {
+  position: absolute;
+  left: 50%;
+  width: min(320px, 36vw);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  transform: translateX(-50%);
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+#admin-dashboard .admin-global-search:focus-within {
+  border-color: rgba(255, 255, 255, 0.30);
+  background: rgba(255, 255, 255, 0.075);
+}
+
+#admin-dashboard .admin-global-search span {
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+#admin-dashboard .admin-global-search input {
+  width: 100%;
+  min-height: 34px;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: rgba(255, 255, 255, 0.90);
+  font-size: 0.72rem;
+}
+
+#admin-dashboard .admin-global-search input:focus {
+  box-shadow: none !important;
+}
+
+#admin-dashboard .admin-global-search input::placeholder {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+#admin-dashboard .user-profile {
+  min-height: 42px;
+  padding: 4px 4px 4px 12px;
+  border-color: rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: none;
+}
+
+#admin-dashboard .grid-cards {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+#admin-dashboard .crm-card {
+  min-height: 164px;
+  padding: 22px;
+  border-color: rgba(255, 255, 255, 0.10);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+#admin-dashboard .crm-card::after {
+  top: auto;
+  right: 16px;
+  bottom: 14px;
+  width: 88px;
+  height: 26px;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(165deg, transparent 45%, rgba(255, 255, 255, 0.38) 47%, transparent 49%) 0 0 / 26px 26px repeat-x;
+  opacity: 0.45;
+}
+
+#admin-dashboard .crm-card-value {
+  font-size: clamp(1.8rem, 2.5vw, 2.65rem);
+  font-weight: 700;
+  letter-spacing: -0.065em;
+  text-shadow: 0 0 14px rgba(255, 255, 255, 0.14);
+}
+
+#admin-dashboard .metric-caption {
+  display: inline-flex;
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.075);
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 0.64rem;
+  letter-spacing: 0.02em;
+}
+
+#admin-dashboard .table-container,
+#admin-dashboard .glass-panel,
+#admin-dashboard .submissions-box,
+#admin-dashboard .qma-command-card,
+#admin-dashboard .qma-profile-panel,
+#admin-dashboard .qma-admin-grid > * {
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+#admin-dashboard .table-container { border-color: rgba(255, 255, 255, 0.10); }
+#admin-dashboard th { background: rgba(255, 255, 255, 0.028); }
+#admin-dashboard tbody tr:hover { background: rgba(255, 255, 255, 0.035); }
+
+@media (max-width: 1180px) and (min-width: 769px) {
+  #admin-dashboard .grid-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #admin-dashboard .admin-global-search { display: none; }
+}
+
+@media (max-width: 768px) {
+  #admin-dashboard .main-content { background: #121317; }
+  #admin-dashboard .admin-global-search { display: none; }
+  #admin-dashboard .grid-cards { grid-template-columns: 1fr; gap: 12px; }
+  #admin-dashboard .crm-card { min-height: 148px; padding: 20px; border-radius: 20px; }
+  #admin-dashboard .sidebar-logo::after { display: none; }
+  #admin-dashboard .nav-item.active { background: rgba(255, 255, 255, 0.18); color: #fff; }
+}
