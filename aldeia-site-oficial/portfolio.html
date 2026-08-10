@@ -149,7 +149,7 @@
                     </div>
                 </div>
 
-                <a href="javascript:void(0)" onclick="openBudgetModal()" class="btn-vamos">Vamos?<span class="btn-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span></a>
+                <a href="#contato" class="btn-vamos" data-budget-trigger>Vamos?<span class="btn-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span></a>
                 <button class="nav-hamburger" id="nav-toggle" aria-label="Menu">
                     <span></span><span></span><span></span>
                 </button>
@@ -275,7 +275,7 @@
                     <img src="assets/logo-tp.svg" class="logo-footer" alt="ALDEIA Logo">
                 </div>
                 <p id="footer-desc">Buscando algo <strong>fora do padrão?</strong><br>Vamos conversar.</p>
-                <a href="javascript:void(0)" onclick="openBudgetModal()" class="btn-cta btn-cta-sm">Faça um
+                <a href="#contato" class="btn-cta btn-cta-sm" data-budget-trigger>Faça um
                     orçamento<span class="btn-arrow-icon">→</span></a>
             </div>
             <div class="footer-col">
@@ -342,14 +342,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="components/VideoPlayer.js"></script>
     <script src="assets/tracker.js"></script>
-    <script src="app.js?v=75"></script>
+    <script src="app.js?v=76"></script>
     <script src="portfolio.js"></script>
 
 
     <!-- MODAL ORÇAMENTO -->
     <div id="budget-modal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeBudgetModal()">✕</button>
+            <button class="modal-close" type="button" data-budget-close aria-label="Fechar orçamento">✕</button>
             <div id="modal-success-screen"
                 style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
                 <svg style="width: 64px; height: 64px; stroke: #ffffff; margin-bottom: 24px; fill: none;"

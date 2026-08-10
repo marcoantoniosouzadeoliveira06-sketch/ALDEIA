@@ -120,6 +120,50 @@
     initGrain('preloader-grain');
     initGrain('hero-grain');
 
+    // ===== ORÇAMENTO: CONTROLES SEM HANDLERS INLINE =====
+    // Funciona mesmo com a política de segurança bloqueando atributos onclick.
+    function bindBudgetModalControls() {
+        const modal = document.getElementById('budget-modal');
+        if (!modal || modal.dataset.controlsBound === 'true') return;
+        modal.dataset.controlsBound = 'true';
+
+        const openModal = () => {
+            const formScreen = document.getElementById('modal-form-screen');
+            const successScreen = document.getElementById('modal-success-screen');
+            if (formScreen) formScreen.style.display = 'block';
+            if (successScreen) successScreen.style.display = 'none';
+            document.getElementById('modal-cadastro-form')?.reset();
+            modal.style.display = 'flex';
+            requestAnimationFrame(() => modal.classList.add('active'));
+            window.lenis?.stop();
+            document.getElementById('m-nome')?.focus({ preventScroll: true });
+        };
+
+        const closeModal = () => {
+            modal.classList.remove('active');
+            window.setTimeout(() => { modal.style.display = 'none'; }, 400);
+            window.lenis?.start();
+            requestAnimationFrame(() => window.lenis?.start());
+        };
+
+        document.querySelectorAll('[data-budget-trigger], #floating-whatsapp-widget').forEach(trigger => {
+            trigger.addEventListener('click', event => {
+                event.preventDefault();
+                openModal();
+            });
+        });
+        modal.querySelectorAll('[data-budget-close]').forEach(close => close.addEventListener('click', closeModal));
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && modal.classList.contains('active')) closeModal();
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindBudgetModalControls, { once: true });
+    } else {
+        bindBudgetModalControls();
+    }
+
     // ===== CUSTOM CURSOR =====
     const cursor = document.getElementById('custom-cursor');
     const follower = document.getElementById('cursor-follower');

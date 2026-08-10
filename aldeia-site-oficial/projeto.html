@@ -211,7 +211,7 @@
                     <img src="assets/logo-tp.svg" class="logo-footer" alt="ALDEIA Logo">
                 </div>
                 <p id="footer-desc">Buscando algo <strong>fora do padrão?</strong><br>Vamos conversar.</p>
-                <a href="javascript:void(0)" onclick="openBudgetModal()" class="btn-cta btn-cta-sm">Faça um
+                <a href="#contato" class="btn-cta btn-cta-sm" data-budget-trigger>Faça um
                     orçamento<span class="btn-arrow-icon">→</span></a>
             </div>
             <div class="footer-col">
@@ -277,14 +277,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="assets/tracker.js"></script>
-    <script src="app.js?v=75"></script>
+    <script src="app.js?v=76"></script>
     <script src="projeto.js"></script>
     <!-- Preloader Removido -->
 
     <!-- MODAL ORÇAMENTO -->
     <div id="budget-modal">
         <div class="modal-content">
-            <button class="modal-close" onclick="closeBudgetModal()">✕</button>
+            <button class="modal-close" type="button" data-budget-close aria-label="Fechar orçamento">✕</button>
             <div id="modal-success-screen"
                 style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
                 <svg style="width: 64px; height: 64px; stroke: hsl(0, 0%, 23%); margin-bottom: 24px; fill: none;"
