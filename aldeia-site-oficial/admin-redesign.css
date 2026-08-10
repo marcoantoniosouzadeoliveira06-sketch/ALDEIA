@@ -278,6 +278,80 @@ body {
   #admin-dashboard .table-container { border-radius: 20px; }
 }
 
+/* Command controls and consistent module polish. */
+#admin-dashboard .sidebar-minimize-button {
+  width: 30px;
+  height: 30px;
+  margin-right: 2px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.82);
+  cursor: pointer;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  transition: background 180ms ease, transform 180ms ease;
+}
+#admin-dashboard .sidebar-minimize-button:hover { background: rgba(255,255,255,.15); transform: scale(1.06); }
+
+@media (min-width: 769px) {
+  #admin-dashboard .sidebar,
+  #admin-dashboard .main-content,
+  #admin-dashboard .topbar { transition: width 280ms var(--qma-spring), margin 280ms var(--qma-spring), left 280ms var(--qma-spring); }
+  #admin-dashboard .sidebar.crm-sidebar-minimized { width: 76px; padding-inline: 12px; }
+  #admin-dashboard .sidebar.crm-sidebar-minimized .sidebar-logo { padding: 0; gap: 6px; font-size: 0; }
+  #admin-dashboard .sidebar.crm-sidebar-minimized .sidebar-logo::after { display: none; }
+  #admin-dashboard .sidebar.crm-sidebar-minimized .sidebar-logo svg { width: 28px; height: 28px; padding: 6px; }
+  #admin-dashboard .sidebar.crm-sidebar-minimized .nav-item { justify-content: center; gap: 0; padding-inline: 8px; font-size: 0; }
+  #admin-dashboard .sidebar.crm-sidebar-minimized .nav-item svg { width: 19px; height: 19px; }
+  #admin-dashboard .sidebar.crm-sidebar-minimized ~ .main-content { width: calc(100% - 76px); margin-left: 76px; }
+  #admin-dashboard .sidebar.crm-sidebar-minimized ~ .main-content .topbar { left: 76px; }
+}
+
+#admin-dashboard .trello-board-grid { grid-template-columns: repeat(4, minmax(250px, 1fr)); gap: 16px; overflow-x: auto; padding-bottom: 8px; }
+#admin-dashboard .kanban-col { min-height: 530px; padding: 16px; border-color: rgba(255,255,255,.10); border-radius: 24px; background: rgba(255,255,255,.028); box-shadow: inset 0 1px 0 rgba(255,255,255,.07); }
+#admin-dashboard .kanban-col-header { padding: 6px 4px 16px; border-top-width: 0 !important; }
+#admin-dashboard .col-title { font-size: .84rem; letter-spacing: -.02em; }
+#admin-dashboard .col-badge { min-width: 28px; padding: 5px 9px; border-radius: 999px; text-align: center; background: rgba(255,255,255,.10); }
+#admin-dashboard .kanban-cards-container { min-height: 420px; padding: 3px; border-radius: 18px; transition: background 180ms ease, outline-color 180ms ease; }
+#admin-dashboard .kanban-cards-container.is-drop-target { outline: 1px dashed rgba(255,255,255,.45); background: rgba(255,255,255,.06); }
+#admin-dashboard .trello-card { border-radius: 18px; border-color: rgba(255,255,255,.10); background: rgba(8,9,11,.76); box-shadow: inset 0 1px 0 rgba(255,255,255,.06); cursor: grab; }
+#admin-dashboard .trello-card.is-dragging { opacity: .48; cursor: grabbing; transform: scale(.98); }
+#admin-dashboard .trello-card:hover { border-color: rgba(255,255,255,.22); box-shadow: 0 16px 30px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.09); }
+#admin-dashboard .card-tag { border-radius: 999px; padding: 4px 9px; }
+
+#admin-dashboard .portfolio-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; margin: 0 0 24px; }
+#admin-dashboard .portfolio-card { overflow: hidden; border: 1px solid rgba(255,255,255,.10); border-radius: 24px; background: rgba(255,255,255,.035); box-shadow: inset 0 1px 0 rgba(255,255,255,.07); transition: transform 220ms var(--qma-spring), border-color 220ms ease; }
+#admin-dashboard .portfolio-card:hover { border-color: rgba(255,255,255,.25); transform: translateY(-3px); }
+#admin-dashboard .portfolio-card-cover { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: radial-gradient(circle at 70% 25%, var(--project-accent, #e4e4e7), transparent 65%), #16171c; }
+#admin-dashboard .portfolio-card-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 350ms var(--qma-spring); }
+#admin-dashboard .portfolio-card:hover .portfolio-card-cover img { transform: scale(1.04); }
+#admin-dashboard .portfolio-card-placeholder { display: grid; height: 100%; place-items: center; color: rgba(255,255,255,.55); font-size: .78rem; }
+#admin-dashboard .portfolio-card-category { position: absolute; left: 12px; bottom: 12px; padding: 5px 9px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; background: rgba(8,9,11,.66); backdrop-filter: blur(12px); color: rgba(255,255,255,.86); font-size: .65rem; font-weight: 700; }
+#admin-dashboard .portfolio-card-body { padding: 16px; }
+#admin-dashboard .portfolio-card-body h3 { color: rgba(255,255,255,.94); font-size: 1rem; letter-spacing: -.035em; }
+#admin-dashboard .portfolio-card-body p { margin: 6px 0 14px; color: rgba(255,255,255,.50); font-size: .73rem; }
+#admin-dashboard .portfolio-card-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+#admin-dashboard .portfolio-card-action { padding: 7px 10px; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; background: rgba(255,255,255,.06); color: rgba(255,255,255,.82); cursor: pointer; font: inherit; font-size: .7rem; text-decoration: none; transition: background 180ms ease, transform 180ms ease; }
+#admin-dashboard .portfolio-card-action:hover { background: rgba(255,255,255,.14); transform: translateY(-1px); }
+#admin-dashboard .portfolio-card-action.primary { background: #fff; color: #101114; border-color: #fff; }
+#admin-dashboard .portfolio-card-action.danger { color: #fca5a5; }
+#admin-dashboard .portfolio-card-note, #admin-dashboard .portfolio-empty-state { color: rgba(255,255,255,.48); font-size: .72rem; }
+#admin-dashboard .portfolio-empty-state { grid-column: 1 / -1; padding: 28px; border: 1px dashed rgba(255,255,255,.14); border-radius: 20px; text-align: center; }
+
+#admin-dashboard #profile-tab .qma-profile-panel,
+#admin-dashboard #telemetry-tab > .crm-card,
+#admin-dashboard #logins-tab > .table-container,
+#admin-dashboard #cms-tab .submissions-box { border-radius: 28px; border-color: rgba(255,255,255,.10); background: rgba(255,255,255,.035) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.07); }
+#admin-dashboard #cms-tab .cms-accordion-item { margin-bottom: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,.09); border-radius: 18px; background: rgba(0,0,0,.22); }
+#admin-dashboard #cms-tab .cms-accordion-header { padding: 16px 18px; background: rgba(255,255,255,.04); transition: background 180ms ease; }
+#admin-dashboard #cms-tab .cms-accordion-header:hover { background: rgba(255,255,255,.09); }
+#admin-dashboard #cms-tab .cms-accordion-body { padding: 18px; }
+
+@media (max-width: 1180px) { #admin-dashboard .trello-board-grid { grid-template-columns: repeat(2, minmax(280px, 1fr)); } #admin-dashboard .portfolio-card-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 768px) { #admin-dashboard .sidebar-minimize-button { display:none; } #admin-dashboard .trello-board-grid { grid-template-columns: minmax(260px,1fr); } #admin-dashboard .kanban-col { min-height: 420px; } #admin-dashboard .portfolio-card-grid { grid-template-columns: 1fr; } }
+
 /* Stitch reference: CRM Aldeia v3.1 — visual only; the existing DOM and APIs remain authoritative. */
 #admin-dashboard {
   background: #121317;

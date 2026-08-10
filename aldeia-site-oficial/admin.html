@@ -1213,6 +1213,7 @@
             <!-- SIDEBAR -->
             <aside class="sidebar">
                 <div class="sidebar-logo">
+                    <button id="sidebar-minimize-button" class="sidebar-minimize-button" type="button" onclick="toggleAdminSidebar()" aria-label="Minimizar menu lateral" title="Minimizar menu">•••</button>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2L2 22h20L12 2z"/></svg>
                     ALDEIA
                 </div>
@@ -1524,6 +1525,8 @@
                             <button type="button" class="qma-btn accent" onclick="resetPortForm(); document.getElementById('portfolio-form').scrollIntoView({ behavior: 'smooth' });">+ Novo Projeto (Case)</button>
                         </div>
                     </div>
+
+                    <div id="portfolio-card-grid" class="portfolio-card-grid" aria-live="polite"></div>
 
                     <div class="submissions-box" style="margin-bottom: 24px; background: rgba(17, 17, 17, 0.5); padding: 30px; border-radius: 8px;">
                         <div class="box-header" style="margin-bottom: 20px;">
@@ -2334,6 +2337,24 @@
             });
         }
 
+        function toggleAdminSidebar() {
+            const sidebar = document.querySelector('#admin-dashboard .sidebar');
+            if (!sidebar) return;
+            const compact = sidebar.classList.toggle('crm-sidebar-minimized');
+            localStorage.setItem('aldeia_admin_sidebar_compact', compact ? '1' : '0');
+            document.getElementById('sidebar-minimize-button')?.setAttribute('aria-label', compact ? 'Expandir menu lateral' : 'Minimizar menu lateral');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.querySelector('#admin-dashboard .sidebar');
+            if (sidebar && localStorage.getItem('aldeia_admin_sidebar_compact') === '1' && window.innerWidth > 768) {
+                sidebar.classList.add('crm-sidebar-minimized');
+            }
+            document.querySelectorAll('#admin-dashboard .nav-item').forEach((item) => {
+                item.title = item.textContent.trim();
+            });
+        });
+
         // Busca contextual: filtra a aba ativa sem chamar a API ou alterar dados.
         function filterAdminWorkspace(rawQuery) {
             const query = String(rawQuery || '').trim().toLocaleLowerCase('pt-BR');
@@ -2404,7 +2425,7 @@
                 'portfolio-tab': window.loadPortfolio,
                 'logins-tab': window.loadLoginLogs,
                 'cms-tab': window.loadSiteContentForEditor,
-                'telemetry-tab': window.loadSecurityStats,
+                'telemetry-tab': window.loadAnalyticsWorkspace,
                 'dashboard-tab': window.loadDashboardStats,
                 'settings-tab': window.loadAdminSettings
             };
@@ -4055,6 +4076,31 @@
             if (modal) modal.style.display = 'none';
         }
 
+        async function loadAnalyticsWorkspace() {
+            const body = document.getElementById('telemetry-logs-body');
+            if (!body) return;
+            body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Atualizando eventos reais…</td></tr>';
+            try {
+                const response = await fetch('/api/analytics', { headers: getAuthHeaders() });
+                if (!response.ok) throw new Error('Falha ao carregar analytics');
+                const events = await response.json();
+                if (!Array.isArray(events) || events.length === 0) {
+                    body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Ainda não há eventos coletados.</td></tr>';
+                    return;
+                }
+                body.innerHTML = '';
+                events.slice(0, 100).forEach((event) => {
+                    const row = document.createElement('tr');
+                    const timestamp = event.timestamp ? new Date(event.timestamp).toLocaleString('pt-BR') : '—';
+                    row.innerHTML = `<td>${escapeHTML(timestamp)}</td><td><code>${escapeHTML(String(event.sessionId || '—').slice(0, 12))}</code></td><td><span class="metric-caption">${escapeHTML(event.eventType || 'evento')}</span></td><td>${escapeHTML(event.path || '/')} ${event.elementId ? '· ' + escapeHTML(event.elementId) : ''}</td>`;
+                    body.appendChild(row);
+                });
+            } catch (error) {
+                console.error('[ANALYTICS LOAD ERROR]', error);
+                body.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#fca5a5;">Não foi possível carregar analytics agora.</td></tr>';
+            }
+        }
+
         // Fetch and load security stats (Rate Limiter)
         async function loadSecurityStats() {
             const container = document.getElementById('security-stats-list');
@@ -4121,6 +4167,7 @@
         // ===== PORTFOLIO MANAGER =====
         async function loadPortfolio() {
             const listEl = document.getElementById('portfolio-list');
+            const cardGrid = document.getElementById('portfolio-card-grid');
             if (!listEl) return;
             
             listEl.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Carregando portfólio...</td></tr>';
@@ -4130,8 +4177,10 @@
                 if (res.ok) {
                     rawPortfolioProjects = await res.json();
                     listEl.innerHTML = '';
+                    if (cardGrid) cardGrid.innerHTML = '';
                     if (rawPortfolioProjects.length === 0) {
                         listEl.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum projeto cadastrado.</td></tr>';
+                        if (cardGrid) cardGrid.innerHTML = '<div class="portfolio-empty-state">Nenhum case publicado ainda. Use “Novo Projeto” para criar o primeiro card.</div>';
                         return;
                     }
                     rawPortfolioProjects.forEach(p => {
@@ -4155,6 +4204,29 @@
                             </td>
                         `;
                         listEl.appendChild(tr);
+
+                        if (cardGrid) {
+                            const card = document.createElement('article');
+                            card.className = 'portfolio-card';
+                            const cover = String(p.cover || '').trim();
+                            const category = escapeHTML(p.categoryLabel || p.category || 'Projeto');
+                            const title = escapeHTML(p.title || 'Projeto sem título');
+                            const safeProjectId = encodeURIComponent(String(p.id || ''));
+                            const managerActions = currentAdminUser?.role === 'admin'
+                                ? `<button type="button" class="portfolio-card-action" onclick="editProject('${String(p.id).replace(/'/g, "\\'")}')">Editar</button><button type="button" class="portfolio-card-action danger" onclick="deleteProject('${String(p.id).replace(/'/g, "\\'")}')">Excluir</button>`
+                                : '<span class="portfolio-card-note">Você pode adicionar novos cases.</span>';
+                            card.innerHTML = `
+                                <div class="portfolio-card-cover" style="--project-accent:${colorHex}">
+                                    ${cover ? `<img src="${cover}" alt="Capa do projeto ${title}" loading="lazy">` : '<div class="portfolio-card-placeholder">Sem capa</div>'}
+                                    <span class="portfolio-card-category">${category}</span>
+                                </div>
+                                <div class="portfolio-card-body">
+                                    <h3>${title}</h3>
+                                    <p>${escapeHTML(p.format || 'Formato original')} · ${Array.isArray(p.assets) ? p.assets.length : 0} mídia(s)</p>
+                                    <div class="portfolio-card-actions"><a class="portfolio-card-action primary" href="/projeto.html?id=${safeProjectId}" target="_blank" rel="noopener">Visualizar</a>${managerActions}</div>
+                                </div>`;
+                            cardGrid.appendChild(card);
+                        }
                     });
                 }
             } catch (err) {
@@ -4666,11 +4738,36 @@
             document.getElementById('badge-count-in_progress').textContent = countInProgress;
             document.getElementById('badge-count-review').textContent = countReview;
             document.getElementById('badge-count-done').textContent = countDone;
+            setupTrelloDropzones();
+        }
+
+        function setupTrelloDropzones() {
+            document.querySelectorAll('.kanban-cards-container').forEach((zone) => {
+                const status = zone.id.replace('trello-col-', '');
+                zone.ondragover = (event) => {
+                    event.preventDefault();
+                    zone.classList.add('is-drop-target');
+                };
+                zone.ondragleave = () => zone.classList.remove('is-drop-target');
+                zone.ondrop = async (event) => {
+                    event.preventDefault();
+                    zone.classList.remove('is-drop-target');
+                    const taskId = event.dataTransfer.getData('text/plain');
+                    if (taskId) await moveTrelloTask(taskId, status);
+                };
+            });
         }
 
         function createTrelloCardElement(task) {
             const card = document.createElement('div');
             card.className = 'trello-card';
+            card.draggable = true;
+            card.addEventListener('dragstart', (event) => {
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', task.id);
+                card.classList.add('is-dragging');
+            });
+            card.addEventListener('dragend', () => card.classList.remove('is-dragging'));
 
             const assignedName = task.assignedTo || 'Japex';
             let avatarUrl = 'assets/japex.webp';
@@ -4700,6 +4797,7 @@
                             <option value="review" ${task.status === 'review' ? 'selected' : ''}>Em Revisão</option>
                             <option value="done" ${task.status === 'done' ? 'selected' : ''}>Concluído</option>
                         </select>
+                        <button onclick="openTrelloTaskEditor('${task.id}')" style="background: none; border: none; color: rgba(255,255,255,.72); cursor: pointer; padding: 2px 4px;" title="Editar Tarefa">✎</button>
                         <button onclick="deleteTrelloTask('${task.id}')" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 2px 4px;" title="Excluir Tarefa">🗑️</button>
                     </div>
                 </div>
@@ -4712,6 +4810,19 @@
             document.getElementById('trello-task-title').value = '';
             document.getElementById('trello-task-desc').value = '';
             document.getElementById('trello-task-client').value = '';
+            document.getElementById('trello-task-modal').classList.add('active');
+        }
+
+        function openTrelloTaskEditor(id) {
+            const task = allTrelloTasks.find((entry) => entry.id === id);
+            if (!task) return;
+            document.getElementById('trello-task-id').value = task.id;
+            document.getElementById('trello-task-title').value = task.title || '';
+            document.getElementById('trello-task-desc').value = task.description || '';
+            document.getElementById('trello-task-client').value = task.clientName || '';
+            document.getElementById('trello-task-assigned').value = task.assignedTo || 'Japex';
+            document.getElementById('trello-task-priority').value = task.priority || 'Média';
+            document.getElementById('trello-task-status').value = task.status || 'backlog';
             document.getElementById('trello-task-modal').classList.add('active');
         }
 
