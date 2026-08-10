@@ -352,6 +352,141 @@ body {
 @media (max-width: 1180px) { #admin-dashboard .trello-board-grid { grid-template-columns: repeat(2, minmax(280px, 1fr)); } #admin-dashboard .portfolio-card-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
 @media (max-width: 768px) { #admin-dashboard .sidebar-minimize-button { display:none; } #admin-dashboard .trello-board-grid { grid-template-columns: minmax(260px,1fr); } #admin-dashboard .kanban-col { min-height: 420px; } #admin-dashboard .portfolio-card-grid { grid-template-columns: 1fr; } }
 
+/* Fidelity pass — matched to the supplied Stitch Command Center screen. */
+#admin-dashboard,
+#admin-dashboard .crm-wrapper,
+#admin-dashboard .main-content {
+  background: #121317 !important;
+}
+
+@media (min-width: 769px) {
+  #admin-dashboard .sidebar {
+    width: 280px;
+    padding: 24px 12px;
+    background: #090a0d;
+    border-right: 1px solid rgba(255,255,255,.07);
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  #admin-dashboard .main-content { width: calc(100% - 280px); margin-left: 280px; padding: 96px 32px 32px; }
+  #admin-dashboard .topbar {
+    left: 280px;
+    height: 64px;
+    min-height: 64px;
+    padding: 10px 28px;
+    background: rgba(9,10,13,.94);
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    backdrop-filter: blur(20px);
+  }
+}
+
+#admin-dashboard .sidebar-logo {
+  min-height: 46px;
+  margin: 0 0 22px;
+  padding: 0 8px;
+  gap: 8px;
+  font-size: .88rem;
+  font-weight: 700;
+  letter-spacing: -.045em;
+}
+#admin-dashboard .sidebar-brand-mark {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+}
+#admin-dashboard .sidebar-logo::after {
+  margin-left: 0;
+  font-size: .52rem;
+  letter-spacing: .04em;
+  color: rgba(255,255,255,.43);
+}
+#admin-dashboard .sidebar-minimize-button {
+  order: -1;
+  width: 26px;
+  height: 26px;
+  margin-right: 0;
+  padding: 0;
+  background: transparent;
+  border-color: transparent;
+  color: rgba(255,255,255,.75);
+}
+#admin-dashboard .sidebar-minimize-button:hover { background: rgba(255,255,255,.08); transform:none; }
+#admin-dashboard .sidebar-nav { gap: 3px; }
+#admin-dashboard .nav-item {
+  min-height: 39px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: .76rem;
+  font-weight: 600;
+  color: #a4a5aa;
+}
+#admin-dashboard .nav-item:hover { background: rgba(255,255,255,.06); color: #fff; transform:none; }
+#admin-dashboard .nav-item.active {
+  color: #fff;
+  background: rgba(255,255,255,.18);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+#admin-dashboard .topbar .page-title {
+  font-size: .78rem;
+  color: rgba(255,255,255,.55);
+  font-weight: 500;
+  letter-spacing: -.01em;
+}
+#admin-dashboard .admin-global-search {
+  width: min(340px, 38vw);
+  height: 34px;
+  background: rgba(255,255,255,.045);
+  border-color: rgba(255,255,255,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+#admin-dashboard .admin-global-search input { font-size: .7rem; }
+#admin-dashboard .user-profile { background: transparent; border-color: transparent; box-shadow:none; padding:0; }
+#admin-dashboard .user-greeting { display:none; }
+#admin-dashboard .user-avatar { width:30px; height:30px; }
+#admin-dashboard .btn-logout { color:rgba(255,255,255,.68); font-size:.72rem; margin-left:4px; }
+
+#admin-dashboard .grid-cards { grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
+#admin-dashboard .crm-card {
+  min-height: 154px;
+  padding: 20px;
+  border-radius: 22px;
+  border-color: rgba(255,255,255,.085);
+  background: rgba(255,255,255,.022);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+  backdrop-filter: blur(20px);
+}
+#admin-dashboard .crm-card::after { display:none; }
+#admin-dashboard .crm-card:hover { border-color:rgba(255,255,255,.16); box-shadow:inset 0 1px 0 rgba(255,255,255,.07); transform:none; }
+#admin-dashboard .crm-card-title { font-size:.64rem; letter-spacing:.075em; color:#a6a7ad; }
+#admin-dashboard .crm-card-value { margin-top:auto; font-size:2rem; font-weight:700; letter-spacing:-.065em; text-shadow:none; }
+#admin-dashboard .metric-caption { padding:0; background:transparent; color:#8b8c92; font-size:.66rem; }
+
+#admin-dashboard .table-container,
+#admin-dashboard .glass-panel,
+#admin-dashboard .submissions-box,
+#admin-dashboard .qma-command-card,
+#admin-dashboard .qma-profile-panel,
+#admin-dashboard #cms-tab .submissions-box,
+#admin-dashboard #telemetry-tab > .crm-card,
+#admin-dashboard #logins-tab > .table-container {
+  border-radius:22px;
+  border-color:rgba(255,255,255,.085);
+  background:rgba(255,255,255,.022) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+#admin-dashboard .kanban-col { border-radius:22px; background:rgba(255,255,255,.022); box-shadow:inset 0 1px 0 rgba(255,255,255,.04); }
+#admin-dashboard .trello-card { border-radius:16px; background:#17181c; box-shadow:none; }
+#admin-dashboard .portfolio-card { border-radius:22px; background:rgba(255,255,255,.022); }
+
+@media (max-width: 1180px) and (min-width:769px) { #admin-dashboard .grid-cards{grid-template-columns:repeat(2,minmax(0,1fr));} }
+@media (max-width:768px) {
+  #admin-dashboard .main-content { background:#121317 !important; }
+  #admin-dashboard .crm-card, #admin-dashboard .table-container, #admin-dashboard .glass-panel, #admin-dashboard .submissions-box { border-radius:20px; }
+}
+
 /* Stitch reference: CRM Aldeia v3.1 — visual only; the existing DOM and APIs remain authoritative. */
 #admin-dashboard {
   background: #121317;
