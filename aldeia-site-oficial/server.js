@@ -779,7 +779,7 @@ app.use(express.text({ type: 'text/plain', limit: '5kb' }));
 
 const publicRootFiles = new Set([
     '/index.html', '/portfolio.html', '/projeto.html', '/admin.html',
-    '/style.css', '/app.js', '/portfolio.js', '/projeto.js', '/logo.svg',
+    '/style.css', '/admin-redesign.css', '/app.js', '/portfolio.js', '/projeto.js', '/logo.svg',
     '/robots.txt', '/sitemap.xml'
 ]);
 const publicDirectoryPrefixes = ['/assets/', '/components/'];
