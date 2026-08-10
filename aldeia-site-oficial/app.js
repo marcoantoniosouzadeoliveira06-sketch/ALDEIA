@@ -197,21 +197,38 @@
     const mobileMenu = document.getElementById('mobile-menu');
 
     if (navToggle && mobileMenu) {
+        navToggle.dataset.mobileNavBound = 'true';
+        const setMobileMenuState = (isOpen) => {
+            navToggle.classList.toggle('active', isOpen);
+            mobileMenu.classList.toggle('active', isOpen);
+            navToggle.setAttribute('aria-expanded', String(isOpen));
+            navToggle.setAttribute('aria-label', isOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação');
+            document.body.classList.toggle('mobile-menu-open', isOpen);
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+
+            if (!isOpen && lenis) lenis.start();
+            if (isOpen && lenis) lenis.stop();
+        };
+
         navToggle.addEventListener('click', () => {
-            navToggle.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+            setMobileMenuState(!mobileMenu.classList.contains('active'));
         });
 
         // Close mobile menu on link click
         const mobileLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
         mobileLinks.forEach((link) => {
             link.addEventListener('click', () => {
-                navToggle.classList.remove('active');
-                mobileMenu.classList.remove('active');
-                document.body.style.overflow = '';
+                setMobileMenuState(false);
             });
         });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && mobileMenu.classList.contains('active')) setMobileMenuState(false);
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768 && mobileMenu.classList.contains('active')) setMobileMenuState(false);
+        }, { passive: true });
     }
 
     // Smooth scroll for all anchor links
@@ -1282,12 +1299,13 @@
 
     // 3. ScrollFloat Initialization
     function initScrollFloat() {
-        if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-        gsap.registerPlugin(ScrollTrigger);
-
         const floaters = document.querySelectorAll('.scroll-float');
         floaters.forEach(el => {
-            const text = el.innerText.trim();
+            if (el.dataset.scrollFloatReady === 'true') return;
+            const text = el.textContent.trim();
+            if (!text) return;
+
+            el.dataset.scrollFloatReady = 'true';
             el.innerHTML = ''; // Clear text
 
             const textSpan = document.createElement('span');
@@ -1306,7 +1324,29 @@
             const ease = el.getAttribute('data-ease') || 'back.inOut(2)';
             const scrollStart = el.getAttribute('data-start') || 'center bottom+=50%';
             const scrollEnd = el.getAttribute('data-end') || 'bottom bottom-=40%';
-            const stagger = parseFloat(el.getAttribute('data-stagger')) || 0.03;
+            const stagger = parseFloat(el.getAttribute('data-stagger')) || 0.05;
+
+            if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+                chars.forEach((char, index) => {
+                    char.style.setProperty('--scroll-float-delay', `${index * stagger * 1000}ms`);
+                });
+
+                const reveal = () => el.classList.add('is-revealed');
+                if (!('IntersectionObserver' in window)) {
+                    reveal();
+                    return;
+                }
+
+                const observer = new IntersectionObserver((entries) => {
+                    if (!entries.some(entry => entry.isIntersecting)) return;
+                    reveal();
+                    observer.disconnect();
+                }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+                observer.observe(el);
+                return;
+            }
+
+            gsap.registerPlugin(ScrollTrigger);
 
             gsap.fromTo(
                 chars,
@@ -1336,6 +1376,7 @@
             );
         });
     }
+    window.initScrollFloat = initScrollFloat;
 
     // 4. MetallicPaint WebGL Initialization
     function initMetallicPaint() {

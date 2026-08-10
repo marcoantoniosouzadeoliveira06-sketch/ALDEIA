@@ -5084,3 +5084,225 @@ main > section:not(.hero-section) {
         padding: 0;
     }
 }
+
+/* Navegação mobile: cartões de vidro compactos, inspirados no padrão CardNav. */
+@media (max-width: 768px) {
+    html {
+        color-scheme: dark;
+    }
+
+    #main-nav {
+        padding: 12px 12px 0;
+    }
+
+    .nav-inner {
+        min-height: 58px;
+        padding: 0 12px 0 16px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 22px;
+        background: rgba(10, 10, 10, 0.72);
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28);
+        backdrop-filter: blur(20px) saturate(130%);
+        -webkit-backdrop-filter: blur(20px) saturate(130%);
+    }
+
+    .nav-logo {
+        position: static;
+        transform: none;
+        margin-right: auto;
+    }
+
+    .nav-logo img,
+    .nav-logo .logo-nav {
+        max-height: 24px;
+        width: auto;
+    }
+
+    .nav-hamburger {
+        width: 42px;
+        height: 42px;
+        margin-left: auto;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.07);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        transition: transform 300ms var(--ease), background 300ms var(--ease), border-color 300ms var(--ease);
+    }
+
+    .nav-hamburger:hover,
+    .nav-hamburger:focus-visible {
+        border-color: rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .nav-hamburger:active {
+        transform: scale(0.95);
+    }
+
+    .nav-hamburger span {
+        width: 17px;
+        height: 1.5px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.88);
+    }
+
+    #mobile-menu {
+        inset: auto 12px auto;
+        top: 80px;
+        display: block;
+        padding: 10px;
+        overflow: hidden;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transform: translate3d(0, -12px, 0) scale(0.98);
+        transform-origin: top center;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 26px;
+        background: rgba(9, 9, 9, 0.8);
+        box-shadow: 0 24px 72px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(24px) saturate(135%);
+        -webkit-backdrop-filter: blur(24px) saturate(135%);
+        transition: opacity 300ms var(--ease), transform 300ms var(--ease), visibility 300ms step-end;
+    }
+
+    #mobile-menu.active {
+        pointer-events: auto;
+        opacity: 1;
+        visibility: visible;
+        transform: translate3d(0, 0, 0) scale(1);
+        transition: opacity 300ms var(--ease), transform 300ms var(--ease), visibility 0s;
+    }
+
+    .mobile-nav-links {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .mobile-nav-link {
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        min-height: 64px;
+        padding: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 17px;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.035));
+        color: rgba(255, 255, 255, 0.9);
+        font-family: var(--font-h);
+        font-size: 0.84rem;
+        font-weight: 750;
+        line-height: 1.05;
+        letter-spacing: -0.025em;
+        transition: transform 300ms var(--ease), background 300ms var(--ease), border-color 300ms var(--ease), color 300ms var(--ease);
+    }
+
+    .mobile-nav-link::after {
+        position: absolute;
+        top: 10px;
+        right: 11px;
+        color: rgba(255, 255, 255, 0.42);
+        content: '↗';
+        font-family: Arial, sans-serif;
+        font-size: 0.8rem;
+        transition: transform 300ms var(--ease), color 300ms var(--ease);
+    }
+
+    .mobile-nav-link:nth-child(3n + 1) {
+        background: linear-gradient(145deg, rgba(86, 128, 153, 0.18), rgba(255, 255, 255, 0.035));
+    }
+
+    .mobile-nav-link:last-child:nth-child(odd) {
+        grid-column: span 2;
+    }
+
+    .mobile-nav-link:hover,
+    .mobile-nav-link:focus-visible {
+        border-color: rgba(255, 255, 255, 0.23);
+        background: rgba(255, 255, 255, 0.13);
+        color: #fff;
+        transform: translate3d(0, -2px, 0) scale(1.01);
+    }
+
+    .mobile-nav-link:hover::after,
+    .mobile-nav-link:focus-visible::after {
+        color: rgba(255, 255, 255, 0.9);
+        transform: translate3d(2px, -2px, 0);
+    }
+
+    body.mobile-menu-open {
+        overscroll-behavior: none;
+    }
+
+    #budget-modal {
+        align-items: flex-start !important;
+        padding: 84px 12px 20px !important;
+        overflow-y: auto !important;
+    }
+
+    #budget-modal .modal-content {
+        width: min(100%, 360px) !important;
+        max-height: 78dvh !important;
+        margin: 0 auto !important;
+        padding: 20px !important;
+        border-radius: 24px !important;
+        background: rgba(12, 12, 12, 0.86) !important;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.46), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(24px) saturate(135%) !important;
+        -webkit-backdrop-filter: blur(24px) saturate(135%) !important;
+    }
+
+    #budget-modal .modal-content h2 {
+        margin-bottom: 6px !important;
+        padding-right: 28px;
+        font-size: clamp(1.35rem, 7vw, 1.8rem) !important;
+        line-height: 1.08 !important;
+    }
+
+    #budget-modal .modal-content > p {
+        margin-bottom: 16px !important;
+        font-size: 0.78rem !important;
+        line-height: 1.35 !important;
+    }
+
+    #budget-modal .input-group {
+        margin-bottom: 10px !important;
+    }
+
+    #budget-modal .input-group label {
+        margin-bottom: 5px !important;
+        font-size: 0.63rem !important;
+    }
+
+    #budget-modal input,
+    #budget-modal textarea {
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+        font-size: 0.8rem !important;
+    }
+
+    #budget-modal textarea {
+        min-height: 72px !important;
+    }
+
+    #budget-modal .submit-budget {
+        min-height: 48px;
+        margin-top: 4px;
+        border-radius: 14px;
+        font-size: 0.76rem;
+    }
+}
+
+@media (max-width: 390px) {
+    #mobile-menu {
+        top: 76px;
+    }
+
+    .mobile-nav-link {
+        min-height: 56px;
+        padding: 10px;
+        font-size: 0.76rem;
+    }
+}

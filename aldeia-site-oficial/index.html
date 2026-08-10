@@ -7,8 +7,8 @@
     <link rel="canonical" href="https://aldeia-agencia-oficial.onrender.com/">
     <meta name="theme-color" content="#050505">
     <!-- FAVICON ALDEIA -->
-    <link rel="icon" type="image/svg+xml" href="/assets/logo-isotype.svg">
-    <link rel="apple-touch-icon" href="/assets/logo-isotype.svg">
+    <link rel="icon" type="image/svg+xml" href="/assets/logo-marca.svg">
+    <link rel="apple-touch-icon" href="/assets/logo-marca.svg">
     <meta name="description" content="Agência Aldeia: identidade visual, branding, sites e design estratégico para marcas que buscam presença digital de alto padrão.">
     <meta name="keywords" content="agência de design, web design, UI UX, design estratégico, performance digital, sites de alta conversão, e-sports design, identidade visual">
     <meta name="author" content="ALDEIA Design">
@@ -35,11 +35,11 @@
     <link href="https://api.fontshare.com/v2/css?f[]=clash-display@300,400,500,600,700&display=swap" rel="stylesheet">
 
     <style>html.lenis,html.lenis-smooth{scroll-behavior:auto!important}.lenis-target{scroll-behavior:auto!important}</style>
-    <link rel="stylesheet" href="style.css?v=81">
+    <link rel="stylesheet" href="style.css?v=82">
     <link rel="stylesheet" href="components/LogoLoop.css">
     <link rel="stylesheet" href="components/GradualBlur.css">
     <link rel="stylesheet" href="components/ShinyText.css">
-    <link rel="stylesheet" href="components/ScrollFloat.css?v=64">
+    <link rel="stylesheet" href="components/ScrollFloat.css?v=65">
     <link rel="stylesheet" href="components/MetallicPaint.css">
     <!-- JSON-LD Structured Data for SEO -->
     <script type="application/ld+json">
@@ -152,7 +152,7 @@
                 </div>
 
                 <a href="#contato" class="btn-vamos" aria-label="Fazer um orçamento com a Agência Aldeia">Vamos?<span class="btn-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span></a>
-                <button class="nav-hamburger" id="nav-toggle" aria-label="Abrir menu de navegação" aria-controls="mobile-menu" aria-expanded="false">
+                <button type="button" class="nav-hamburger" id="nav-toggle" aria-label="Abrir menu de navegação" aria-controls="mobile-menu" aria-expanded="false">
                     <span></span><span></span><span></span>
                 </button>
             </div>
@@ -587,7 +587,25 @@
     </svg>
 
     <script src="assets/translator.js?v=71"></script>
-    <script src="app.js?v=76"></script>
+    <script src="app.js?v=77"></script>
+    <script>
+      (() => {
+        const toggle = document.getElementById('nav-toggle');
+        const menu = document.getElementById('mobile-menu');
+        if (!toggle || !menu || toggle.dataset.mobileNavBound === 'true') return;
+        const setState = (open) => {
+          toggle.classList.toggle('active', open);
+          menu.classList.toggle('active', open);
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.setAttribute('aria-label', open ? 'Fechar menu de navegação' : 'Abrir menu de navegação');
+          document.body.classList.toggle('mobile-menu-open', open);
+          document.body.style.overflow = open ? 'hidden' : '';
+        };
+        toggle.addEventListener('click', () => setState(!menu.classList.contains('active')));
+        menu.querySelectorAll('.mobile-nav-link').forEach((link) => link.addEventListener('click', () => setState(false)));
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') setState(false); });
+      })();
+    </script>
     <script>setTimeout(function(){var p=document.getElementById('preloader');if(p&&!p.classList.contains('loaded')){p.classList.add('loaded');setTimeout(function(){p.style.display='none';if(window.lenis)window.lenis.start()},400)}},1400);</script>
 
     <!-- MODAL ORÇAMENTO -->

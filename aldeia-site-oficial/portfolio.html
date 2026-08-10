@@ -10,8 +10,8 @@
     <meta name="author" content="ALDEIA Design">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#050505">
-    <link rel="icon" type="image/svg+xml" href="/assets/logo-isotype.svg">
-    <link rel="apple-touch-icon" href="/assets/logo-isotype.svg">
+    <link rel="icon" type="image/svg+xml" href="/assets/logo-marca.svg">
+    <link rel="apple-touch-icon" href="/assets/logo-marca.svg">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://aldeiadesign.com.br/portfolio">
     <meta property="og:title" content="ALDEIA | Portfólio de Design & Performance Digital">
@@ -40,11 +40,11 @@
             scroll-behavior: auto !important
         }
     </style>
-    <link rel="stylesheet" href="style.css?v=80">
+    <link rel="stylesheet" href="style.css?v=82">
     <link rel="stylesheet" href="components/LogoLoop.css">
     <link rel="stylesheet" href="components/GradualBlur.css">
     <link rel="stylesheet" href="components/ShinyText.css">
-    <link rel="stylesheet" href="components/ScrollFloat.css">
+    <link rel="stylesheet" href="components/ScrollFloat.css?v=65">
     <link rel="stylesheet" href="components/MetallicPaint.css">
     <link rel="stylesheet" href="components/VideoPlayer.css">
     <!-- JSON-LD Structured Data for SEO -->
@@ -150,7 +150,7 @@
                 </div>
 
                 <a href="#contato" class="btn-vamos" data-budget-trigger>Vamos?<span class="btn-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span></a>
-                <button class="nav-hamburger" id="nav-toggle" aria-label="Menu">
+                <button type="button" class="nav-hamburger" id="nav-toggle" aria-label="Abrir menu de navegação" aria-controls="mobile-menu" aria-expanded="false">
                     <span></span><span></span><span></span>
                 </button>
             </div>
@@ -158,7 +158,7 @@
 
         <!-- Mobile Menu Overlay -->
         <div id="mobile-menu">
-            <nav class="mobile-nav-links">
+            <nav class="mobile-nav-links" aria-label="Navegação móvel">
                 <a href="index.html" class="mobile-nav-link">/01 Início</a>
                 <a href="#portfolio" class="mobile-nav-link">/02 Portfólio</a>
             </nav>
@@ -342,7 +342,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="components/VideoPlayer.js"></script>
     <script src="assets/tracker.js"></script>
-    <script src="app.js?v=76"></script>
+    <script src="app.js?v=77"></script>
+    <script>
+      (() => {
+        const toggle = document.getElementById('nav-toggle');
+        const menu = document.getElementById('mobile-menu');
+        if (!toggle || !menu || toggle.dataset.mobileNavBound === 'true') return;
+        const setState = (open) => {
+          toggle.classList.toggle('active', open); menu.classList.toggle('active', open);
+          toggle.setAttribute('aria-expanded', String(open)); document.body.style.overflow = open ? 'hidden' : '';
+        };
+        toggle.addEventListener('click', () => setState(!menu.classList.contains('active')));
+        menu.querySelectorAll('.mobile-nav-link').forEach((link) => link.addEventListener('click', () => setState(false)));
+      })();
+    </script>
     <script src="portfolio.js"></script>
 
 

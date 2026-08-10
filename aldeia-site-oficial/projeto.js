@@ -50,9 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const catEl = document.getElementById('project-page-category');
         if (titleEl) {
             titleEl.textContent = project.title;
-            titleEl.classList.add('shiny-text');
+            titleEl.classList.add('shiny-text', 'scroll-float');
             titleEl.style.setProperty('--color', '#c8c8c8');
             titleEl.style.setProperty('--shine-color', '#ffffff');
+            window.initScrollFloat?.();
         }
         if (catEl) {
             catEl.textContent = project.categoryLabel;

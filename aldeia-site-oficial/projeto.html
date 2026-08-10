@@ -10,8 +10,8 @@
     <meta name="author" content="ALDEIA Design">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#050505">
-    <link rel="icon" type="image/svg+xml" href="/assets/logo-isotype.svg">
-    <link rel="apple-touch-icon" href="/assets/logo-isotype.svg">
+    <link rel="icon" type="image/svg+xml" href="/assets/logo-marca.svg">
+    <link rel="apple-touch-icon" href="/assets/logo-marca.svg">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://aldeiadesign.com.br/projeto">
     <meta property="og:title" content="ALDEIA | Projeto de Design & Performance Digital">
@@ -40,11 +40,11 @@
             scroll-behavior: auto !important
         }
     </style>
-    <link rel="stylesheet" href="style.css?v=9">
+    <link rel="stylesheet" href="style.css?v=82">
     <link rel="stylesheet" href="components/LogoLoop.css">
     <link rel="stylesheet" href="components/GradualBlur.css">
     <link rel="stylesheet" href="components/ShinyText.css">
-    <link rel="stylesheet" href="components/ScrollFloat.css">
+    <link rel="stylesheet" href="components/ScrollFloat.css?v=65">
     <link rel="stylesheet" href="components/MetallicPaint.css">
     <link rel="stylesheet" href="components/VideoPlayer.css">
     <!-- JSON-LD Structured Data for SEO -->
@@ -150,7 +150,7 @@
                 </div>
 
                 <a href="#contato" class="btn-vamos">Vamos?<span class="btn-arrow">→</span></a>
-                <button class="nav-hamburger" id="nav-toggle" aria-label="Menu">
+                <button type="button" class="nav-hamburger" id="nav-toggle" aria-label="Abrir menu de navegação" aria-controls="mobile-menu" aria-expanded="false">
                     <span></span><span></span><span></span>
                 </button>
             </div>
@@ -158,7 +158,7 @@
 
         <!-- Mobile Menu Overlay -->
         <div id="mobile-menu">
-            <nav class="mobile-nav-links">
+            <nav class="mobile-nav-links" aria-label="Navegação móvel">
                 <a href="#inicio" class="mobile-nav-link">/01 Início</a>
                 <a href="#sobre" class="mobile-nav-link">/02 Sobre</a>
                 <a href="#portfolio" class="mobile-nav-link">/03 Portfólio</a>
@@ -277,7 +277,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="assets/tracker.js"></script>
-    <script src="app.js?v=76"></script>
+    <script src="app.js?v=77"></script>
+    <script>
+      (() => {
+        const toggle = document.getElementById('nav-toggle');
+        const menu = document.getElementById('mobile-menu');
+        if (!toggle || !menu || toggle.dataset.mobileNavBound === 'true') return;
+        const setState = (open) => {
+          toggle.classList.toggle('active', open); menu.classList.toggle('active', open);
+          toggle.setAttribute('aria-expanded', String(open)); document.body.style.overflow = open ? 'hidden' : '';
+        };
+        toggle.addEventListener('click', () => setState(!menu.classList.contains('active')));
+        menu.querySelectorAll('.mobile-nav-link').forEach((link) => link.addEventListener('click', () => setState(false)));
+      })();
+    </script>
     <script src="projeto.js"></script>
     <!-- Preloader Removido -->
 

@@ -18,3 +18,28 @@
   line-height: 1.15;
   padding-block: 4px;
 }
+
+/* Fallback leve para as páginas que não carregam GSAP. */
+.scroll-float:not(.is-revealed) .char {
+  opacity: 0;
+  transform: translate3d(0, 120%, 0) scale(0.7, 2.3);
+  transform-origin: 50% 0%;
+  will-change: transform, opacity;
+}
+
+.scroll-float.is-revealed .char {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  transition:
+    opacity 650ms cubic-bezier(0.16, 1, 0.3, 1) var(--scroll-float-delay, 0ms),
+    transform 800ms cubic-bezier(0.16, 1, 0.3, 1) var(--scroll-float-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-float .char,
+  .scroll-float:not(.is-revealed) .char {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
