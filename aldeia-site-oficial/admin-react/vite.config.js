@@ -1,1 +1,0 @@
-import {defineConfig} from 'vite'; import react from '@vitejs/plugin-react'; export default defineConfig({base:'/admin-spa/',plugins:[react()],root:'admin-react',build:{outDir:'../admin-spa',emptyOutDir:true}});

@@ -779,10 +779,10 @@ app.use(express.text({ type: 'text/plain', limit: '5kb' }));
 
 const publicRootFiles = new Set([
     '/index.html', '/portfolio.html', '/projeto.html', '/admin.html',
-    '/style.css', '/admin-redesign.css', '/app.js', '/portfolio.js', '/projeto.js', '/logo.svg',
+    '/style.css', '/app.js', '/portfolio.js', '/projeto.js', '/logo.svg',
     '/robots.txt', '/sitemap.xml'
 ]);
-const publicDirectoryPrefixes = ['/assets/', '/components/', '/admin-spa/'];
+const publicDirectoryPrefixes = ['/assets/', '/components/'];
 app.use((req, res, next) => {
     if (!['GET', 'HEAD'].includes(req.method) || req.path.startsWith('/api/')) return next();
     const requestedPath = decodeURIComponent(req.path);
@@ -2320,10 +2320,6 @@ app.get('/admin', (req, res) => {
 
 app.get(['/admin/dashboard', '/admin/orcamentos', '/admin/portfolio', '/admin/configuracoes', '/admin/seguranca', '/admin/editor'], (req, res) => {
     res.sendFile(path.join(ROOT_DIR, 'admin.html'));
-});
-
-app.get(['/admin-react', '/admin-react/*'], (req, res) => {
-    res.sendFile(path.join(ROOT_DIR, 'admin-spa', 'index.html'));
 });
 
 app.get('/ping', (req, res) => {
