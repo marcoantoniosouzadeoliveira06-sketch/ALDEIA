@@ -782,7 +782,7 @@ const publicRootFiles = new Set([
     '/style.css', '/admin-redesign.css', '/app.js', '/portfolio.js', '/projeto.js', '/logo.svg',
     '/robots.txt', '/sitemap.xml'
 ]);
-const publicDirectoryPrefixes = ['/assets/', '/components/'];
+const publicDirectoryPrefixes = ['/assets/', '/components/', '/admin-spa/'];
 app.use((req, res, next) => {
     if (!['GET', 'HEAD'].includes(req.method) || req.path.startsWith('/api/')) return next();
     const requestedPath = decodeURIComponent(req.path);
@@ -2315,11 +2315,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
-    res.sendFile(path.join(ROOT_DIR, 'admin.html'));
+    res.sendFile(path.join(ROOT_DIR, 'admin-spa', 'index.html'));
 });
 
 app.get(['/admin/dashboard', '/admin/orcamentos', '/admin/portfolio', '/admin/configuracoes', '/admin/seguranca', '/admin/editor'], (req, res) => {
-    res.sendFile(path.join(ROOT_DIR, 'admin.html'));
+    res.sendFile(path.join(ROOT_DIR, 'admin-spa', 'index.html'));
 });
 
 app.get('/ping', (req, res) => {
