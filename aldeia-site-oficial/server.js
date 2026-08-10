@@ -349,23 +349,15 @@ const profilePayloadSchema = z.object({
 const passwordChangeSchema = z.object({
     currentPassword: z.string().min(1).max(72),
     newPassword: z.string()
-        .min(12)
-        .max(72)
-        .regex(/[a-z]/)
-        .regex(/[A-Z]/)
-        .regex(/[0-9]/)
-        .regex(/[^A-Za-z0-9]/),
+        .min(8)
+        .max(72),
     confirmPassword: z.string().min(1).max(72)
 }).strict().refine(value => value.newPassword === value.confirmPassword, 'As senhas nao coincidem');
 const ADMIN_ROLES = ['admin', 'operator'];
 const USERNAME_PATTERN = /^[a-z0-9][a-z0-9._-]{2,39}$/;
 const initialPasswordSchema = z.string()
-    .min(12)
-    .max(72)
-    .regex(/[a-z]/)
-    .regex(/[A-Z]/)
-    .regex(/[0-9]/)
-    .regex(/[^A-Za-z0-9]/);
+    .min(8)
+    .max(72);
 const createAdminUserSchema = z.object({
     displayName: requiredText(120),
     username: z.string().trim().toLowerCase().regex(USERNAME_PATTERN),

@@ -1199,8 +1199,8 @@
     <div id="admin-login" class="login-container">
         <form id="login-form" class="login-box qma-glass">
             <h2>Acesso Restrito ALDEIA</h2>
-            <input type="text" id="admin-username" class="login-input qma-input" placeholder="Usuário (Japex / Temari)" required autocomplete="off">
-            <input type="password" id="admin-password" class="login-input qma-input" placeholder="Senha" required autocomplete="off">
+            <input type="text" id="admin-username" class="login-input qma-input" placeholder="Usuário (Japex / Temari)" required autocomplete="username">
+            <input type="password" id="admin-password" class="login-input qma-input" placeholder="Senha" required autocomplete="current-password">
             <button type="submit" class="btn-login qma-btn accent">Entrar no Sistema</button>
             <div id="login-error-msg" class="login-error" style="color: #ff4444; margin-top: var(--qma-gap-3); display: none; font-size: 0.875rem;">Senha ou usuário incorreto.</div>
         </form>
@@ -1493,13 +1493,13 @@
                             </div>
                             <div>
                                 <label class="qma-settings-label" for="password-new">Nova Senha</label>
-                                <input class="qma-input" id="password-new" name="newPassword" type="password" autocomplete="new-password" required minlength="12" maxlength="72">
+                                <input class="qma-input" id="password-new" name="newPassword" type="password" autocomplete="new-password" required minlength="8" maxlength="72">
                             </div>
                             <div>
                                 <label class="qma-settings-label" for="password-confirm">Confirmar Nova Senha</label>
-                                <input class="qma-input" id="password-confirm" name="confirmPassword" type="password" autocomplete="new-password" required minlength="12" maxlength="72">
+                                <input class="qma-input" id="password-confirm" name="confirmPassword" type="password" autocomplete="new-password" required minlength="8" maxlength="72">
                             </div>
-                            <p class="qma-helper">Use pelo menos 12 caracteres, com letra maiúscula, minúscula, número e símbolo.</p>
+                            <p class="qma-helper">Use pelo menos 8 caracteres.</p>
                             <div id="password-status" class="qma-status-message" role="status" aria-live="polite"></div>
                             <button type="submit" class="btn-login" id="password-submit">Atualizar Senha com Segurança</button>
                         </form>
@@ -2263,13 +2263,13 @@
                         </div>
                         <div>
                             <label class="qma-settings-label" for="team-initial-password">Senha Inicial</label>
-                            <input class="qma-input" id="team-initial-password" name="initialPassword" type="password" required minlength="12" maxlength="72" autocomplete="new-password">
+                            <input class="qma-input" id="team-initial-password" name="initialPassword" type="password" required minlength="8" maxlength="72" autocomplete="new-password">
                         </div>
                         <div>
                             <label class="qma-settings-label" for="team-role">Cargo</label>
                             <select class="qma-input" id="team-role" name="role" required><option value="operator">Operador</option><option value="admin">Administrador</option></select>
                         </div>
-                        <p class="qma-helper full">A senha deve conter 12 caracteres, maiúscula, minúscula, número e símbolo.</p>
+                        <p class="qma-helper full">A senha inicial deve conter pelo menos 8 caracteres.</p>
                         <div id="admin-user-modal-status" class="team-modal-status full" role="status" aria-live="polite"></div>
                         <div class="qma-modal-actions full">
                             <button type="button" class="qma-control-button" id="admin-user-cancel">Cancelar</button>
