@@ -2315,10 +2315,14 @@ app.get('/', (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
-    res.sendFile(path.join(ROOT_DIR, 'admin-spa', 'index.html'));
+    res.sendFile(path.join(ROOT_DIR, 'admin.html'));
 });
 
 app.get(['/admin/dashboard', '/admin/orcamentos', '/admin/portfolio', '/admin/configuracoes', '/admin/seguranca', '/admin/editor'], (req, res) => {
+    res.sendFile(path.join(ROOT_DIR, 'admin.html'));
+});
+
+app.get(['/admin-react', '/admin-react/*'], (req, res) => {
     res.sendFile(path.join(ROOT_DIR, 'admin-spa', 'index.html'));
 });
 
