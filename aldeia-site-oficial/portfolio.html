@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -9,6 +9,9 @@
     <meta name="keywords" content="agência de design, web design, UI UX, design estratégico, performance digital, sites de alta conversão, e-sports design, identidade visual">
     <meta name="author" content="ALDEIA Design">
     <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#050505">
+    <link rel="icon" type="image/svg+xml" href="/assets/logo-isotype.svg">
+    <link rel="apple-touch-icon" href="/assets/logo-isotype.svg">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://aldeiadesign.com.br/portfolio">
     <meta property="og:title" content="ALDEIA | Portfólio de Design & Performance Digital">
@@ -87,7 +90,7 @@
     </script>
 </head>
 
-<body>
+<body data-cms-owner="page">
 
 
 
@@ -145,15 +148,6 @@
                         <button onclick="changeLanguage('sv')">Svenska</button>
                     </div>
                 </div>
-
-                <!-- Theme Switcher Widget -->
-                <button id="theme-toggle-btn" class="theme-toggle" aria-label="Alternar Tema"
-                    style="margin-right: 15px;">
-                    <svg id="theme-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                </button>
 
                 <a href="javascript:void(0)" onclick="openBudgetModal()" class="btn-vamos">Vamos?<span class="btn-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span></a>
                 <button class="nav-hamburger" id="nav-toggle" aria-label="Menu">
@@ -348,7 +342,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="components/VideoPlayer.js"></script>
     <script src="assets/tracker.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js?v=75"></script>
     <script src="portfolio.js"></script>
 
 
@@ -436,16 +430,19 @@
         }
 
         #budget-modal .modal-content {
-            width: 90%;
-            max-width: 480px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 35px 30px;
-            border-radius: 12px;
+            width: min(92vw, 420px);
+            max-height: min(82vh, 680px);
+            overflow-y: auto;
+            background: rgba(16, 16, 16, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            padding: 28px 24px;
+            border-radius: 28px;
             position: relative;
             transform: scale(0.92);
             transition: transform 0.4s var(--ease);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.66), inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
 
         #budget-modal.active .modal-content {
@@ -613,7 +610,10 @@
                 modal.style.display = 'none';
             }, 400);
 
-            if (window.lenis) window.lenis.start();
+            if (window.lenis) {
+                window.lenis.start();
+                requestAnimationFrame(() => window.lenis?.start());
+            }
 
             // [TELEMETRY] Track abandonment if not converted
             const t = window.__aldeiaTelemetry;
@@ -877,9 +877,6 @@
                             paint.setAttribute('data-tint', fut.tint);
                             paint.setAttribute('data-wave', fut.wave);
 
-                            const canvas = paint.querySelector('.paint-container');
-                            if (canvas) canvas.remove();
-
                             if (typeof window.initMetallicPaint === 'function') {
                                 window.initMetallicPaint();
                             }
@@ -1100,34 +1097,6 @@
             });
         }
 
-        // Theme Switcher Logic
-        const themeToggleBtn = document.getElementById('theme-toggle-btn');
-        const themeIcon = document.getElementById('theme-icon');
-
-        const sunSvgHtml = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
-        const moonSvgHtml = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
-
-        function updateThemeUI(isLight) {
-            if (isLight) {
-                document.body.classList.add('light-theme');
-                if (themeIcon) themeIcon.innerHTML = sunSvgHtml;
-            } else {
-                document.body.classList.remove('light-theme');
-                if (themeIcon) themeIcon.innerHTML = moonSvgHtml;
-            }
-        }
-
-        // Check saved preference
-        const savedTheme = localStorage.getItem('aldeia_theme');
-        updateThemeUI(savedTheme === 'light');
-
-        if (themeToggleBtn) {
-            themeToggleBtn.addEventListener('click', () => {
-                const isLight = document.body.classList.toggle('light-theme');
-                localStorage.setItem('aldeia_theme', isLight ? 'light' : 'dark');
-                updateThemeUI(isLight);
-            });
-        }
     </script>
 
 

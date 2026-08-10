@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="portfolio-card-badge" style="${badgeStyle}">${catLabel}</div>
                 <div class="portfolio-card-overlay">
                     <span class="portfolio-card-cat" style="color:${accentColor}">${catLabel}</span>
-                    <h3 class="portfolio-card-title">${safeTitle}</h3>
+                    <h3 class="portfolio-card-title shiny-text" style="--color: #c8c8c8; --shine-color: #ffffff;">${safeTitle}</h3>
                     ${creatorHtml}
                 </div>
             `;

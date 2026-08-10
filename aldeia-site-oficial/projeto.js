@@ -48,7 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Preenchendo os dados
         const titleEl = document.getElementById('project-page-title');
         const catEl = document.getElementById('project-page-category');
-        if (titleEl) titleEl.textContent = project.title;
+        if (titleEl) {
+            titleEl.textContent = project.title;
+            titleEl.classList.add('shiny-text');
+            titleEl.style.setProperty('--color', '#c8c8c8');
+            titleEl.style.setProperty('--shine-color', '#ffffff');
+        }
         if (catEl) {
             catEl.textContent = project.categoryLabel;
             catEl.style.color = accentColor;

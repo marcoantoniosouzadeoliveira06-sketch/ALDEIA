@@ -25,6 +25,14 @@
         requestAnimationFrame(raf);
         window.lenis = lenis;
 
+        const restoreScroll = () => {
+            if (!document.getElementById('budget-modal')?.classList.contains('active')) lenis.start();
+        };
+        window.addEventListener('pageshow', restoreScroll);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) restoreScroll();
+        });
+
         // Stop during preloader
         lenis.stop();
     } catch (_) {}
@@ -1287,9 +1295,13 @@
 
     // 4. MetallicPaint WebGL Initialization
     function initMetallicPaint() {
-        document.fonts.ready.then(() => {
-            const paintElements = document.querySelectorAll('.metallic-paint');
+        const paintElements = document.querySelectorAll('.metallic-paint');
         paintElements.forEach(el => {
+            // O CMS e o observador podem solicitar a inicialização ao mesmo tempo.
+            // Esta marca impede dois canvas/WebGL loops para o mesmo título.
+            if (el.dataset.paintInitialized === 'true') return;
+            el.dataset.paintInitialized = 'true';
+            document.fonts.ready.then(() => {
             const text = el.getAttribute('data-text');
             const font = el.getAttribute('data-font') || 'Clash Display';
             const size = parseInt(el.getAttribute('data-size')) || 120;
@@ -1686,13 +1698,15 @@
               requestAnimationFrame(render);
             };
             img.src = imageSrc;
+            });
         });
-      });
     }
     window.initMetallicPaint = initMetallicPaint;
 
     // ===== CARREGAMENTO DINÂMICO DO CMS (SITE CONTENT) =====
     async function loadDynamicCMSContent() {
+        // Home e Portfólio já têm um carregador CMS próprio, que preserva a estrutura visual da página.
+        if (document.body?.dataset.cmsOwner === 'page') return;
         try {
             const res = await fetch('/api/content?t=' + Date.now());
             if (!res.ok) return;
