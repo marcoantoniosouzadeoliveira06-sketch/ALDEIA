@@ -1,6 +1,105 @@
 [
   {
     "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 1,
+    "y": 37,
+    "timestamp": "2026-08-11T15:04:52.455Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T15:04:37.457Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T15:04:22.384Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 56,
+    "y": 4,
+    "timestamp": "2026-08-11T15:04:22.384Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T15:02:48.467Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T15:02:39.957Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T15:01:56.510Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T15:00:57.587Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T14:59:53.079Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 75,
+    "y": 3,
+    "timestamp": "2026-08-11T14:58:10.570Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 57,
+    "y": 4,
+    "timestamp": "2026-08-11T14:57:55.573Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
     "eventType": "pageview",
     "path": "/",
     "elementId": "",

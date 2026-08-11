@@ -5373,6 +5373,45 @@ main > section:not(.hero-section) {
     overflow: visible !important;
 }
 
+/* Guarda de viewport: nenhum bloco decorativo pode criar uma faixa lateral ou
+   deslocar a página horizontalmente em telas estreitas e ultrawide. */
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+body > header,
+body > main,
+body > footer {
+    width: 100%;
+    max-width: 100%;
+}
+
+.hero-marquee-wrapper-dual {
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .portfolio-banner-content {
+        padding: 20px 16px;
+    }
+
+    .portfolio-banner-content .banner-btn {
+        display: inline-flex;
+        flex: 0 0 auto;
+        width: max-content;
+        min-height: 52px;
+        padding: 0 18px 0 20px;
+        border-radius: 999px;
+        line-height: 1;
+        white-space: nowrap;
+    }
+}
+
 /* Mantém as linhas do título compactas como eram e corrige o corte lateral
    da mídia quando a janela fica mais estreita que o vídeo. */
 .hero-content-centered {
@@ -5411,5 +5450,40 @@ main > section:not(.hero-section) {
     .hero-video-bg video {
         object-fit: cover;
         object-position: center;
+    }
+}
+
+/* Correções finais de largura: ficam ao final para prevalecerem sobre os
+   ajustes responsivos legados. */
+html,
+body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: clip !important;
+}
+
+body > header,
+body > main,
+body > footer {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.hero-marquee-wrapper-dual {
+    left: 0 !important;
+    width: 100% !important;
+    overflow: hidden !important;
+}
+
+@media (max-width: 768px) {
+    .portfolio-banner-content .banner-btn {
+        display: inline-flex !important;
+        flex: 0 0 auto !important;
+        width: max-content !important;
+        min-height: 52px !important;
+        padding: 0 18px 0 20px !important;
+        border-radius: 999px !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
     }
 }
