@@ -19,6 +19,15 @@ const DOMPurify = require('isomorphic-dompurify');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
+// Global Fallback for Unhandled Promise Rejections (Anti-Griefing Node Crash Protection)
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[SecOps] Unhandled Rejection Prevented Node Crash:', reason);
+});
+process.on('uncaughtException', (err) => {
+    console.error('[SecOps] Uncaught Exception Prevented Node Crash:', err);
+});
+
+
 // Configurar DNS do Node.js para IPv4 e resolver fallback (evita ECONNREFUSED em SRV no Windows)
 try {
     dns.setDefaultResultOrder('ipv4first');
@@ -30,65 +39,91 @@ const PORT = process.env.PORT || 3000;
 const ROOT_DIR = __dirname;
 
 // ===== CONFIGURAÇÃO DE SEGURANÇA E ADMIN =====
-const DEFAULT_ADMIN_USERNAME = 'japex';
-const DEFAULT_ADMIN_PASSWORD = 'japex123';
-const LEGACY_DEFAULT_ADMIN_PASSWORD = '123japex';
+const IS_PRODUCTION = process.env.NODE_ENV === 'production' ||
+    Boolean(process.env.RENDER_SERVICE_ID) ||
+    Boolean(process.env.RAILWAY_ENVIRONMENT);
+const DEFAULT_ADMIN_USERNAME = String(process.env.DEFAULT_ADMIN_USERNAME || 'japex').trim().toLowerCase();
+const DEFAULT_ADMIN_PASSWORD = IS_PRODUCTION ? '' : 'japex123';
+const LEGACY_DEFAULT_ADMIN_PASSWORD = IS_PRODUCTION ? '' : '123japex';
 const USER_PROFILES_FILE = 'user_profiles.json';
 const ADMIN_PASSWORD_HASH = (process.env.ADMIN_PASSWORD_HASH_OVERRIDE || process.env.ADMIN_PASSWORD_HASH || '').trim();
-const HAS_VALID_ADMIN_HASH = /^\$2[aby]\$\d{2}\$/.test(ADMIN_PASSWORD_HASH) || /^[a-f0-9]{64}$/.test(ADMIN_PASSWORD_HASH);
-const BOOTSTRAP_SESSION_SECRET = crypto.createHash('sha256').update('aldeia-japex-session-v1').digest('hex');
-const SESSION_SIGNING_SECRET = process.env.SESSION_SIGNING_SECRET || (HAS_VALID_ADMIN_HASH ? ADMIN_PASSWORD_HASH : BOOTSTRAP_SESSION_SECRET);
-const VIEW_FINGERPRINT_SECRET = process.env.VIEW_FINGERPRINT_SECRET || SESSION_SIGNING_SECRET;
-if (!HAS_VALID_ADMIN_HASH) {
+const HAS_BCRYPT_ADMIN_HASH = /^\$2[aby]\$\d{2}\$/.test(ADMIN_PASSWORD_HASH);
+const HAS_VALID_ADMIN_HASH = HAS_BCRYPT_ADMIN_HASH || (!IS_PRODUCTION && /^[a-f0-9]{64}$/.test(ADMIN_PASSWORD_HASH));
+const SESSION_SIGNING_SECRET = String(process.env.SESSION_SIGNING_SECRET || (IS_PRODUCTION ? '' : crypto.randomBytes(48).toString('base64url'))).trim();
+const VIEW_FINGERPRINT_SECRET = String(process.env.VIEW_FINGERPRINT_SECRET || SESSION_SIGNING_SECRET).trim();
+if (IS_PRODUCTION && !HAS_BCRYPT_ADMIN_HASH) {
+    throw new Error('[AUTH] ADMIN_PASSWORD_HASH bcrypt é obrigatório em produção.');
+}
+if (IS_PRODUCTION && SESSION_SIGNING_SECRET.length < 32) {
+    throw new Error('[AUTH] SESSION_SIGNING_SECRET deve ter ao menos 32 caracteres em produção.');
+}
+if (IS_PRODUCTION && VIEW_FINGERPRINT_SECRET.length < 32) {
+    throw new Error('[AUTH] VIEW_FINGERPRINT_SECRET deve ter ao menos 32 caracteres em produção.');
+}
+if (!IS_PRODUCTION && !HAS_VALID_ADMIN_HASH) {
     console.warn('[AUTH] ADMIN_PASSWORD_HASH ausente no ambiente — login usa user_profiles.json + credencial bootstrap (japex).');
 }
 
 // Tokens com TTL (24 horas = 86.400.000 ms)
 const TOKEN_TTL = 24 * 60 * 60 * 1000;
-const validTokens = new Map(); // token -> timestamp
+const MAX_ACTIVE_TOKENS = 10_000;
+const MAX_TOKENS_PER_USER = 8;
+const validTokens = new Map();
 const ipRequests = new Map();  // ip -> array of timestamps
 const pendingJsonWrites = new Map();
+let analyticsResetAt = 0;
+let analyticsResetLoaded = false;
 
-// Limpeza periódica de memória (RAM) a cada 30 minutos
+// Limpeza periódica de memória (RAM) a cada 30 minutos (Fix: Leak Referencial)
 const memoryCleanupTimer = setInterval(() => {
     const now = Date.now();
-    for (const [token, tokenData] of validTokens.entries()) {
-        if (!tokenData || now - tokenData.timestamp > TOKEN_TTL) {
-            validTokens.delete(token);
-        }
-    }
+    pruneValidTokens(now);
+    // Cria um novo Map para evitar memory leak referencial
+    const newIpRequests = new Map();
     for (const [ip, timestamps] of ipRequests.entries()) {
         const recent = timestamps.filter(t => t > now - 60000);
-        if (recent.length === 0) {
-            ipRequests.delete(ip);
-        } else {
-            ipRequests.set(ip, recent);
+        if (recent.length > 0) {
+            newIpRequests.set(ip, recent);
         }
     }
+    ipRequests.clear();
+    for (const [k, v] of newIpRequests.entries()) ipRequests.set(k, v);
 }, 30 * 60 * 1000);
 memoryCleanupTimer.unref?.();
 
 // ===== UTILITÁRIOS SEGUROS DE PERSISTÊNCIA EM FALLBACK JSON =====
 const memoryCache = new Map();
 
+function cloneJSON(value) {
+    return JSON.parse(JSON.stringify(value));
+}
+
+function resolveJSONPath(filename) {
+    const filePath = path.resolve(ROOT_DIR, filename);
+    if (path.dirname(filePath) !== ROOT_DIR || !filename.endsWith('.json')) {
+        throw new Error('Arquivo de persistência inválido.');
+    }
+    return filePath;
+}
+
 function safeReadJSON(filename, defaultVal = []) {
     if (memoryCache.has(filename)) {
-        return JSON.parse(JSON.stringify(memoryCache.get(filename)));
+        return cloneJSON(memoryCache.get(filename));
     }
-    const filePath = path.join(ROOT_DIR, filename);
+    const filePath = resolveJSONPath(filename);
     try {
         if (!fs.existsSync(filePath)) {
-            memoryCache.set(filename, defaultVal);
-            return defaultVal;
+            memoryCache.set(filename, cloneJSON(defaultVal));
+            return cloneJSON(defaultVal);
         }
         const raw = fs.readFileSync(filePath, 'utf8');
         if (!raw.trim()) {
-            memoryCache.set(filename, defaultVal);
-            return defaultVal;
+            memoryCache.set(filename, cloneJSON(defaultVal));
+            return cloneJSON(defaultVal);
         }
         const data = JSON.parse(raw);
-        memoryCache.set(filename, data);
-        return JSON.parse(JSON.stringify(data));
+        memoryCache.set(filename, cloneJSON(data));
+        return cloneJSON(data);
     } catch (err) {
         console.error(`[PERSISTENCE] Erro ao ler ${filename}:`, err.message);
         return defaultVal;
@@ -96,26 +131,46 @@ function safeReadJSON(filename, defaultVal = []) {
 }
 
 function safeWriteJSON(filename, data) {
-    memoryCache.set(filename, JSON.parse(JSON.stringify(data)));
-    const filePath = path.join(ROOT_DIR, filename);
-    const tmpPath = `${filePath}.tmp_${Date.now()}`;
-    const jsonStr = JSON.stringify(data, null, 2);
+    const snapshot = cloneJSON(data);
+    memoryCache.set(filename, snapshot);
 
     const previousWrite = pendingJsonWrites.get(filename) || Promise.resolve();
     const writeOperation = previousWrite.catch(() => {}).then(async () => {
+        const filePath = resolveJSONPath(filename);
+        const tmpPath = `${filePath}.${process.pid}.${crypto.randomUUID()}.tmp`;
+
         try {
-            await fs.promises.writeFile(tmpPath, jsonStr, 'utf8');
+            await fs.promises.writeFile(tmpPath, JSON.stringify(snapshot, null, 2), { encoding: 'utf8', flag: 'wx' });
             await fs.promises.rename(tmpPath, filePath);
-        } catch (err) {
-            console.error(`[PERSISTENCE] Erro ao salvar ${filename}:`, err.message);
-            try { await fs.promises.unlink(tmpPath); } catch (_) {}
-            throw err;
+        } finally {
+            await fs.promises.unlink(tmpPath).catch(() => {});
         }
     });
 
     pendingJsonWrites.set(filename, writeOperation);
-    writeOperation.catch(() => {});
-    return true;
+    writeOperation.finally(() => {
+        if (pendingJsonWrites.get(filename) === writeOperation) {
+            pendingJsonWrites.delete(filename);
+        }
+    }).catch((error) => console.error(`[PERSISTENCE] Erro ao salvar ${filename}:`, error.message));
+
+    return writeOperation;
+}
+
+function getAnalyticsResetAt() {
+    if (!analyticsResetLoaded) {
+        const state = safeReadJSON('analytics_state.json', { resetAt: 0 });
+        analyticsResetAt = Math.max(0, Number(state?.resetAt) || 0);
+        analyticsResetLoaded = true;
+    }
+    return analyticsResetAt;
+}
+
+async function markAnalyticsReset() {
+    analyticsResetAt = Date.now();
+    analyticsResetLoaded = true;
+    analyticsDeduplication.clear();
+    await safeWriteJSON('analytics_state.json', { resetAt: analyticsResetAt });
 }
 
 // ===== CONEXÃO & MODELOS DO MONGODB ATLAS (NUVEM) =====
@@ -166,7 +221,9 @@ const submissionSchema = new mongoose.Schema({
     ipISP: { type: String, default: '' },
     ipCoords: { type: String, default: '' },
     locationConsent: { type: Boolean, default: false },
-    locationCoords: { type: String, default: '' }
+    locationCoords: { type: String, default: '' },
+    locationString: { type: String, default: 'Localização Indisponível' },
+    ipAddress: { type: String, default: '0.0.0.0' }
 }, { timestamps: true });
 
 const siteContentSchema = new mongoose.Schema({
@@ -406,7 +463,7 @@ const analyticsPayloadSchema = z.object({
         elementId: plainText(200).optional().default(''),
         x: z.coerce.number().min(0).max(100).optional().default(0),
         y: z.coerce.number().min(0).max(100).optional().default(0),
-        timestamp: z.string().datetime({ offset: true }).optional()
+        timestamp: z.string().datetime({ offset: true })
     }).strip()).min(1).max(50)
 }).strip();
 const telemetryPayloadSchema = z.object({
@@ -707,7 +764,7 @@ const uploadFilter = (req, file, cb) => {
 const upload = multer({
     storage: multer.memoryStorage(),
     fileFilter: uploadFilter,
-    limits: { fileSize: 25 * 1024 * 1024 } // 25 MB máximo por mídia
+    limits: { fileSize: 10 * 1024 * 1024 } // 10 MB OOM protection // 25 MB máximo por mídia
 });
 
 // ===== MIDDLEWARES =====
@@ -880,10 +937,40 @@ function signJwtParts(headerPart, payloadPart) {
     return crypto.createHmac('sha256', SESSION_SIGNING_SECRET).update(`${headerPart}.${payloadPart}`).digest('base64url');
 }
 
+function pruneValidTokens(now = Date.now()) {
+    for (const [token, session] of validTokens.entries()) {
+        if (!session || session.expiresAt <= now) validTokens.delete(token);
+    }
+}
+
+function evictOldestToken(predicate) {
+    let tokenToRemove = null;
+    let oldestIssuedAt = Number.POSITIVE_INFINITY;
+
+    for (const [token, session] of validTokens.entries()) {
+        if (predicate(session) && session.issuedAt < oldestIssuedAt) {
+            tokenToRemove = token;
+            oldestIssuedAt = session.issuedAt;
+        }
+    }
+
+    if (tokenToRemove) validTokens.delete(tokenToRemove);
+}
+
 function createAdminToken(account) {
     if (!SESSION_SIGNING_SECRET) return null;
     const safeAccount = sanitizeProfileResponse(account, account?.username || 'Admin');
-    const nowSeconds = Math.floor(Date.now() / 1000);
+    const now = Date.now();
+    const nowSeconds = Math.floor(now / 1000);
+    pruneValidTokens(now);
+
+    while (validTokens.size >= MAX_ACTIVE_TOKENS) {
+        evictOldestToken(() => true);
+    }
+    while ([...validTokens.values()].filter((session) => session.username === safeAccount.username).length >= MAX_TOKENS_PER_USER) {
+        evictOldestToken((session) => session.username === safeAccount.username);
+    }
+
     const headerPart = encodeJwtPart({ alg: 'HS256', typ: 'JWT' });
     const payloadPart = encodeJwtPart({
         sub: safeAccount.username,
@@ -894,7 +981,14 @@ function createAdminToken(account) {
         jti: crypto.randomUUID()
     });
     const token = `${headerPart}.${payloadPart}.${signJwtParts(headerPart, payloadPart)}`;
-    validTokens.set(token, { timestamp: Date.now(), username: safeAccount.username, displayName: safeAccount.displayName, id: safeAccount.id, role: safeAccount.role });
+    validTokens.set(token, {
+        issuedAt: now,
+        expiresAt: now + TOKEN_TTL,
+        username: safeAccount.username,
+        displayName: safeAccount.displayName,
+        id: safeAccount.id,
+        role: safeAccount.role
+    });
     return token;
 }
 
@@ -937,7 +1031,7 @@ async function bootstrapUserProfiles() {
             active: true,
             isRoot: true
         };
-        safeWriteJSON(USER_PROFILES_FILE, profiles);
+        await safeWriteJSON(USER_PROFILES_FILE, profiles);
         console.log('[AUTH] user_profiles.json garantido com administrador padrão (japex).');
     }
 }
@@ -1044,7 +1138,7 @@ function verifyToken(req) {
         try {
             const payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8'));
             const data = validTokens.get(token);
-            if (payload.exp > Math.floor(Date.now() / 1000) && Date.now() - data.timestamp < TOKEN_TTL &&
+            if (data && Number.isInteger(payload.exp) && payload.exp > Math.floor(Date.now() / 1000) && data.expiresAt > Date.now() &&
                 payload.sub === data.username && payload.id === data.id && payload.role === data.role) {
                 return data;
             }
@@ -1196,7 +1290,7 @@ app.post('/api/admin/users', requireAuth, requireRole(['admin']), validate(creat
         }
         const profiles = safeReadJSON('user_profiles.json', {});
         profiles[username] = userRecord;
-        const localSaved = safeWriteJSON('user_profiles.json', profiles);
+        const localSaved = await safeWriteJSON('user_profiles.json', profiles).then(() => true);
         if (!mongoSaved && !localSaved) throw new Error('user persistence failed');
         return res.status(201).json({ status: 'success', user: sanitizeProfileResponse(userRecord, username) });
     } catch (error) {
@@ -1220,7 +1314,7 @@ app.patch('/api/admin/users/:username/role', requireAuth, requireRole(['admin'])
         const profiles = safeReadJSON('user_profiles.json', {});
         const key = Object.keys(profiles).find(item => item.toLowerCase() === username) || username;
         profiles[key] = { ...(profiles[key] || account), username: account.username, role: nextRole };
-        safeWriteJSON('user_profiles.json', profiles);
+        await safeWriteJSON('user_profiles.json', profiles);
         invalidateUserSessions(account.username);
         return res.json({ status: 'success', user: sanitizeProfileResponse({ ...account, role: nextRole }, account.username) });
     } catch (error) {
@@ -1240,7 +1334,7 @@ app.delete('/api/admin/users/:username', requireAuth, requireRole(['admin']), va
         const profiles = safeReadJSON('user_profiles.json', {});
         const key = Object.keys(profiles).find(item => item.toLowerCase() === username);
         if (key) delete profiles[key];
-        safeWriteJSON('user_profiles.json', profiles);
+        await safeWriteJSON('user_profiles.json', profiles);
         invalidateUserSessions(account.username);
         return res.json({ status: 'success', message: 'Acesso revogado.' });
     } catch (error) {
@@ -1316,7 +1410,7 @@ app.post('/api/content', requireAuth, requireRole(['admin']), validate(cmsConten
         }
     }
 
-    const jsonSuccess = safeWriteJSON('site_content.json', contentData);
+    const jsonSuccess = await safeWriteJSON('site_content.json', contentData).then(() => true);
     if (saved || jsonSuccess) {
         res.json({ status: 'success', message: 'Conteúdo atualizado com sucesso' });
     } else {
@@ -1440,7 +1534,7 @@ app.get('/api/projects/:id', projectViewLimiter, validate(idParamsSchema, 'param
     return res.json(sanitizeProjectResponse(project));
 });
 
-app.post('/api/portfolio', requireAuth, validate(projectPayloadSchema), async (req, res) => {
+app.post('/api/portfolio', requireAuth, requireRole(['admin']), validate(projectPayloadSchema), async (req, res) => {
     const payload = req.validatedBody;
     req.body = payload;
     const format = payload.format || 'post';
@@ -1471,7 +1565,7 @@ app.post('/api/portfolio', requireAuth, validate(projectPayloadSchema), async (r
 
     let data = safeReadJSON('portfolio.json', []);
     data.push(newProject);
-    const jsonSuccess = safeWriteJSON('portfolio.json', data);
+    const jsonSuccess = await safeWriteJSON('portfolio.json', data).then(() => true);
 
     if (savedInMongo || jsonSuccess) {
         res.json({ status: 'success', project: sanitizeProjectResponse(newProject) });
@@ -1829,7 +1923,7 @@ app.put('/api/profile/password', requireAuth, validate(passwordChangeSchema), as
         const profiles = safeReadJSON('user_profiles.json', {});
         const key = username.toLowerCase();
         profiles[key] = { ...(profiles[key] || { username, role: normalizeAccountRole('', username) }), passwordHash };
-        if (!safeWriteJSON('user_profiles.json', profiles)) throw new Error('profile persistence failed');
+        await safeWriteJSON('user_profiles.json', profiles);
 
         invalidateUserSessions(username);
         const token = createAdminToken({ ...account, passwordHash });
@@ -1863,7 +1957,8 @@ function uploadToCloudinary(file) {
     });
 }
 
-app.post('/api/upload', requireAuth, (req, res) => {
+const uploadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5, message: { status: 'error', message: 'Muitos uploads. Tente novamente mais tarde.' } });
+app.post('/api/upload', requireAuth, uploadLimiter, (req, res) => {
     upload.single('file')(req, res, async (err) => {
         if (err) {
             return res.status(400).json({ status: 'error', message: 'Arquivo inválido ou maior que o limite permitido.' });
@@ -1913,15 +2008,15 @@ app.post('/api/cadastro', async (req, res) => {
         visits: body.visits,
         firstVisit: body.firstVisit,
         locationConsent: body.locationConsent,
-        location: body.location
+        locationString: body.locationString,
+        coordinates: body.coordinates,
+        ipAddress: body.ipAddress
     });
     if (!leadResult.success) {
         return res.status(400).json({ status: 'error', message: 'Dados de contato inválidos.' });
     }
-    const { nome, email, telefone, instagram, projeto: projetoSeguro, utmSource, utmMedium, utmCampaign, visits, firstVisit, locationConsent, location } = leadResult.data;
-    const locationCoords = locationConsent && location
-        ? `${Number(location.latitude).toFixed(2)}, ${Number(location.longitude).toFixed(2)}`
-        : '';
+    const { nome, email, telefone, instagram, projeto: projetoSeguro, utmSource, utmMedium, utmCampaign, visits, firstVisit, locationConsent, locationString, coordinates, ipAddress } = leadResult.data;
+    const locationCoords = coordinates || '';
 
     const newSubmission = {
         id: crypto.randomUUID(),
@@ -1943,7 +2038,9 @@ app.post('/api/cadastro', async (req, res) => {
         ipISP: '',
         ipCoords: '',
         locationConsent,
-        locationCoords
+        locationCoords,
+        locationString: locationString || 'Localização Indisponível',
+        ipAddress: ipAddress || '0.0.0.0'
     };
 
     if (isMongoConnected) {
@@ -1956,7 +2053,7 @@ app.post('/api/cadastro', async (req, res) => {
 
     let submissions = safeReadJSON('submissions.json', []);
     submissions.push(newSubmission);
-    safeWriteJSON('submissions.json', submissions);
+    await safeWriteJSON('submissions.json', submissions);
 
     res.json({ status: 'success', message: 'Cadastro recebido com sucesso', id: newSubmission.id });
 });
@@ -2025,13 +2122,20 @@ function removeDuplicateAnalyticsEvents(req, res, next) {
 }
 
 async function persistAnalyticsEvents(events) {
-    const normalizedEvents = events.map((event) => ({ ...event, timestamp: new Date().toISOString() }));
+    const resetAt = getAnalyticsResetAt();
+    const normalizedEvents = events
+        .filter((event) => Date.parse(event.timestamp) >= resetAt)
+        .map((event) => ({ ...event, timestamp: new Date().toISOString() }));
+
+    if (normalizedEvents.length === 0) {
+        return { storage: isMongoConnected ? 'mongo' : 'local', events: [] };
+    }
     if (isMongoConnected) {
         await AnalyticsModel.insertMany(normalizedEvents);
         return { storage: 'mongo', events: normalizedEvents };
     }
     const storedEvents = safeReadJSON('analytics.json', []);
-    safeWriteJSON('analytics.json', [...normalizedEvents, ...storedEvents].slice(0, 1000));
+    await safeWriteJSON('analytics.json', [...normalizedEvents, ...storedEvents].slice(0, 1000));
     return { storage: 'local', events: normalizedEvents };
 }
 
@@ -2080,7 +2184,8 @@ app.post('/api/telemetry', analyticsEventLimiter, parseAnalyticsBeacon, validate
         path: telemetry.page_url,
         elementId: telemetry.converted ? 'converted' : 'abandoned',
         x: 0,
-        y: 0
+        y: 0,
+        timestamp: new Date().toISOString()
     };
     pruneAnalyticsDeduplication();
     const key = `${event.sessionId}|${event.eventType}|${event.path}|${event.elementId}`;
@@ -2198,7 +2303,7 @@ app.put('/api/admin/settings', requireAuth, requireRole(['admin']), validate(adm
             return res.status(503).json({ status: 'error', message: 'Configuracoes indisponiveis.' });
         }
     }
-    safeWriteJSON('admin_settings.json', settings);
+    await safeWriteJSON('admin_settings.json', settings);
     return res.json({ status: 'success', settings });
 });
 
@@ -2230,9 +2335,13 @@ app.post('/api/admin/maintenance', requireAuth, requireRole(['admin']), validate
         }
         if (action === 'clear_telemetry') {
             if (isMongoConnected) await Promise.all([AnalyticsModel.deleteMany({}), ProjectViewEventModel.deleteMany({}), ProjectViewWindowModel.deleteMany({})]);
-            safeWriteJSON('visits.json', []);
-            safeWriteJSON('project_view_events.json', []);
-            safeWriteJSON('project_view_windows.json', {});
+            await Promise.all([
+                safeWriteJSON('analytics.json', []),
+                safeWriteJSON('visits.json', []),
+                safeWriteJSON('project_view_events.json', []),
+                safeWriteJSON('project_view_windows.json', {})
+            ]);
+            await markAnalyticsReset();
             return res.json({ status: 'success', message: 'Logs de telemetria limpos.' });
         }
         return res.status(400).json({ status: 'error', message: 'Acao invalida.' });
@@ -2253,7 +2362,13 @@ app.delete('/api/admin/data', requireAuth, requireRole(['admin']), validate(admi
     if (scopes.has('views')) mongoActions.push(ProjectViewEventModel.deleteMany({}), ProjectViewWindowModel.deleteMany({}));
     try {
         if (isMongoConnected) await Promise.all(mongoActions);
-        if (scopes.has('analytics')) safeWriteJSON('visits.json', []);
+        if (scopes.has('analytics')) {
+            await Promise.all([
+                safeWriteJSON('analytics.json', []),
+                safeWriteJSON('visits.json', [])
+            ]);
+            await markAnalyticsReset();
+        }
         if (scopes.has('audit')) safeWriteJSON('login_audit.json', []);
         if (scopes.has('submissions')) safeWriteJSON('submissions.json', []);
         if (scopes.has('clients')) safeWriteJSON('clients.json', []);

@@ -1,5 +1,383 @@
 [
   {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T11:12:34.420Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "portfolio.html",
+    "x": 41,
+    "y": 40,
+    "timestamp": "2026-08-11T11:12:34.420Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:55:06.033Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "#orcamento",
+    "x": 43,
+    "y": 87,
+    "timestamp": "2026-08-11T10:55:06.033Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 25,
+    "y": 87,
+    "timestamp": "2026-08-11T10:55:06.033Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "modal-close",
+    "x": 73,
+    "y": 82,
+    "timestamp": "2026-08-11T10:55:06.033Z"
+  },
+  {
+    "sessionId": "6a87098831289482581b29099acb0518",
+    "eventType": "abandonment",
+    "path": "/",
+    "elementId": "abandoned",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:55:05.161Z"
+  },
+  {
+    "sessionId": "42b5ce34c5f408f099a45fa54db4eb38",
+    "eventType": "abandonment",
+    "path": "/",
+    "elementId": "abandoned",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:54:50.972Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:53:01.462Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "#orcamento",
+    "x": 61,
+    "y": 84,
+    "timestamp": "2026-08-11T10:53:01.462Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 83,
+    "y": 85,
+    "timestamp": "2026-08-11T10:53:01.462Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:52:46.401Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "cookie-settings",
+    "x": 20,
+    "y": 86,
+    "timestamp": "2026-08-11T10:52:46.401Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 33,
+    "y": 86,
+    "timestamp": "2026-08-11T10:52:46.401Z"
+  },
+  {
+    "sessionId": "dd89c5955e908ce9f8aee0ede853f8a0",
+    "eventType": "abandonment",
+    "path": "/",
+    "elementId": "abandoned",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:52:41.675Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:51:06.907Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "#orcamento",
+    "x": 52,
+    "y": 93,
+    "timestamp": "2026-08-11T10:51:06.907Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:50:51.280Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "cookie-settings",
+    "x": 16,
+    "y": 91,
+    "timestamp": "2026-08-11T10:50:51.280Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 12,
+    "y": 88,
+    "timestamp": "2026-08-11T10:50:51.280Z"
+  },
+  {
+    "sessionId": "781efb31293c5251da1733f4be3c867b",
+    "eventType": "abandonment",
+    "path": "/",
+    "elementId": "abandoned",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:50:44.715Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 24,
+    "y": 90,
+    "timestamp": "2026-08-11T10:49:30.619Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:49:15.626Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 56,
+    "y": 84,
+    "timestamp": "2026-08-11T10:49:15.626Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "#orcamento",
+    "x": 55,
+    "y": 84,
+    "timestamp": "2026-08-11T10:49:15.626Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:49:00.555Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "cookie-settings",
+    "x": 19,
+    "y": 18,
+    "timestamp": "2026-08-11T10:49:00.555Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 62,
+    "y": 16,
+    "timestamp": "2026-08-11T10:49:00.555Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:07:57.822Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 37,
+    "y": 86,
+    "timestamp": "2026-08-11T10:05:17.183Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "m-btn-envio",
+    "x": 47,
+    "y": 88,
+    "timestamp": "2026-08-11T10:05:17.183Z"
+  },
+  {
+    "sessionId": "933f2e6713afa58a92b36cae7cc7a72f",
+    "eventType": "conversion",
+    "path": "/",
+    "elementId": "converted",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:05:16.674Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "#orcamento",
+    "x": 82,
+    "y": 84,
+    "timestamp": "2026-08-11T10:04:19.133Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 43,
+    "y": 84,
+    "timestamp": "2026-08-11T10:04:19.133Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T10:04:05.034Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T22:28:56.046Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 27,
+    "y": 63,
+    "timestamp": "2026-08-10T22:28:40.405Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "faq-btn",
+    "x": 34,
+    "y": 66,
+    "timestamp": "2026-08-10T22:28:40.405Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T22:28:25.402Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T22:22:55.769Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T22:22:28.328Z"
+  },
+  {
+    "sessionId": "s_1786372482575_a99eqm",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-10T22:20:24.576Z"
+  },
+  {
     "sessionId": "s_1786372482575_a99eqm",
     "eventType": "pageview",
     "path": "/",

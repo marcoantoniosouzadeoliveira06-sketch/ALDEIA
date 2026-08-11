@@ -10,7 +10,8 @@
         "type": "image",
         "src": "assets/portfolio/16.webp"
       }
-    ]
+    ],
+    "views": 1
   },
   {
     "id": "p20",
@@ -23,6 +24,7 @@
         "type": "image",
         "src": "assets/portfolio/20.webp"
       }
-    ]
+    ],
+    "views": 1
   }
 ]

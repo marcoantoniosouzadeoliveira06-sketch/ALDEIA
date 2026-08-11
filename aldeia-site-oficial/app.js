@@ -1932,6 +1932,8 @@
     function initDomeGallery() {
         const root = document.getElementById('portfolio-dome');
         if (!root) return;
+        if (root.dataset.domeInitialized === 'true') return;
+        root.dataset.domeInitialized = 'true';
 
         const main = root.querySelector('.sphere-main');
         const sphere = root.querySelector('.sphere');
@@ -1985,6 +1987,9 @@
             img.src = it.src;
             img.setAttribute('draggable', 'false');
             img.alt = it.alt;
+            img.loading = 'lazy';
+            img.decoding = 'async';
+            img.fetchPriority = 'low';
 
             imgWrap.appendChild(img);
             itemEl.appendChild(imgWrap);
@@ -2046,9 +2051,32 @@
         }
     }
 
-    try {
-        initDomeGallery();
-    } catch (e) {
-        console.warn('[DomeGallery] Erro na inicialização:', e);
+    function scheduleDomeGallery() {
+        const root = document.getElementById('portfolio-dome');
+        if (!root || root.dataset.domeScheduled === 'true' || root.dataset.domeInitialized === 'true') return;
+        root.dataset.domeScheduled = 'true';
+
+        const render = () => {
+            try {
+                initDomeGallery();
+            } catch (e) {
+                console.warn('[DomeGallery] Erro na inicialização:', e);
+            }
+        };
+
+        if (!('IntersectionObserver' in window)) {
+            render();
+            return;
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            if (!entries.some(entry => entry.isIntersecting)) return;
+            observer.disconnect();
+            render();
+        }, { rootMargin: '320px 0px' });
+        observer.observe(root);
     }
+
+    window.initDomeGallery = scheduleDomeGallery;
+    scheduleDomeGallery();
 })();

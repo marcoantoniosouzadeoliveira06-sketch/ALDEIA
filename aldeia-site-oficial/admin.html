@@ -1218,8 +1218,135 @@
             #clients-tab table, #portfolio-tab table, #telemetry-tab table { min-width: 620px; }
         }
     </style>
+
+<style>
+/* OMNI-AUDIT HARD MODE: DESIGN SYSTEM OVERRIDES */
+:root {
+    --aldeia-padding: 1.5rem;
+    --aldeia-radius: 0.75rem;
+}
+.card, .dashboard-card, .trello-card, .client-card, .modal-content {
+    padding: var(--aldeia-padding) !important;
+    border-radius: var(--aldeia-radius) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    background: rgba(9, 9, 9, 0.85) !important; /* Preto Premium Aldeia */
+    border: 1px solid rgba(228, 228, 231, 0.08) !important; /* Prata sutil */
+}
+/* Truncamento para não quebrar Flexbox */
+.client-card h3, .trello-card h4, .project-card h3, .truncate-text {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100%;
+    display: block;
+}
+.toast-error {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    background-color: #ef4444;
+    color: #ffffff;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    z-index: 99999;
+    font-weight: 600;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    animation: toastSlide 4s forwards;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+@keyframes toastSlide {
+    0% { opacity: 0; transform: translateX(50px); }
+    10% { opacity: 1; transform: translateX(0); }
+    90% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(50px); }
+}
+.empty-state {
+    padding: 3rem;
+    text-align: center;
+    color: #a1a1aa; /* Cinza Aldeia */
+    font-style: italic;
+    background: rgba(255,255,255,0.02);
+    border-radius: var(--aldeia-radius);
+    border: 1px dashed rgba(255,255,255,0.1);
+    width: 100%;
+}
+</style>
 </head>
+
+
 <body>
+<script>
+/* OMNI-AUDIT HARD MODE: GLOBAL FETCH INTERCEPTOR & ERROR HANDLING */
+(function() {
+    const originalFetch = window.fetch;
+    window.fetch = async function() {
+        try {
+            const response = await originalFetch.apply(this, arguments);
+            // Ignore auth verify silent fails
+            if (!response.ok && !response.url.includes('/api/auth/verify')) {
+                showToastError(`Falha HTTP: ${response.status}`);
+            }
+            return response;
+        } catch (err) {
+            showToastError("Falha de Rede: Não foi possível conectar ao servidor.");
+            window.dispatchEvent(new Event('fetchError'));
+            throw err;
+        }
+    };
+
+    window.showToastError = function(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-error';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    };
+
+    // Observer para renderizar Empty States em listas dinâmicas se estiverem vazias
+    const observer = new MutationObserver(() => {
+        const lists = document.querySelectorAll('.clients-list, .trello-board, .portfolio-grid');
+        lists.forEach(list => {
+            if (list.children.length === 0 && !list.innerHTML.includes('Carregando')) {
+                list.innerHTML = `<div class="empty-state">Nenhum dado encontrado para exibição.</div>`;
+            }
+        });
+    });
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
+
+    // Anti-Griefing: UI State Lock Reverser
+    window.addEventListener('fetchError', () => {
+        document.querySelectorAll('button:disabled').forEach(btn => {
+            if (btn.innerText.includes('Carregando') || btn.innerText.includes('Enviando') || btn.innerText.includes('Salvando')) {
+                btn.disabled = false;
+                btn.innerHTML = btn.getAttribute('data-original-text') || 'Salvar';
+            }
+        });
+    });
+    document.addEventListener('click', e => {
+        const btn = e.target.closest('button');
+        if (btn && !btn.hasAttribute('data-original-text')) {
+            btn.setAttribute('data-original-text', btn.innerHTML);
+        }
+    });
+
+    // Anti-Griefing: Data Parsing Bottleneck (Limitar Arrays gigantes a 5000 itens)
+    const originalParse = JSON.parse;
+    JSON.parse = function(text, reviver) {
+        const result = originalParse(text, reviver);
+        if (Array.isArray(result) && result.length > 5000) {
+            if (window.showToastError) window.showToastError("Atenção: Carregamento massivo (Anti-Griefing). Omitindo dados além de 5000 itens.");
+            return result.slice(0, 5000);
+        }
+        return result;
+    };
+
+})();
+</script>
+
 
     <!-- TELA DE LOGIN -->
     <div id="admin-login" class="login-container">
@@ -4081,7 +4208,7 @@
             });
         }
 
-        function renderTelemetryEvents(events) {
+        function renderTelemetryEventsLegacy(events) {
             const listEl = document.getElementById('telemetry-events-list');
             const emptyEl = document.getElementById('telemetry-empty-state');
             listEl.innerHTML = '';
@@ -4115,8 +4242,47 @@
             });
         }
 
+        function renderTelemetryEvents(events) {
+            const listEl = document.getElementById('telemetry-events-list');
+            const emptyEl = document.getElementById('telemetry-empty-state');
+            if (!listEl || !emptyEl) return;
+
+            listEl.replaceChildren();
+            if (!Array.isArray(events) || events.length === 0) {
+                emptyEl.style.display = 'block';
+                return;
+            }
+            emptyEl.style.display = 'none';
+
+            events.forEach((event) => {
+                const tr = document.createElement('tr');
+                const dwell = Number(event?.dwell_time || 0);
+                const values = [
+                    `${String(event?.session_id || '—').slice(0, 12)}…`,
+                    event?.converted ? '● Convertido' : '● Abandonou',
+                    dwell < 60 ? `${dwell.toFixed(1)}s` : `${Math.floor(dwell / 60)}m ${(dwell % 60).toFixed(0)}s`,
+                    event?.page_url || '/',
+                    event?.created_at || '—'
+                ];
+
+                tr.style.cursor = 'pointer';
+                tr.addEventListener('click', () => showTelemetryDetails(event));
+                values.forEach((value, index) => {
+                    const td = document.createElement('td');
+                    const span = document.createElement('span');
+                    span.textContent = value;
+                    if (index === 1) span.className = event?.converted ? 'tele-badge badge-converted' : 'tele-badge badge-abandoned';
+                    if (index === 2) span.className = 'tele-dwell';
+                    if (index === 4) span.className = 'timestamp-text';
+                    td.appendChild(span);
+                    tr.appendChild(td);
+                });
+                listEl.appendChild(tr);
+            });
+        }
+
         // Show Telemetry Session Details Modal
-        function showTelemetryDetails(ev) {
+        function showTelemetryDetailsLegacy(ev) {
             const modal = document.getElementById('telemetry-detail-modal');
             const body = document.getElementById('telemetry-detail-body');
             if (!modal || !body) return;
@@ -4135,6 +4301,36 @@
             modal.style.display = 'flex';
         }
         
+        function showTelemetryDetails(event) {
+            const modal = document.getElementById('telemetry-detail-modal');
+            const body = document.getElementById('telemetry-detail-body');
+            if (!modal || !body) return;
+
+            const details = [
+                ['ID da Sessão', event?.session_id],
+                ['Status', event?.converted ? '● Convertido' : '● Abandonou'],
+                ['Tempo de Permanência', `${Number(event?.dwell_time || 0).toFixed(1)} segundos`],
+                ['Página de Origem', event?.page_url || '/'],
+                ['IP do Visitante', event?.masked_ip],
+                ['User Agent (Navegador)', event?.user_agent],
+                ['Criado em', event?.created_at]
+            ];
+            const fragment = document.createDocumentFragment();
+
+            details.forEach(([label, value]) => {
+                const row = document.createElement('div');
+                const title = document.createElement('strong');
+                const content = document.createElement('span');
+                title.textContent = `${label}: `;
+                content.textContent = String(value ?? '—');
+                row.append(title, content);
+                fragment.appendChild(row);
+            });
+
+            body.replaceChildren(fragment);
+            modal.style.display = 'flex';
+        }
+
         function closeTelemetryDetailModal() {
             const modal = document.getElementById('telemetry-detail-modal');
             if (modal) modal.style.display = 'none';
@@ -4298,6 +4494,86 @@
                 listEl.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">Erro ao carregar portfólio.</td></tr>';
             }
         }
+
+        async function loadPortfolioSecure() {
+            const listEl = document.getElementById('portfolio-list');
+            if (!listEl) return;
+
+            const loadingRow = document.createElement('tr');
+            const loadingCell = document.createElement('td');
+            loadingCell.colSpan = 4;
+            loadingCell.style.cssText = 'text-align:center;color:var(--text-muted);';
+            loadingCell.textContent = 'Carregando portfólio...';
+            loadingRow.appendChild(loadingCell);
+            listEl.replaceChildren(loadingRow);
+
+            try {
+                const response = await fetch(`/api/portfolio?t=${Date.now()}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const payload = await response.json();
+                rawPortfolioProjects = Array.isArray(payload) ? payload : [];
+                listEl.replaceChildren();
+
+                if (rawPortfolioProjects.length === 0) {
+                    loadingCell.textContent = 'Nenhum projeto cadastrado.';
+                    listEl.appendChild(loadingRow);
+                    return;
+                }
+
+                rawPortfolioProjects.forEach((project) => {
+                    const tr = document.createElement('tr');
+                    const color = /^#[0-9a-f]{6}$/i.test(project?.accentColor || '') ? project.accentColor : '#e4e4e7';
+                    const titleCell = document.createElement('td');
+                    const titleWrap = document.createElement('div');
+                    const dot = document.createElement('div');
+                    const title = document.createElement('strong');
+                    const categoryCell = document.createElement('td');
+                    const category = document.createElement('span');
+                    const actionsCell = document.createElement('td');
+                    const actions = document.createElement('div');
+
+                    titleWrap.style.cssText = 'display:flex;align-items:center;gap:10px;';
+                    dot.style.cssText = `width:12px;height:12px;border-radius:50%;background:${color};border:1px solid rgba(255,255,255,.3);flex-shrink:0;`;
+                    title.style.color = '#fff';
+                    title.textContent = project?.title || 'Sem título';
+                    titleWrap.append(dot, title);
+                    titleCell.appendChild(titleWrap);
+
+                    category.style.cssText = 'background:rgba(255,255,255,.1);padding:4px 8px;border-radius:4px;font-size:.8rem;';
+                    category.textContent = project?.categoryLabel || project?.category || 'Sem categoria';
+                    categoryCell.appendChild(category);
+
+                    actions.style.cssText = 'display:flex;gap:8px;';
+                    if (currentAdminUser?.role === 'admin') {
+                        const edit = document.createElement('button');
+                        edit.type = 'button';
+                        edit.textContent = 'Editar';
+                        edit.style.cssText = 'background:rgba(228,228,231,.15);color:#a1a1aa;border:1px solid rgba(228,228,231,.3);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:.8rem;';
+                        edit.addEventListener('click', () => editProject(project.id));
+
+                        const remove = document.createElement('button');
+                        remove.type = 'button';
+                        remove.textContent = 'Excluir';
+                        remove.style.cssText = 'background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:.8rem;';
+                        remove.addEventListener('click', () => deleteProject(project.id));
+                        actions.append(edit, remove);
+                    } else {
+                        actions.textContent = 'Somente adição';
+                    }
+                    actionsCell.appendChild(actions);
+                    tr.append(titleCell, categoryCell, actionsCell);
+                    listEl.appendChild(tr);
+                });
+            } catch (error) {
+                console.error(error);
+                loadingCell.style.color = '#f87171';
+                loadingCell.textContent = 'Não foi possível carregar o portfólio.';
+                listEl.replaceChildren(loadingRow);
+            }
+        }
+
+        loadPortfolio = loadPortfolioSecure;
 
         function editProject(id) {
             const project = rawPortfolioProjects.find(p => p.id === id);
@@ -5166,7 +5442,10 @@
             const result = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(result?.message || 'A operação falhou.');
             setSettingsStatus(result?.message || 'Operação concluída.');
-            if (action === 'clear_telemetry') loadDashboardStats();
+            if (action === 'clear_telemetry') {
+                loadDashboardStats();
+                window.loadTelemetryData?.();
+            }
         }
 
         async function downloadAdminBackup() {
@@ -5199,6 +5478,7 @@
             document.querySelectorAll('input[name="purge-scope"]:checked').forEach(input => { input.checked = false; });
             setSettingsStatus(result?.message || 'Dados operacionais removidos.');
             loadDashboardStats();
+            if (scopes.includes('analytics')) window.loadTelemetryData?.();
         }
 
         function initializeOmegaAdminControls() {
