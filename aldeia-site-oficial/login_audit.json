@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "id": "c3ed632e-6593-45b8-a646-6f5ac0d14aeb",
+    "timestamp": "2026-08-11 21:59:01",
+    "username": "Japex",
+    "ip": "::1",
+    "status": "Sucesso",
+    "userAgent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.4170"
+  },
+  {
+    "id": "ff4bb98f-9545-4d0a-a47e-dcf9ff78e833",
+    "timestamp": "2026-08-11 21:59:26",
+    "username": "Japex",
+    "ip": "::1",
+    "status": "Sucesso",
+    "userAgent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; pt-BR) WindowsPowerShell/5.1.19041.4170"
+  },
+  {
+    "id": "6c7b27d9-fd8c-442b-9f5d-e5ac088256ed",
+    "timestamp": "2026-08-11 22:01:12",
+    "username": "Japex",
+    "ip": "::1",
+    "status": "Sucesso",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
+  }
+]

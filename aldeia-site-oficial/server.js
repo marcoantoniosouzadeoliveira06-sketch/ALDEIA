@@ -71,8 +71,12 @@ const MAX_TOKENS_PER_USER = 8;
 const validTokens = new Map();
 const ipRequests = new Map();  // ip -> array of timestamps
 const pendingJsonWrites = new Map();
+const pendingGoogleOAuthStates = new Map();
+const recentMeetingShares = new Map();
 let analyticsResetAt = 0;
 let analyticsResetLoaded = false;
+let lastGoogleCalendarSyncAt = '';
+let cachedGoogleRefreshToken = '';
 
 // Limpeza periódica de memória (RAM) a cada 30 minutos (Fix: Leak Referencial)
 const memoryCleanupTimer = setInterval(() => {
@@ -88,6 +92,10 @@ const memoryCleanupTimer = setInterval(() => {
     }
     ipRequests.clear();
     for (const [k, v] of newIpRequests.entries()) ipRequests.set(k, v);
+    pruneGoogleOAuthStates(now);
+    for (const [key, expiresAt] of recentMeetingShares.entries()) {
+        if (Number(expiresAt) <= now) recentMeetingShares.delete(key);
+    }
 }, 30 * 60 * 1000);
 memoryCleanupTimer.unref?.();
 
@@ -244,11 +252,34 @@ const trelloTaskSchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     title: { type: String, required: true },
     description: { type: String, default: '' },
-    status: { type: String, default: 'backlog', index: true }, // 'backlog', 'in_progress', 'review', 'done'
-    assignedTo: { type: String, default: 'Japex', index: true },
+    status: { type: String, default: 'backlog', index: true },
+    assignedTo: { type: String, default: '', index: true },
     priority: { type: String, default: 'média' }, // 'alta', 'média', 'baixa'
     clientName: { type: String, default: '' },
-    dueDate: { type: String, default: '' }
+    dueDate: { type: String, default: '' },
+    subtasks: { type: [{ id: String, title: String, completed: Boolean }], default: [] },
+    assets: { type: [{ url: String, label: String }], default: [] },
+    timeSpentSeconds: { type: Number, default: 0 },
+    timerStartedAt: { type: String, default: '' }
+}, { timestamps: true });
+
+const meetingSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    title: { type: String, required: true },
+    description: { type: String, default: '' },
+    eventType: { type: String, enum: ['meeting', 'work'], default: 'meeting', index: true },
+    clientId: { type: String, default: '', index: true },
+    clientName: { type: String, default: '' },
+    clientEmail: { type: String, default: '' },
+    startAt: { type: String, required: true, index: true },
+    endAt: { type: String, required: true },
+    attendees: { type: [String], default: [] },
+    sendInvite: { type: Boolean, default: true },
+    meetLink: { type: String, default: '' },
+    googleEventId: { type: String, default: '' },
+    source: { type: String, enum: ['aldeia', 'google'], default: 'aldeia', index: true },
+    integrationStatus: { type: String, default: 'local' },
+    createdBy: { type: String, default: 'Admin' }
 }, { timestamps: true });
 
 const userProfileSchema = new mongoose.Schema({
@@ -288,6 +319,13 @@ projectViewEventSchema.index({ viewedAt: 1 }, { expireAfterSeconds: 90 * 24 * 60
 const adminSettingsSchema = new mongoose.Schema({
     key: { type: String, default: 'main', unique: true },
     externalAnalytics: { type: Boolean, default: true },
+    sidebarLogo: { type: String, default: '' },
+    updatedBy: { type: String, default: 'Admin' }
+}, { timestamps: true });
+
+const googleCalendarIntegrationSchema = new mongoose.Schema({
+    key: { type: String, default: 'calendar', unique: true },
+    refreshToken: { type: mongoose.Schema.Types.Mixed, default: null },
     updatedBy: { type: String, default: 'Admin' }
 }, { timestamps: true });
 
@@ -298,10 +336,12 @@ const AnalyticsModel = mongoose.model('Analytics', analyticsSchema);
 const SiteContentModel = mongoose.model('SiteContent', siteContentSchema);
 const AuditLogModel = mongoose.model('AuditLog', auditLogSchema);
 const TrelloTaskModel = mongoose.model('TrelloTask', trelloTaskSchema);
+const MeetingModel = mongoose.model('Meeting', meetingSchema);
 const UserProfileModel = mongoose.model('UserProfile', userProfileSchema);
 const ProjectViewWindowModel = mongoose.model('ProjectViewWindow', projectViewWindowSchema);
 const ProjectViewEventModel = mongoose.model('ProjectViewEvent', projectViewEventSchema);
 const AdminSettingsModel = mongoose.model('AdminSettings', adminSettingsSchema);
+const GoogleCalendarIntegrationModel = mongoose.model('GoogleCalendarIntegration', googleCalendarIntegrationSchema);
 
 // ===== ZERO-TRUST INPUT NORMALIZATION =====
 const SAFE_RICH_TEXT = { ALLOWED_TAGS: ['strong', 'em', 'br', 'ul', 'ol', 'li', 'p', 'span'], ALLOWED_ATTR: [] };
@@ -394,13 +434,39 @@ const clientUpdateSchema = clientPayloadSchema.partial().refine(value => Object.
 const trelloPayloadSchema = z.object({
     title: requiredText(180),
     description: plainText(2000).optional().default(''),
-    status: z.enum(['backlog', 'in_progress', 'review', 'done']).optional().default('backlog'),
-    assignedTo: plainText(100).optional().default('Japex'),
+    status: z.enum(['backlog', 'in_progress', 'awaiting_client', 'review', 'done']).optional().default('backlog'),
+    assignedTo: plainText(100).optional().default(''),
     priority: z.enum(['alta', 'média', 'baixa']).optional().default('média'),
     clientName: plainText(160).optional().default(''),
-    dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal(''))
+    dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal('')),
+    subtasks: z.array(z.object({
+        id: z.string().trim().regex(SAFE_ID),
+        title: requiredText(180),
+        completed: z.boolean().optional().default(false)
+    }).strip()).max(30).optional().default([]),
+    assets: z.array(z.object({
+        url: safeMediaUrl,
+        label: plainText(120).optional().default('Referência')
+    }).strip()).max(12).optional().default([]),
+    timeSpentSeconds: z.number().int().min(0).max(31_536_000).optional().default(0),
+    timerStartedAt: z.string().datetime().optional().or(z.literal(''))
 }).strip();
 const trelloUpdateSchema = trelloPayloadSchema.partial().refine(value => Object.keys(value).length > 0, 'Nenhum campo válido para atualizar');
+const meetingPayloadSchema = z.object({
+    title: requiredText(180),
+    description: plainText(4000).optional().default(''),
+    eventType: z.enum(['meeting', 'work']).optional().default('meeting'),
+    clientId: z.string().trim().regex(SAFE_ID).optional().or(z.literal('')),
+    clientName: plainText(160).optional().default(''),
+    clientEmail: z.string().trim().email().max(254).optional().or(z.literal('')),
+    startAt: z.string().datetime(),
+    endAt: z.string().datetime(),
+    attendees: z.array(z.string().trim().email().max(254)).max(20).optional().default([]),
+    sendInvite: z.boolean().optional().default(true)
+}).strict().refine(value => new Date(value.endAt) > new Date(value.startAt), 'O término deve ocorrer após o início');
+const meetingSharePayloadSchema = z.object({
+    recipient: z.enum(['client', 'admin'])
+}).strict();
 const profilePayloadSchema = z.object({
     displayName: requiredText(120).optional(),
     avatar: safeMediaUrl.optional()
@@ -426,7 +492,10 @@ const createAdminUserSchema = z.object({
 const updateAdminUserRoleSchema = z.object({ role: z.enum(ADMIN_ROLES) }).strict();
 const adminUsernameParamsSchema = z.object({ username: z.string().trim().toLowerCase().regex(USERNAME_PATTERN) }).strict();
 const adminSettingsPayloadSchema = z.object({
-    externalAnalytics: z.boolean()
+    externalAnalytics: z.boolean(),
+    sidebarLogo: z.string().trim().max(2048).refine(value => (
+        value === '' || value.startsWith('/assets/uploads/') || /^https:\/\//i.test(value)
+    ), 'Logo invalida').optional()
 }).strict();
 const maintenanceActionSchema = z.object({
     action: z.enum(['clear_api_cache', 'sync_cloudinary', 'optimize_indexes', 'clear_telemetry']),
@@ -434,7 +503,7 @@ const maintenanceActionSchema = z.object({
 }).strict();
 const adminPurgeSchema = z.object({
     confirmation: z.literal('Aldeia'),
-    scopes: z.array(z.enum(['analytics', 'audit', 'submissions', 'clients', 'tasks', 'views'])).min(1).max(6)
+    scopes: z.array(z.enum(['analytics', 'audit', 'submissions', 'clients', 'tasks', 'meetings', 'views'])).min(1).max(7)
 }).strict();
 const leadPayloadSchema = z.object({
     nome: requiredText(160),
@@ -562,15 +631,51 @@ function sanitizeClientResponse(client) {
 
 function sanitizeTrelloResponse(task) {
     const value = scrubNoSql(task || {});
+    const subtasks = Array.isArray(value.subtasks) ? value.subtasks.slice(0, 30).map(item => ({
+        id: SAFE_ID.test(String(item?.id || '')) ? String(item.id) : `sub_${crypto.randomUUID().slice(0, 8)}`,
+        title: sanitizePlainText(item?.title || ''),
+        completed: item?.completed === true
+    })).filter(item => item.title) : [];
+    const assets = Array.isArray(value.assets) ? value.assets.slice(0, 12).filter(item => isSafeMediaUrl(item?.url)).map(item => ({
+        url: String(item.url).trim(),
+        label: sanitizePlainText(item?.label || 'Referência')
+    })) : [];
     return {
         id: SAFE_ID.test(String(value.id || '')) ? String(value.id) : '',
         title: sanitizePlainText(value.title || ''),
         description: sanitizePlainText(value.description || ''),
-        status: ['backlog', 'in_progress', 'review', 'done'].includes(value.status) ? value.status : 'backlog',
+        status: ['backlog', 'in_progress', 'awaiting_client', 'review', 'done'].includes(value.status) ? value.status : 'backlog',
         assignedTo: sanitizePlainText(value.assignedTo || ''),
         priority: ['alta', 'média', 'baixa'].includes(value.priority) ? value.priority : 'média',
         clientName: sanitizePlainText(value.clientName || ''),
-        dueDate: sanitizePlainText(value.dueDate || '')
+        dueDate: sanitizePlainText(value.dueDate || ''),
+        subtasks,
+        assets,
+        timeSpentSeconds: Math.max(0, Math.min(31_536_000, Number(value.timeSpentSeconds) || 0)),
+        timerStartedAt: sanitizePlainText(value.timerStartedAt || '')
+    };
+}
+
+function sanitizeMeetingResponse(meeting) {
+    const value = scrubNoSql(meeting || {});
+    return {
+        id: SAFE_ID.test(String(value.id || '')) ? String(value.id) : '',
+        title: sanitizePlainText(value.title || ''),
+        description: sanitizePlainText(value.description || '').slice(0, 4000),
+        eventType: value.eventType === 'work' ? 'work' : 'meeting',
+        clientId: SAFE_ID.test(String(value.clientId || '')) ? String(value.clientId) : '',
+        clientName: sanitizePlainText(value.clientName || ''),
+        clientEmail: sanitizePlainText(value.clientEmail || ''),
+        startAt: sanitizePlainText(value.startAt || ''),
+        endAt: sanitizePlainText(value.endAt || ''),
+        attendees: Array.isArray(value.attendees) ? value.attendees.slice(0, 20).map(sanitizePlainText).filter(Boolean) : [],
+        sendInvite: value.sendInvite !== false,
+        meetLink: isSafeMediaUrl(value.meetLink) ? String(value.meetLink).trim() : '',
+        googleEventId: sanitizePlainText(value.googleEventId || ''),
+        source: value.source === 'google' ? 'google' : 'aldeia',
+        integrationStatus: ['connected', 'not_configured', 'failed', 'local'].includes(value.integrationStatus) ? value.integrationStatus : 'local',
+        createdBy: sanitizePlainText(value.createdBy || 'Admin'),
+        createdAt: sanitizePlainText(value.createdAt || '')
     };
 }
 
@@ -622,14 +727,14 @@ if (MONGODB_URI) {
     })
         .then(async () => {
             isMongoConnected = true;
-            console.log('✅ [MONGODB ATLAS] Conectado com sucesso ao banco na nuvem!');
+            console.log('[MONGODB ATLAS] Conectado com sucesso ao banco na nuvem.');
             await autoMigrateData();
         })
         .catch(err => {
-            console.error('❌ [MONGODB ATLAS] Erro ao conectar ao banco na nuvem:', err.message);
+            console.error('[MONGODB ATLAS] Erro ao conectar ao banco na nuvem:', err.message);
         });
 } else {
-    console.warn('⚠️ [MONGODB ATLAS] MONGODB_URI não configurada no .env. Usando fallback JSON local.');
+    console.warn('[MONGODB ATLAS] MONGODB_URI não configurada no .env. Usando fallback JSON local.');
 }
 
 mongoose.connection.on('disconnected', () => {
@@ -649,7 +754,7 @@ async function autoMigrateData() {
             if (localData.length > 0) {
                 console.log(`[MIGRATION] Migrando ${localData.length} projetos do JSON para o MongoDB Atlas...`);
                 await ProjectModel.insertMany(localData);
-                console.log('✅ [MIGRATION] Portfólio migrado com sucesso para a nuvem!');
+                console.log('[MIGRATION] Portfólio migrado com sucesso para a nuvem.');
             }
         }
 
@@ -660,7 +765,7 @@ async function autoMigrateData() {
             if (localClients.length > 0) {
                 console.log(`[MIGRATION] Migrando ${localClients.length} clientes para o MongoDB Atlas...`);
                 await ClientModel.insertMany(localClients);
-                console.log('✅ [MIGRATION] Clientes migrados com sucesso!');
+                console.log('[MIGRATION] Clientes migrados com sucesso.');
             }
         }
 
@@ -671,7 +776,7 @@ async function autoMigrateData() {
             if (localSubs.length > 0) {
                 console.log(`[MIGRATION] Migrando ${localSubs.length} leads para o MongoDB Atlas...`);
                 await SubmissionModel.insertMany(localSubs);
-                console.log('✅ [MIGRATION] Leads migrados com sucesso!');
+                console.log('[MIGRATION] Leads migrados com sucesso.');
             }
         }
 
@@ -682,7 +787,7 @@ async function autoMigrateData() {
             if (Object.keys(localContent).length > 0) {
                 console.log(`[MIGRATION] Migrando conteúdo do CMS para o MongoDB Atlas...`);
                 await SiteContentModel.create({ key: 'main', content: localContent });
-                console.log('✅ [MIGRATION] Conteúdo do CMS migrado com sucesso!');
+                console.log('[MIGRATION] Conteúdo do CMS migrado com sucesso.');
             }
         }
 
@@ -693,24 +798,32 @@ async function autoMigrateData() {
             if (localAudit.length > 0) {
                 console.log(`[MIGRATION] Migrando logs de login para o MongoDB Atlas...`);
                 await AuditLogModel.insertMany(localAudit.slice(-200));
-                console.log('✅ [MIGRATION] Logs de audit migrados com sucesso!');
+                console.log('[MIGRATION] Logs de audit migrados com sucesso.');
             }
         }
 
-        // 6. Tarefas Trello (Equipe ALDEIA)
+        // 6. Tarefas Kanban: remove apenas o antigo pacote demonstrativo e
+        // migra tarefas locais reais quando o Mongo ainda estiver vazio.
+        await TrelloTaskModel.deleteMany({ id: { $in: ['t1', 't2', 't3', 't4'] } });
         const trelloCount = await TrelloTaskModel.countDocuments();
         if (trelloCount === 0) {
-            const defaultTasks = [
-                { id: 't1', title: 'Design do Portfólio LOUD', description: 'Criar capas 4:5 e feed promocional', status: 'in_progress', assignedTo: 'Japex', priority: 'alta', clientName: 'LOUD Esports', dueDate: '2026-08-10' },
-                { id: 't2', title: 'Revisão das Animações 3D', description: 'Ajustar parâmetros de refração e iluminação', status: 'review', assignedTo: 'Temari', priority: 'média', clientName: 'FURY Gaming', dueDate: '2026-08-08' },
-                { id: 't3', title: 'Identidade Visual MIBR', description: 'Desenvolver conceito de marca e paleta', status: 'backlog', assignedTo: 'Nesh', priority: 'alta', clientName: 'MIBR', dueDate: '2026-08-15' },
-                { id: 't4', title: 'Aprovação de Proposal de Cliente', description: 'Aguardando confirmação do contrato', status: 'done', assignedTo: 'Japex', priority: 'baixa', clientName: 'Red Canids', dueDate: '2026-08-01' }
-            ];
-            await TrelloTaskModel.insertMany(defaultTasks);
-            console.log('✅ [MIGRATION] Tarefas padrão do Trello adicionadas!');
+            const localTasks = safeReadJSON('trello_tasks.json', []);
+            if (Array.isArray(localTasks) && localTasks.length) {
+                await TrelloTaskModel.insertMany(localTasks.map(sanitizeTrelloResponse));
+                console.log('[MIGRATION] Tarefas locais do Kanban migradas.');
+            }
         }
 
         // 7. Perfis de Usuários Padrão (Japex, Temari, Nesh, Admin)
+        const meetingsCount = await MeetingModel.countDocuments();
+        if (meetingsCount === 0) {
+            const localMeetings = safeReadJSON('meetings.json', []);
+            if (Array.isArray(localMeetings) && localMeetings.length) {
+                await MeetingModel.insertMany(localMeetings.map(sanitizeMeetingResponse));
+                console.log('[MIGRATION] Local meetings migrated to MongoDB Atlas.');
+            }
+        }
+
         const profilesCount = await UserProfileModel.countDocuments();
         if (profilesCount === 0) {
             const defaultProfiles = [
@@ -718,8 +831,9 @@ async function autoMigrateData() {
                 { username: 'admin', displayName: 'Administrador ALDEIA', avatar: '/assets/japex.webp', role: 'admin', active: true, isRoot: false }
             ];
             await UserProfileModel.insertMany(defaultProfiles);
-            console.log('✅ [MIGRATION] Perfis de usuários padrão inicializados!');
+            console.log('[MIGRATION] Perfis de usuários padrão inicializados.');
         }
+        await loadStoredGoogleRefreshToken();
     } catch (err) {
         console.error('[MIGRATION ERROR]', err.message);
     }
@@ -821,6 +935,7 @@ const apiLimiter = rateLimit({
     max: 120,
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => process.env.NODE_ENV !== 'production' && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.ip),
     message: { status: 'error', message: 'Muitas requisições de API, tente novamente mais tarde.' }
 });
 
@@ -845,10 +960,20 @@ const projectViewLimiter = rateLimit({
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 5,
+    max: 8,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { status: 'error', message: 'Muitas tentativas. Tente novamente mais tarde.' }
+    skipSuccessfulRequests: true,
+    skip: (req) => process.env.NODE_ENV !== 'production' && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.ip),
+    message: { status: 'error', message: 'Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.' }
+});
+
+const meetingShareLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { status: 'error', message: 'Muitos envios em pouco tempo. Aguarde antes de tentar novamente.' }
 });
 
 app.use(compression());
@@ -1269,6 +1394,16 @@ async function listActiveAdminUsers() {
         merged.set('japex', sanitizeProfileResponse({ username: 'Japex', displayName: 'Japex', role: 'admin', active: true, isRoot: true }, 'Japex'));
     }
     return [...merged.values()];
+}
+
+async function resolveActiveKanbanAssignee(value) {
+    const key = String(value || '').trim().toLowerCase();
+    if (!key) return null;
+    const users = await listActiveAdminUsers();
+    return users.find(user =>
+        String(user.username || '').toLowerCase() === key ||
+        String(user.displayName || '').toLowerCase() === key
+    ) || null;
 }
 
 app.get('/api/admin/users', requireAuth, requireRole(['admin']), async (req, res) => {
@@ -1776,15 +1911,23 @@ app.get('/api/trello', requireAuth, requireRole(['admin']), async (req, res) => 
 
 app.post('/api/trello', requireAuth, requireRole(['admin']), validate(trelloPayloadSchema), async (req, res) => {
     req.body = req.validatedBody;
+    const assignee = await resolveActiveKanbanAssignee(req.body.assignedTo);
+    if (req.body.assignedTo && !assignee) {
+        return res.status(400).json({ status: 'error', message: 'Selecione uma conta ativa da equipe.' });
+    }
     const newTask = {
         id: 't_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
         title: req.body.title || 'Nova Tarefa',
         description: req.body.description || '',
         status: req.body.status || 'backlog',
-        assignedTo: req.body.assignedTo || 'Japex',
+        assignedTo: assignee?.username || '',
         priority: req.body.priority || 'média',
         clientName: req.body.clientName || '',
-        dueDate: req.body.dueDate || ''
+        dueDate: req.body.dueDate || '',
+        subtasks: req.body.subtasks || [],
+        assets: req.body.assets || [],
+        timeSpentSeconds: req.body.timeSpentSeconds || 0,
+        timerStartedAt: req.body.timerStartedAt || ''
     };
 
     if (isMongoConnected) {
@@ -1799,7 +1942,14 @@ app.post('/api/trello', requireAuth, requireRole(['admin']), validate(trelloPayl
 
 app.put('/api/trello/:id', requireAuth, requireRole(['admin']), validate(idParamsSchema, 'params'), validate(trelloUpdateSchema), async (req, res) => {
     const taskId = req.validatedParams.id;
-    const payload = req.validatedBody;
+    const payload = { ...req.validatedBody };
+    if (Object.hasOwn(payload, 'assignedTo')) {
+        const assignee = await resolveActiveKanbanAssignee(payload.assignedTo);
+        if (payload.assignedTo && !assignee) {
+            return res.status(400).json({ status: 'error', message: 'Selecione uma conta ativa da equipe.' });
+        }
+        payload.assignedTo = assignee?.username || '';
+    }
     let updatedTask = null;
 
     if (isMongoConnected) {
@@ -1851,6 +2001,812 @@ app.delete('/api/trello/:id', requireAuth, requireRole(['admin']), validate(idPa
     } else {
         res.status(404).json({ status: 'error', message: 'Tarefa não encontrada' });
     }
+});
+
+// ===== AGENDAMENTOS + GOOGLE CALENDAR / MEET =====
+const GOOGLE_CALENDAR_ID = String(process.env.GOOGLE_CALENDAR_ID || 'primary').trim();
+const GOOGLE_CLIENT_ID = String(process.env.GOOGLE_CLIENT_ID || '').trim();
+const GOOGLE_CLIENT_SECRET = String(process.env.GOOGLE_CLIENT_SECRET || '').trim();
+const GOOGLE_REFRESH_TOKEN = String(process.env.GOOGLE_REFRESH_TOKEN || '').trim();
+const GOOGLE_OAUTH_REDIRECT_URI = String(process.env.GOOGLE_OAUTH_REDIRECT_URI || '').trim();
+const GOOGLE_TOKEN_ENCRYPTION_KEY = String(process.env.GOOGLE_TOKEN_ENCRYPTION_KEY || '').trim();
+const GOOGLE_TOKEN_STORAGE_FILE = 'google_calendar_tokens.json';
+const GOOGLE_OAUTH_STATE_TTL = 10 * 60 * 1000;
+const RESEND_API_KEY = String(process.env.RESEND_API_KEY || '').trim();
+const EMAIL_FROM = String(process.env.EMAIL_FROM || '').trim();
+const ADMIN_NOTIFICATION_EMAIL = String(process.env.ADMIN_NOTIFICATION_EMAIL || '').trim();
+const MEETING_SHARE_COOLDOWN_MS = 45 * 1000;
+
+function pruneGoogleOAuthStates(now = Date.now()) {
+    for (const [state, entry] of pendingGoogleOAuthStates.entries()) {
+        if (!entry || Number(entry.expiresAt) <= now) pendingGoogleOAuthStates.delete(state);
+    }
+}
+
+function getGoogleTokenCipherKey() {
+    if (GOOGLE_TOKEN_ENCRYPTION_KEY.length < 32) return null;
+    return crypto.createHash('sha256').update(GOOGLE_TOKEN_ENCRYPTION_KEY, 'utf8').digest();
+}
+
+function encryptGoogleRefreshToken(refreshToken) {
+    const key = getGoogleTokenCipherKey();
+    if (!key) throw new Error('GOOGLE_TOKEN_ENCRYPTION_KEY ausente');
+    const iv = crypto.randomBytes(12);
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+    const ciphertext = Buffer.concat([cipher.update(String(refreshToken), 'utf8'), cipher.final()]);
+    return {
+        version: 1,
+        iv: iv.toString('base64url'),
+        tag: cipher.getAuthTag().toString('base64url'),
+        ciphertext: ciphertext.toString('base64url')
+    };
+}
+
+function decryptGoogleRefreshToken(value) {
+    const key = getGoogleTokenCipherKey();
+    if (!key || !value || typeof value !== 'object') return '';
+    try {
+        const iv = Buffer.from(String(value.iv || ''), 'base64url');
+        const tag = Buffer.from(String(value.tag || ''), 'base64url');
+        const ciphertext = Buffer.from(String(value.ciphertext || ''), 'base64url');
+        if (iv.length !== 12 || tag.length !== 16 || !ciphertext.length) return '';
+        const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+        decipher.setAuthTag(tag);
+        return Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString('utf8').trim();
+    } catch (_) {
+        return '';
+    }
+}
+
+function getStoredGoogleRefreshToken() {
+    if (cachedGoogleRefreshToken) return cachedGoogleRefreshToken;
+    const stored = safeReadJSON(GOOGLE_TOKEN_STORAGE_FILE, {});
+    const refreshToken = decryptGoogleRefreshToken(stored);
+    if (refreshToken) cachedGoogleRefreshToken = refreshToken;
+    return refreshToken;
+}
+
+function getGoogleRefreshToken() {
+    return getStoredGoogleRefreshToken() || GOOGLE_REFRESH_TOKEN;
+}
+
+async function loadStoredGoogleRefreshToken() {
+    if (cachedGoogleRefreshToken) return cachedGoogleRefreshToken;
+    if (isMongoConnected) {
+        try {
+            const integration = await GoogleCalendarIntegrationModel.findOne({ key: 'calendar' }).lean();
+            const refreshToken = decryptGoogleRefreshToken(integration?.refreshToken);
+            if (refreshToken) {
+                cachedGoogleRefreshToken = refreshToken;
+                return refreshToken;
+            }
+        } catch (error) {
+            console.error('[GOOGLE CALENDAR TOKEN LOAD]', error.message);
+        }
+    }
+    return getStoredGoogleRefreshToken();
+}
+
+async function storeGoogleRefreshToken(refreshToken, user = {}) {
+    const encrypted = encryptGoogleRefreshToken(refreshToken);
+    cachedGoogleRefreshToken = String(refreshToken).trim();
+    if (isMongoConnected) {
+        try {
+            await GoogleCalendarIntegrationModel.findOneAndUpdate(
+                { key: 'calendar' },
+                { $set: { refreshToken: encrypted, updatedBy: sanitizePlainText(user?.username || user?.displayName || 'Admin') } },
+                { upsert: true, new: true }
+            );
+        } catch (error) {
+            console.error('[GOOGLE CALENDAR TOKEN SAVE]', error.message);
+            throw new Error('Não foi possível salvar a conexão com o Google Calendar.');
+        }
+    }
+    await safeWriteJSON(GOOGLE_TOKEN_STORAGE_FILE, {
+        ...encrypted,
+        updatedAt: new Date().toISOString()
+    });
+}
+
+function isGoogleOAuthReady() {
+    return Boolean(
+        GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET && GOOGLE_OAUTH_REDIRECT_URI && GOOGLE_CALENDAR_ID && getGoogleTokenCipherKey()
+    );
+}
+
+function isGoogleCalendarConfigured() {
+    return Boolean(GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET && getGoogleRefreshToken() && GOOGLE_CALENDAR_ID);
+}
+
+function getGoogleCalendarStatus() {
+    return {
+        configured: isGoogleCalendarConfigured(),
+        oauthReady: isGoogleOAuthReady(),
+        calendarLabel: GOOGLE_CALENDAR_ID === 'primary' ? 'Calendario principal' : 'Calendario conectado',
+        lastSyncedAt: lastGoogleCalendarSyncAt || ''
+    };
+}
+
+function createGoogleOAuthState(user) {
+    pruneGoogleOAuthStates();
+    const state = crypto.randomBytes(32).toString('base64url');
+    pendingGoogleOAuthStates.set(state, {
+        userId: sanitizePlainText(user?.id || user?.username || ''),
+        expiresAt: Date.now() + GOOGLE_OAUTH_STATE_TTL
+    });
+    return state;
+}
+
+function getGoogleOAuthAuthorizationUrl(state) {
+    const parameters = new URLSearchParams({
+        client_id: GOOGLE_CLIENT_ID,
+        redirect_uri: GOOGLE_OAUTH_REDIRECT_URI,
+        response_type: 'code',
+        scope: 'https://www.googleapis.com/auth/calendar.events',
+        access_type: 'offline',
+        prompt: 'consent',
+        state
+    });
+    return `https://accounts.google.com/o/oauth2/v2/auth?${parameters.toString()}`;
+}
+
+async function exchangeGoogleOAuthCode(code) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12_000);
+    try {
+        const response = await fetch('https://oauth2.googleapis.com/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                code,
+                client_id: GOOGLE_CLIENT_ID,
+                client_secret: GOOGLE_CLIENT_SECRET,
+                redirect_uri: GOOGLE_OAUTH_REDIRECT_URI,
+                grant_type: 'authorization_code'
+            }),
+            signal: controller.signal
+        });
+        if (!response.ok) throw new Error(`OAuth Google respondeu HTTP ${response.status}`);
+        return response.json();
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+async function getGoogleCalendarAccessToken() {
+    const refreshToken = getGoogleRefreshToken();
+    if (!refreshToken) throw new Error('Google Calendar nao esta conectado');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+    try {
+        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                client_id: GOOGLE_CLIENT_ID,
+                client_secret: GOOGLE_CLIENT_SECRET,
+                refresh_token: refreshToken,
+                grant_type: 'refresh_token'
+            }),
+            signal: controller.signal
+        });
+        if (!tokenResponse.ok) throw new Error(`OAuth Google respondeu HTTP ${tokenResponse.status}`);
+        const tokenData = await tokenResponse.json();
+        if (!tokenData?.access_token) throw new Error('OAuth Google não retornou access_token');
+        return tokenData.access_token;
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+function normalizeGoogleCalendarDate(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    const complete = /^\d{4}-\d{2}-\d{2}$/.test(raw) ? `${raw}T09:00:00-03:00` : raw;
+    const date = new Date(complete);
+    return Number.isNaN(date.getTime()) ? '' : date.toISOString();
+}
+
+function normalizeGoogleCalendarEvent(event) {
+    const startAt = normalizeGoogleCalendarDate(event?.start?.dateTime || event?.start?.date);
+    const endAt = normalizeGoogleCalendarDate(event?.end?.dateTime || event?.end?.date);
+    if (!startAt || !endAt) return null;
+    const externalId = sanitizePlainText(event?.id || '');
+    const digest = crypto.createHash('sha256').update(externalId || `${startAt}:${event?.summary || ''}`).digest('hex').slice(0, 20);
+    const attendees = Array.isArray(event?.attendees)
+        ? event.attendees.map(item => sanitizePlainText(item?.email || '')).filter(Boolean).slice(0, 20)
+        : [];
+    const meetLink = String(event?.hangoutLink || event?.conferenceData?.entryPoints?.find(point => point?.entryPointType === 'video')?.uri || '').trim();
+    return sanitizeMeetingResponse({
+        id: `google_${digest}`,
+        title: sanitizePlainText(event?.summary || 'Evento do Google Calendar'),
+        description: sanitizePlainText(event?.description || '').slice(0, 4000),
+        eventType: meetLink ? 'meeting' : 'work',
+        clientName: '',
+        clientEmail: '',
+        startAt,
+        endAt,
+        attendees,
+        sendInvite: false,
+        meetLink,
+        googleEventId: externalId,
+        source: 'google',
+        integrationStatus: 'connected',
+        createdBy: 'Google Calendar',
+        createdAt: sanitizePlainText(event?.created || event?.updated || '')
+    });
+}
+
+async function listGoogleCalendarEvents() {
+    const accessToken = await getGoogleCalendarAccessToken();
+    const timeMin = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    const timeMax = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+    let pageToken = '';
+    let pages = 0;
+    const results = [];
+    do {
+        const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GOOGLE_CALENDAR_ID)}/events`);
+        url.searchParams.set('singleEvents', 'true');
+        url.searchParams.set('orderBy', 'startTime');
+        url.searchParams.set('timeMin', timeMin);
+        url.searchParams.set('timeMax', timeMax);
+        url.searchParams.set('maxResults', '250');
+        if (pageToken) url.searchParams.set('pageToken', pageToken);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 12_000);
+        try {
+            const response = await fetch(url, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+                signal: controller.signal
+            });
+            if (!response.ok) throw new Error(`Google Calendar respondeu HTTP ${response.status}`);
+            const payload = await response.json();
+            const items = Array.isArray(payload?.items) ? payload.items : [];
+            items.filter(item => item?.status !== 'cancelled').forEach(item => {
+                const normalized = normalizeGoogleCalendarEvent(item);
+                if (normalized) results.push(normalized);
+            });
+            pageToken = String(payload?.nextPageToken || '');
+            pages += 1;
+        } finally {
+            clearTimeout(timeout);
+        }
+    } while (pageToken && pages < 4);
+    return results;
+}
+
+async function upsertGoogleCalendarEvents(events) {
+    const incoming = Array.isArray(events)
+        ? events.map(sanitizeMeetingResponse).filter(event => event.googleEventId && event.id)
+        : [];
+    if (!incoming.length) return { imported: 0, updated: 0 };
+
+    const mergeEvent = (event, existing = {}) => ({
+        ...event,
+        id: existing.id || event.id,
+        clientId: existing.clientId || event.clientId || '',
+        clientName: existing.clientName || event.clientName || '',
+        clientEmail: existing.clientEmail || event.clientEmail || '',
+        description: event.description || existing.description || '',
+        attendees: Array.isArray(event.attendees) && event.attendees.length ? event.attendees : (existing.attendees || []),
+        sendInvite: existing.sendInvite !== false,
+        source: existing.source === 'aldeia' ? 'aldeia' : 'google',
+        integrationStatus: 'connected',
+        createdBy: existing.createdBy || event.createdBy || 'Google Calendar'
+    });
+
+    if (isMongoConnected) {
+        const ids = incoming.map(event => event.googleEventId);
+        const existingItems = await MeetingModel.find({ googleEventId: { $in: ids } }).lean();
+        const existingByGoogleId = new Map(existingItems.map(item => [item.googleEventId, item]));
+        let imported = 0;
+        let updated = 0;
+        const operations = incoming.map(event => {
+            const existing = existingByGoogleId.get(event.googleEventId) || {};
+            if (existing.id) updated += 1; else imported += 1;
+            return {
+                updateOne: {
+                    filter: { googleEventId: event.googleEventId },
+                    update: { $set: mergeEvent(event, existing) },
+                    upsert: true
+                }
+            };
+        });
+        if (operations.length) await MeetingModel.bulkWrite(operations, { ordered: false });
+        return { imported, updated };
+    }
+
+    const stored = safeReadJSON('meetings.json', []);
+    const meetings = Array.isArray(stored) ? stored : [];
+    const indexByGoogleId = new Map(meetings.map((meeting, index) => [meeting?.googleEventId, index]));
+    let imported = 0;
+    let updated = 0;
+    incoming.forEach(event => {
+        const index = indexByGoogleId.get(event.googleEventId);
+        if (Number.isInteger(index)) {
+            meetings[index] = mergeEvent(event, meetings[index]);
+            updated += 1;
+            return;
+        }
+        meetings.push(mergeEvent(event));
+        indexByGoogleId.set(event.googleEventId, meetings.length - 1);
+        imported += 1;
+    });
+    await safeWriteJSON('meetings.json', meetings);
+    return { imported, updated };
+}
+
+async function insertGoogleCalendarMeeting(meeting) {
+    const accessToken = await getGoogleCalendarAccessToken();
+    const requestId = crypto.randomUUID();
+    const fallbackDescription = `${meeting.eventType === 'work' ? 'Bloco de trabalho' : 'Reunião'} agendado pelo CRM ALDEIA${meeting.clientName ? ` — Cliente: ${meeting.clientName}` : ''}`;
+    const eventPayload = {
+        summary: meeting.title,
+        description: meeting.description || fallbackDescription,
+        start: { dateTime: meeting.startAt, timeZone: 'America/Sao_Paulo' },
+        end: { dateTime: meeting.endAt, timeZone: 'America/Sao_Paulo' },
+        attendees: meeting.attendees.map(email => ({ email }))
+    };
+    if (meeting.eventType === 'meeting') {
+        eventPayload.conferenceData = {
+            createRequest: {
+                requestId,
+                conferenceSolutionKey: { type: 'hangoutsMeet' }
+            }
+        };
+    }
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12_000);
+    try {
+        const calendarUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GOOGLE_CALENDAR_ID)}/events?${meeting.eventType === 'meeting' ? 'conferenceDataVersion=1&' : ''}sendUpdates=${meeting.sendInvite ? 'all' : 'none'}`;
+        const calendarResponse = await fetch(calendarUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(eventPayload),
+            signal: controller.signal
+        });
+        if (!calendarResponse.ok) throw new Error(`Google Calendar respondeu HTTP ${calendarResponse.status}`);
+        return calendarResponse.json();
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+app.get('/api/google-calendar/status', requireAuth, requireRole(['admin']), (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ status: 'success', ...getGoogleCalendarStatus() });
+});
+
+app.post('/api/google-calendar/connect', requireAuth, requireRole(['admin']), (req, res) => {
+    if (!isGoogleOAuthReady()) {
+        return res.status(409).json({
+            status: 'error',
+            message: 'A conexao OAuth do Google ainda nao foi configurada no servidor.'
+        });
+    }
+    const state = createGoogleOAuthState(req.user);
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ status: 'success', authorizationUrl: getGoogleOAuthAuthorizationUrl(state) });
+});
+
+app.get('/api/google-calendar/oauth/callback', async (req, res) => {
+    const state = String(req.query?.state || '');
+    const code = String(req.query?.code || '');
+    const pending = pendingGoogleOAuthStates.get(state);
+    pendingGoogleOAuthStates.delete(state);
+
+    const finish = (statusCode, title, description) => {
+        res.status(statusCode).type('html').send(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ALDEIA | Google Calendar</title><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#050505;color:#fff;font-family:Arial,sans-serif"><main style="max-width:420px;margin:24px;padding:32px;border:1px solid rgba(255,255,255,.1);border-radius:24px;background:rgba(255,255,255,.03);text-align:center"><h1 style="margin:0 0 12px;font-size:24px">${title}</h1><p style="margin:0;color:rgba(255,255,255,.62);line-height:1.55">${description}</p></main></body></html>`);
+    };
+
+    if (!pending || pending.expiresAt <= Date.now() || !/^[A-Za-z0-9_-]{32,128}$/.test(state) || !code) {
+        return finish(400, 'Conexao invalida', 'Esta tentativa expirou ou ja foi utilizada. Volte ao CRM e inicie a conexao novamente.');
+    }
+    if (!isGoogleOAuthReady()) {
+        return finish(409, 'Configuracao pendente', 'A conexao OAuth do Google nao esta pronta neste servidor.');
+    }
+    try {
+        const tokenData = await exchangeGoogleOAuthCode(code);
+        const refreshToken = String(tokenData?.refresh_token || getGoogleRefreshToken() || '').trim();
+        if (!refreshToken) throw new Error('OAuth Google nao retornou refresh_token');
+        await storeGoogleRefreshToken(refreshToken, { username: pending.userId });
+        lastGoogleCalendarSyncAt = new Date().toISOString();
+        return res.redirect(303, '/admin/agendamentos?google=connected');
+    } catch (error) {
+        console.error('[GOOGLE OAUTH CALLBACK]', error.message);
+        return finish(502, 'Conexao nao concluida', 'Nao foi possivel concluir a conexao com o Google Calendar.');
+    }
+});
+
+app.post('/api/google-calendar/sync', requireAuth, requireRole(['admin']), async (req, res) => {
+    if (!isGoogleCalendarConfigured()) {
+        return res.status(409).json({
+            status: 'error',
+            message: 'Google Calendar ainda nao esta conectado.'
+        });
+    }
+    try {
+        const events = await listGoogleCalendarEvents();
+        const changes = await upsertGoogleCalendarEvents(events);
+        lastGoogleCalendarSyncAt = new Date().toISOString();
+        res.setHeader('Cache-Control', 'no-store');
+        res.json({
+            status: 'success',
+            events: events.map(event => redactMeetingForClient(event)),
+            ...changes,
+            syncedAt: lastGoogleCalendarSyncAt
+        });
+    } catch (error) {
+        console.error('[GOOGLE CALENDAR SYNC]', error.message);
+        res.status(502).json({ status: 'error', message: 'Nao foi possivel sincronizar o Google Calendar agora.' });
+    }
+});
+
+app.get('/api/meetings', requireAuth, requireRole(['admin']), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (isMongoConnected) {
+        try {
+            const meetings = await MeetingModel.find().sort({ startAt: 1 }).limit(300).lean();
+            return res.json(meetings.map(meeting => redactMeetingForClient(meeting)));
+        } catch (error) { console.error('[MEETINGS GET MONGO]', error.message); }
+    }
+    const storedMeetings = safeReadJSON('meetings.json', []);
+    const meetings = Array.isArray(storedMeetings) ? storedMeetings : [];
+    res.json(meetings.map(meeting => redactMeetingForClient(meeting)).sort((a, b) => new Date(a.startAt) - new Date(b.startAt)));
+});
+
+app.post('/api/meetings/schedule', requireAuth, requireRole(['admin']), validate(meetingPayloadSchema), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    const payload = req.validatedBody;
+    const attendees = [...new Set([payload.clientEmail, ...payload.attendees].filter(Boolean))];
+    const meeting = {
+        id: `meet_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+        title: payload.title,
+        description: payload.description || '',
+        eventType: payload.eventType,
+        clientId: payload.clientId || '',
+        clientName: payload.clientName || '',
+        clientEmail: payload.clientEmail || '',
+        startAt: payload.startAt,
+        endAt: payload.endAt,
+        attendees,
+        sendInvite: payload.sendInvite !== false,
+        meetLink: '',
+        googleEventId: '',
+        source: 'aldeia',
+        integrationStatus: isGoogleCalendarConfigured() ? 'failed' : 'not_configured',
+        createdBy: sanitizePlainText(req.user?.displayName || req.user?.username || 'Admin'),
+        createdAt: new Date().toISOString()
+    };
+
+    let syncWarning = '';
+    if (isGoogleCalendarConfigured()) {
+        try {
+            const googleEvent = await insertGoogleCalendarMeeting(meeting);
+            meeting.googleEventId = sanitizePlainText(googleEvent?.id || '');
+            meeting.meetLink = String(googleEvent?.hangoutLink || googleEvent?.conferenceData?.entryPoints?.find(point => point.entryPointType === 'video')?.uri || '').trim();
+            meeting.integrationStatus = 'connected';
+        } catch (error) {
+            console.error('[GOOGLE CALENDAR SCHEDULE]', error.message);
+            meeting.integrationStatus = 'failed';
+            syncWarning = 'O evento foi salvo no CRM, mas não foi possível enviá-lo ao Google Calendar.';
+        }
+    }
+
+    if (isMongoConnected) {
+        try { await MeetingModel.create(meeting); } catch (error) { console.error('[MEETINGS POST MONGO]', error.message); }
+    }
+    const storedMeetings = safeReadJSON('meetings.json', []);
+    const meetings = Array.isArray(storedMeetings) ? storedMeetings : [];
+    meetings.push(meeting);
+    await safeWriteJSON('meetings.json', meetings);
+    res.status(201).json({ status: 'success', meeting: redactMeetingForClient(meeting), warning: syncWarning });
+});
+
+async function findMeetingForShare(meetingId) {
+    if (isMongoConnected) {
+        try {
+            const meeting = await MeetingModel.findOne({ id: meetingId }).lean();
+            if (meeting) return sanitizeMeetingResponse(meeting);
+        } catch (error) {
+            console.error('[MEETING SHARE LOOKUP]', error.message);
+        }
+    }
+
+    const storedMeetings = safeReadJSON('meetings.json', []);
+    const meetings = Array.isArray(storedMeetings) ? storedMeetings : [];
+    const meeting = meetings.find(item => String(item?.id || '') === meetingId);
+    return meeting ? sanitizeMeetingResponse(meeting) : null;
+}
+
+function parseEmailAddress(value) {
+    const result = z.string().trim().email().max(254).safeParse(String(value || ''));
+    return result.success ? result.data : '';
+}
+
+async function resolveMeetingClientEmail(meeting) {
+    const storedEmail = parseEmailAddress(meeting?.clientEmail);
+    if (storedEmail) return storedEmail;
+
+    const clientId = SAFE_ID.test(String(meeting?.clientId || '')) ? String(meeting.clientId) : '';
+    if (!clientId) return '';
+
+    if (isMongoConnected) {
+        try {
+            const [client, submission] = await Promise.all([
+                ClientModel.findOne({ id: clientId }).select({ email: 1, _id: 0 }).lean(),
+                SubmissionModel.findOne({ id: clientId }).select({ email: 1, _id: 0 }).lean()
+            ]);
+            const databaseEmail = parseEmailAddress(client?.email || submission?.email);
+            if (databaseEmail) return databaseEmail;
+        } catch (error) {
+            console.error('[MEETING SHARE CONTACT LOOKUP]', error.message);
+        }
+    }
+
+    const localClients = safeReadJSON('clients.json', []);
+    const localSubmissions = safeReadJSON('submissions.json', []);
+    const localContacts = [
+        ...(Array.isArray(localClients) ? localClients : []),
+        ...(Array.isArray(localSubmissions) ? localSubmissions : [])
+    ];
+    const localContact = localContacts.find(item => String(item?.id || '') === clientId);
+    return parseEmailAddress(localContact?.email);
+}
+
+function getSafeGoogleMeetLink(value) {
+    try {
+        const url = new URL(String(value || '').trim());
+        if (url.protocol !== 'https:' || url.hostname.toLowerCase() !== 'meet.google.com') return '';
+        return url.toString();
+    } catch (_) {
+        return '';
+    }
+}
+
+const MEETING_ACCESS_GRACE_MS = 30 * 60 * 1000;
+
+function getMeetingAccessState(meeting, nowValue = Date.now()) {
+    const value = sanitizeMeetingResponse(meeting);
+    const nowMs = Number.isFinite(Number(nowValue)) ? Number(nowValue) : Date.now();
+    const startMs = Date.parse(value.startAt);
+    const endMs = Date.parse(value.endAt);
+    const hasValidWindow = Number.isFinite(startMs) && Number.isFinite(endMs) && endMs > startMs;
+    const unlockAt = hasValidWindow ? new Date(startMs).toISOString() : null;
+    const expiresAt = hasValidWindow ? new Date(endMs + MEETING_ACCESS_GRACE_MS).toISOString() : null;
+    const meetLink = getSafeGoogleMeetLink(value.meetLink);
+
+    let status = 'unavailable';
+    if (value.eventType === 'meeting' && meetLink && hasValidWindow) {
+        if (nowMs < startMs) status = 'locked';
+        else if (nowMs <= endMs + MEETING_ACCESS_GRACE_MS) status = 'available';
+        else status = 'expired';
+    }
+
+    return {
+        status,
+        serverNow: new Date(nowMs).toISOString(),
+        unlockAt,
+        expiresAt,
+        ...(status === 'available' ? { meetLink } : {})
+    };
+}
+
+function redactMeetingForClient(meeting, nowValue = Date.now()) {
+    const value = sanitizeMeetingResponse(meeting);
+    const publicMeeting = { ...value };
+    delete publicMeeting.meetLink;
+    const access = getMeetingAccessState(value, nowValue);
+    return {
+        ...publicMeeting,
+        accessStatus: access.status,
+        serverNow: access.serverNow,
+        unlockAt: access.unlockAt,
+        expiresAt: access.expiresAt,
+        ...(access.status === 'available' ? { meetLink: access.meetLink } : {})
+    };
+}
+
+app.get(
+    '/api/meetings/:id/access',
+    requireAuth,
+    requireRole(['admin']),
+    validate(idParamsSchema, 'params'),
+    async (req, res) => {
+        res.setHeader('Cache-Control', 'no-store');
+        const meeting = await findMeetingForShare(req.validatedParams.id);
+        if (!meeting) {
+            return res.status(404).json({ status: 'error', message: 'Agendamento não encontrado.' });
+        }
+        return res.json(getMeetingAccessState(meeting));
+    }
+);
+
+function formatMeetingDateForEmail(value) {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return 'Horário não informado';
+    return new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'full',
+        timeStyle: 'short',
+        timeZone: 'America/Sao_Paulo'
+    }).format(date);
+}
+
+async function sendMeetingEmail({ to, subject, text }) {
+    if (!RESEND_API_KEY || !EMAIL_FROM) {
+        const error = new Error('Serviço de e-mail não configurado');
+        error.code = 'EMAIL_NOT_CONFIGURED';
+        throw error;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+    try {
+        const response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${RESEND_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ from: EMAIL_FROM, to: [to], subject, text }),
+            signal: controller.signal
+        });
+        if (!response.ok) throw new Error(`Provedor de e-mail respondeu HTTP ${response.status}`);
+        return response.json().catch(() => ({}));
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+app.post(
+    '/api/meetings/:id/share-email',
+    requireAuth,
+    requireRole(['admin']),
+    meetingShareLimiter,
+    validate(idParamsSchema, 'params'),
+    validate(meetingSharePayloadSchema),
+    async (req, res) => {
+        res.setHeader('Cache-Control', 'no-store');
+        const meetingId = req.validatedParams.id;
+        const recipientType = req.validatedBody.recipient;
+        const meeting = await findMeetingForShare(meetingId);
+        if (!meeting) {
+            return res.status(404).json({ status: 'error', message: 'Agendamento não encontrado.' });
+        }
+
+        const access = getMeetingAccessState(meeting);
+        if (access.status !== 'available') {
+            const accessMessage = {
+                locked: 'O link do Google Meet será liberado no horário de início da reunião.',
+                expired: 'A janela de acesso desta reunião já foi encerrada.',
+                unavailable: 'Este agendamento não possui um link do Google Meet disponível.'
+            }[access.status];
+            return res.status(409).json({
+                status: 'error',
+                accessStatus: access.status,
+                serverNow: access.serverNow,
+                unlockAt: access.unlockAt,
+                expiresAt: access.expiresAt,
+                message: accessMessage
+            });
+        }
+        const meetLink = access.meetLink;
+
+        const recipientEmail = recipientType === 'client'
+            ? await resolveMeetingClientEmail(meeting)
+            : parseEmailAddress(ADMIN_NOTIFICATION_EMAIL);
+        if (!recipientEmail) {
+            const message = recipientType === 'client'
+                ? 'O cliente não possui um e-mail válido neste agendamento.'
+                : 'O e-mail administrativo ainda não foi configurado no servidor.';
+            return res.status(409).json({ status: 'error', message });
+        }
+
+        const shareKey = `${String(req.user?.username || 'admin').toLowerCase()}:${meetingId}:${recipientType}`;
+        if (Number(recentMeetingShares.get(shareKey) || 0) > Date.now()) {
+            return res.status(429).json({ status: 'error', message: 'Este convite acabou de ser enviado. Aguarde alguns segundos.' });
+        }
+        recentMeetingShares.set(shareKey, Date.now() + MEETING_SHARE_COOLDOWN_MS);
+
+        const safeTitle = sanitizePlainText(meeting.title || 'Reunião ALDEIA').replace(/[\r\n]+/g, ' ').slice(0, 180);
+        const clientGreeting = meeting.clientName ? `Olá, ${sanitizePlainText(meeting.clientName)}.` : 'Olá.';
+        const subject = `Agência ALDEIA | ${safeTitle}`;
+        const text = recipientType === 'client'
+            ? [
+                clientGreeting,
+                '',
+                `Sua reunião “${safeTitle}” está marcada para ${formatMeetingDateForEmail(meeting.startAt)}.`,
+                `Acesse o Google Meet: ${meetLink}`,
+                '',
+                'Agência ALDEIA'
+            ].join('\n')
+            : [
+                'Novo compartilhamento de reunião no CRM ALDEIA.',
+                '',
+                `Reunião: ${safeTitle}`,
+                `Cliente: ${sanitizePlainText(meeting.clientName || 'Não informado')}`,
+                `Horário: ${formatMeetingDateForEmail(meeting.startAt)}`,
+                `Google Meet: ${meetLink}`,
+                `Criado por: ${sanitizePlainText(meeting.createdBy || 'Admin')}`
+            ].join('\n');
+
+        try {
+            await sendMeetingEmail({ to: recipientEmail, subject, text });
+            console.info('[MEETING SHARE]', { meetingId, recipient: recipientType, sentBy: req.user?.username || 'admin' });
+            return res.json({ status: 'success', recipient: recipientType });
+        } catch (error) {
+            recentMeetingShares.delete(shareKey);
+            console.error('[MEETING SHARE SEND]', error.message);
+            const statusCode = error.code === 'EMAIL_NOT_CONFIGURED' ? 503 : 502;
+            return res.status(statusCode).json({
+                status: 'error',
+                message: statusCode === 503
+                    ? 'O serviço de e-mail ainda não foi configurado.'
+                    : 'Não foi possível enviar o e-mail agora.'
+            });
+        }
+    }
+);
+
+async function cancelGoogleCalendarEvent(googleEventId) {
+    if (!googleEventId || !isGoogleCalendarConfigured()) return { cancelled: false, skipped: true };
+    const accessToken = await getGoogleCalendarAccessToken();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+    try {
+        const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GOOGLE_CALENDAR_ID)}/events/${encodeURIComponent(googleEventId)}`);
+        url.searchParams.set('sendUpdates', 'all');
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${accessToken}` },
+            signal: controller.signal
+        });
+        if ([204, 404, 410].includes(response.status)) return { cancelled: true, skipped: false };
+        throw new Error(`Google Calendar HTTP ${response.status}`);
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+app.delete('/api/meetings/:id', requireAuth, requireRole(['admin']), validate(idParamsSchema, 'params'), async (req, res) => {
+    const meetingId = req.validatedParams.id;
+    const meeting = await findMeetingForShare(meetingId);
+    if (!meeting) return res.status(404).json({ status: 'error', message: 'Agendamento não encontrado' });
+
+    let googleWarning = '';
+    if (meeting.googleEventId) {
+        try {
+            await cancelGoogleCalendarEvent(meeting.googleEventId);
+        } catch (error) {
+            googleWarning = 'O item foi removido do CRM, mas não foi possível confirmar o cancelamento no Google Calendar.';
+            console.error('[MEETINGS DELETE GOOGLE]', { meetingId, message: error.message });
+        }
+    }
+
+    let deleted = false;
+    if (isMongoConnected) {
+        try {
+            const result = await MeetingModel.deleteOne({ id: meetingId });
+            deleted = result.deletedCount > 0;
+        } catch (error) {
+            console.error('[MEETINGS DELETE MONGO]', { meetingId, message: error.message });
+        }
+    }
+
+    const storedMeetings = safeReadJSON('meetings.json', []);
+    const meetings = Array.isArray(storedMeetings) ? storedMeetings : [];
+    const remaining = meetings.filter(item => item?.id !== meetingId);
+    if (remaining.length !== meetings.length) {
+        await safeWriteJSON('meetings.json', remaining);
+        deleted = true;
+    }
+
+    if (!deleted) return res.status(500).json({ status: 'error', message: 'Não foi possível remover o agendamento agora.' });
+    res.setHeader('Cache-Control', 'no-store');
+    return res.json({ status: 'success', deletedId: meetingId, warning: googleWarning || undefined });
 });
 
 // ===== ROTAS DE PERFIL DE USUÁRIO =====
@@ -2278,19 +3234,29 @@ async function readAdminSettings() {
     if (isMongoConnected) {
         try {
             const settings = await AdminSettingsModel.findOne({ key: 'main' }).lean();
-            if (settings) return { externalAnalytics: settings.externalAnalytics !== false };
+            if (settings) return {
+                externalAnalytics: settings.externalAnalytics !== false,
+                sidebarLogo: typeof settings.sidebarLogo === 'string' ? settings.sidebarLogo : ''
+            };
         } catch (error) { console.error('[ADMIN SETTINGS GET]', error.message); }
     }
-    const settings = safeReadJSON('admin_settings.json', { externalAnalytics: true });
-    return { externalAnalytics: settings.externalAnalytics !== false };
+    const settings = safeReadJSON('admin_settings.json', { externalAnalytics: true, sidebarLogo: '' });
+    return {
+        externalAnalytics: settings.externalAnalytics !== false,
+        sidebarLogo: typeof settings.sidebarLogo === 'string' ? settings.sidebarLogo : ''
+    };
 }
 
-app.get('/api/admin/settings', requireAuth, requireRole(['admin']), async (req, res) => {
+app.get('/api/admin/settings', requireAuth, async (req, res) => {
     return res.json(await readAdminSettings());
 });
 
 app.put('/api/admin/settings', requireAuth, requireRole(['admin']), validate(adminSettingsPayloadSchema), async (req, res) => {
-    const settings = { externalAnalytics: req.validatedBody.externalAnalytics };
+    const currentSettings = await readAdminSettings();
+    const settings = {
+        externalAnalytics: req.validatedBody.externalAnalytics,
+        sidebarLogo: req.validatedBody.sidebarLogo ?? currentSettings.sidebarLogo
+    };
     if (isMongoConnected) {
         try {
             await AdminSettingsModel.findOneAndUpdate(
@@ -2328,8 +3294,8 @@ app.post('/api/admin/maintenance', requireAuth, requireRole(['admin']), validate
             if (!isMongoConnected) return res.status(503).json({ status: 'error', message: 'MongoDB indisponivel.' });
             await Promise.all([
                 ProjectModel, ClientModel, SubmissionModel, AnalyticsModel, SiteContentModel,
-                AuditLogModel, TrelloTaskModel, UserProfileModel, ProjectViewWindowModel,
-                ProjectViewEventModel, AdminSettingsModel
+                AuditLogModel, TrelloTaskModel, MeetingModel, UserProfileModel, ProjectViewWindowModel,
+                ProjectViewEventModel, AdminSettingsModel, GoogleCalendarIntegrationModel
             ].map(model => model.createIndexes()));
             return res.json({ status: 'success', message: 'Indices do MongoDB verificados.' });
         }
@@ -2359,6 +3325,7 @@ app.delete('/api/admin/data', requireAuth, requireRole(['admin']), validate(admi
     if (scopes.has('submissions')) mongoActions.push(SubmissionModel.deleteMany({}));
     if (scopes.has('clients')) mongoActions.push(ClientModel.deleteMany({}));
     if (scopes.has('tasks')) mongoActions.push(TrelloTaskModel.deleteMany({}));
+    if (scopes.has('meetings')) mongoActions.push(MeetingModel.deleteMany({}));
     if (scopes.has('views')) mongoActions.push(ProjectViewEventModel.deleteMany({}), ProjectViewWindowModel.deleteMany({}));
     try {
         if (isMongoConnected) await Promise.all(mongoActions);
@@ -2373,6 +3340,7 @@ app.delete('/api/admin/data', requireAuth, requireRole(['admin']), validate(admi
         if (scopes.has('submissions')) safeWriteJSON('submissions.json', []);
         if (scopes.has('clients')) safeWriteJSON('clients.json', []);
         if (scopes.has('tasks')) safeWriteJSON('trello_tasks.json', []);
+        if (scopes.has('meetings')) safeWriteJSON('meetings.json', []);
         if (scopes.has('views')) {
             safeWriteJSON('project_view_events.json', []);
             safeWriteJSON('project_view_windows.json', {});
@@ -2394,6 +3362,7 @@ app.get('/api/admin/export/backup', requireAuth, requireRole(['admin']), async (
         submissions: safeReadJSON('submissions.json', []).map(sanitizeLeadResponse),
         clients: safeReadJSON('clients.json', []).map(sanitizeClientResponse),
         tasks: safeReadJSON('trello_tasks.json', []).map(sanitizeTrelloResponse),
+        meetings: safeReadJSON('meetings.json', []).map(meeting => redactMeetingForClient(meeting)),
         profiles: safeProfiles,
         settings: await readAdminSettings()
     };
@@ -2540,7 +3509,11 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(ROOT_DIR, 'admin.html'));
 });
 
-app.get(['/admin/dashboard', '/admin/orcamentos', '/admin/portfolio', '/admin/configuracoes', '/admin/seguranca', '/admin/editor'], (req, res) => {
+app.get([
+    '/admin/dashboard', '/admin/kanban', '/admin/trello', '/admin/agendamentos',
+    '/admin/orcamentos', '/admin/clientes', '/admin/portfolio', '/admin/perfil',
+    '/admin/analytics', '/admin/configuracoes', '/admin/seguranca', '/admin/editor'
+], (req, res) => {
     res.sendFile(path.join(ROOT_DIR, 'admin.html'));
 });
 

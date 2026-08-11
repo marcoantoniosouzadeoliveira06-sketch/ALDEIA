@@ -1,0 +1,39 @@
+[
+  {
+    "id": "meet_1786482604325_f840df8e",
+    "title": "wefwefwerre",
+    "eventType": "meeting",
+    "clientId": "",
+    "clientName": "",
+    "clientEmail": "",
+    "startAt": "2026-05-02T01:00:00.000Z",
+    "endAt": "2026-05-02T02:00:00.000Z",
+    "attendees": [],
+    "sendInvite": true,
+    "meetLink": "",
+    "googleEventId": "",
+    "source": "aldeia",
+    "integrationStatus": "not_configured",
+    "createdBy": "Marco",
+    "createdAt": "2026-08-11T21:10:04.325Z"
+  },
+  {
+    "id": "meet_1786485955904_fb9e93f7",
+    "title": "wefwefwerre",
+    "description": "fggh",
+    "eventType": "meeting",
+    "clientId": "",
+    "clientName": "",
+    "clientEmail": "",
+    "startAt": "2026-08-11T22:15:00.000Z",
+    "endAt": "2026-08-11T23:15:00.000Z",
+    "attendees": [],
+    "sendInvite": true,
+    "meetLink": "",
+    "googleEventId": "",
+    "source": "aldeia",
+    "integrationStatus": "not_configured",
+    "createdBy": "Marco",
+    "createdAt": "2026-08-11T22:05:55.904Z"
+  }
+]

@@ -3,9 +3,18 @@
     "username": "Japex",
     "role": "admin",
     "displayName": "Marco",
-    "avatar": "https://res.cloudinary.com/iszvbnc9/image/upload/v1786195627/aldeia_uploads/xinune4wfjnhsny3szzg.webp",
+    "avatar": "https://res.cloudinary.com/iszvbnc9/image/upload/v1786474676/aldeia_uploads/y0tom9lxbbj6gb106hlk.webp",
     "passwordHash": "$2b$12$7ktsRxYKeIM8t5/RTFVX4uhMKBq2kkxYXE0/MRqqr5FlkQzumYOXy",
     "active": true,
     "isRoot": true
+  },
+  "ryan": {
+    "username": "ryan",
+    "displayName": "RYAN GAY",
+    "role": "operator",
+    "passwordHash": "$2b$12$LEwqkdWS5eko/e3uDubKZ.sm5cgU7J7hLB/Ae6caybUm2aUuYC5Fi",
+    "active": true,
+    "isRoot": false,
+    "createdAt": "2026-08-11T16:06:22.389Z"
   }
 }
