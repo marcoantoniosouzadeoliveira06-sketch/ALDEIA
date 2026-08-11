@@ -104,7 +104,7 @@
         <div class="gradual-blur" data-position="top" data-strength="3" data-div-count="8" data-curve="ease-out"
             style="position: absolute; inset: 0; height: 100%; z-index: -1;"></div>
         <div class="nav-inner">
-            <a href="#inicio" class="nav-logo">
+            <a href="index.html#inicio" class="nav-logo" aria-label="Voltar ao início da Agência Aldeia">
                 <img src="assets/logo-tp.svg" class="logo-nav" alt="ALDEIA Logo">
             </a>
 
@@ -124,7 +124,7 @@
             <div class="nav-actions">
                 <!-- Seletor de Idioma -->
                 <div class="lang-selector">
-                    <button class="lang-btn" id="lang-btn" aria-label="Mudar Idioma">
+                    <button class="lang-btn" id="lang-btn" aria-label="Mudar idioma" aria-expanded="false" aria-controls="lang-dropdown">
                         <svg class="globe-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -149,7 +149,7 @@
                     </div>
                 </div>
 
-                <a href="#contato" class="btn-vamos">Vamos?<span class="btn-arrow">→</span></a>
+                <a href="#orcamento" class="btn-vamos" data-budget-trigger aria-controls="budget-modal" aria-label="Fazer um orçamento com a Agência Aldeia">Vamos?<span class="btn-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span></a>
                 <button type="button" class="nav-hamburger" id="nav-toggle" aria-label="Abrir menu de navegação" aria-controls="mobile-menu" aria-expanded="false">
                     <span></span><span></span><span></span>
                 </button>
@@ -159,13 +159,13 @@
         <!-- Mobile Menu Overlay -->
         <div id="mobile-menu">
             <nav class="mobile-nav-links" aria-label="Navegação móvel">
-                <a href="#inicio" class="mobile-nav-link">/01 Início</a>
-                <a href="#sobre" class="mobile-nav-link">/02 Sobre</a>
-                <a href="#portfolio" class="mobile-nav-link">/03 Portfólio</a>
-                <a href="#servicos" class="mobile-nav-link">/04 Soluções</a>
-                <a href="#faq" class="mobile-nav-link">/05 Dúvidas</a>
-                <a href="#fundadores" class="mobile-nav-link">/06 Fundadores</a>
-                <a href="#contato" class="mobile-nav-link">/07 Contato</a>
+                <a href="index.html#inicio" class="mobile-nav-link">/01 Início</a>
+                <a href="index.html#sobre" class="mobile-nav-link">/02 Sobre</a>
+                <a href="portfolio.html" class="mobile-nav-link">/03 Portfólio</a>
+                <a href="index.html#servicos" class="mobile-nav-link">/04 Soluções</a>
+                <a href="index.html#faq" class="mobile-nav-link">/05 Dúvidas</a>
+                <a href="index.html#fundadores" class="mobile-nav-link">/06 Fundadores</a>
+                <a href="index.html#contato" class="mobile-nav-link">/07 Contato</a>
             </nav>
         </div>
     </header>

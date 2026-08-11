@@ -1,5 +1,149 @@
 [
   {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T14:48:40.575Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 33,
+    "y": 31,
+    "timestamp": "2026-08-11T14:48:40.575Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "nav-toggle",
+    "x": 87,
+    "y": 1,
+    "timestamp": "2026-08-11T14:48:40.575Z"
+  },
+  {
+    "sessionId": "0ccb4ceaad574d45ac198dc539256622",
+    "eventType": "abandonment",
+    "path": "/",
+    "elementId": "abandoned",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T14:48:25.468Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "m-btn-envio",
+    "x": 43,
+    "y": 88,
+    "timestamp": "2026-08-11T14:48:25.466Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T14:44:15.318Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T14:43:57.462Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 84,
+    "y": 87,
+    "timestamp": "2026-08-11T14:41:59.230Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T14:41:29.236Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 3,
+    "y": 98,
+    "timestamp": "2026-08-11T14:41:29.236Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "#orcamento",
+    "x": 7,
+    "y": 98,
+    "timestamp": "2026-08-11T14:41:29.236Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-11T14:41:03.776Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "portfolio.html",
+    "x": 49,
+    "y": 41,
+    "timestamp": "2026-08-11T14:41:03.776Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "nav-toggle",
+    "x": 94,
+    "y": 84,
+    "timestamp": "2026-08-11T14:40:51.045Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 95,
+    "y": 84,
+    "timestamp": "2026-08-11T14:40:51.045Z"
+  },
+  {
+    "sessionId": "s_1786442862816_p0be3q",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "nav-toggle",
+    "x": 92,
+    "y": 84,
+    "timestamp": "2026-08-11T14:40:36.032Z"
+  },
+  {
     "sessionId": "s_1786039681246_9rb0s5",
     "eventType": "pageview",
     "path": "/",
