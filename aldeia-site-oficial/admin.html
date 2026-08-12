@@ -2507,17 +2507,23 @@ function enforceRBACVisibility() {
 
                             // Limpar mensagens que ficaram presas no estado 'pending' no reload
                             function cleanupPendingLocalMessages() {
-                                let changed = false;
-                                for (const chat in state.localMessages) {
-                                    state.localMessages[chat].forEach(m => {
-                                        if (m.status === 'pending') {
-                                            m.status = 'error';
-                                            changed = true;
+                                try {
+                                    let changed = false;
+                                    for (const chat in state.localMessages) {
+                                        if (Array.isArray(state.localMessages[chat])) {
+                                            state.localMessages[chat].forEach(m => {
+                                                if (m && m.status === 'pending') {
+                                                    m.status = 'error';
+                                                    changed = true;
+                                                }
+                                            });
                                         }
-                                    });
-                                }
-                                if (changed) {
-                                    localStorage.setItem('aldeia_wa_local_history', JSON.stringify(state.localMessages));
+                                    }
+                                    if (changed) {
+                                        localStorage.setItem('aldeia_wa_local_history', JSON.stringify(state.localMessages));
+                                    }
+                                } catch(e) {
+                                    console.error('[WhatsApp CRM] Erro ao limpar mensagens pendentes:', e);
                                 }
                             }
                             // Executar na inicializacao
