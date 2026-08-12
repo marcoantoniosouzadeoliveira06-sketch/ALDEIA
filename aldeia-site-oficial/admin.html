@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <!-- Figma Sync Tokens -->
+    <link rel="stylesheet" href="admin_design_tokens.css" />
     <style>
         :root {
             --bg-color: #030303; /* QMA Preto */
@@ -393,22 +395,27 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background: radial-gradient(circle at center, #0a0a0a 0%, #030303 100%);
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: var(--bg-color);
+            z-index: 9999;
         }
         .login-box {
+            background-color: var(--sidebar-bg);
             padding: var(--qma-gap-8);
             border-radius: 16px;
+            border: 1px solid var(--card-border);
             width: 100%;
             max-width: 400px;
             text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
         .login-box h2 {
-            font-size: clamp(1.5rem, 2vw, 1.5rem);
-            line-height: 1.25;
-            letter-spacing: -0.01em;
             margin-bottom: var(--qma-gap-6);
-            font-weight: 500;
-            color: rgba(255,255,255,0.85);
+            font-size: 24px;
+            font-weight: 600;
         }
         .login-input {
             margin-bottom: var(--qma-gap-4);
@@ -418,10 +425,12 @@
             margin-top: var(--qma-gap-2);
         }
 
-        /* ----- MAIN CRM LAYOUT ----- */
+        /* ----- DASHBOARD LAYOUT ----- */
         #admin-dashboard {
             display: none;
             height: 100vh;
+            width: 100vw;
+            overflow: hidden;
         }
         .crm-wrapper {
             display: flex;
@@ -2060,11 +2069,60 @@ body.sidebar-collapsed .nav-item.active svg { color: #fff; stroke: #fff; }
     .crm-card { border-radius: 18px; }
 }
 </style>
+    <!-- SOCKET.IO -->
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 
 
 <body>
 <script>
+// ============================================================================
+// [AGENTE UX/UI]: TRATAMENTO CIRÚRGICO DE 403 E EMPTY STATE
+// ============================================================================
+const originalFetch = window.fetch;
+window.fetch = async function(...args) {
+    const response = await originalFetch.apply(this, args);
+    if (response.status === 403) {
+        const activeTab = document.querySelector('.tab-content.active') || document.querySelector('.crm-content');
+        if (activeTab) {
+            activeTab.innerHTML = `
+            <div class="qma-glass" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 50vh; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 24px; backdrop-filter: blur(16px); animation: fadeIn 0.4s ease;">
+                <div style="background: rgba(255,255,255,0.04); padding: 20px; border-radius: 50%; margin-bottom: 24px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                </div>
+                <h3 style="color: #fff; font-size: 1.35rem; font-weight: 600; margin: 0 0 10px 0; letter-spacing: -0.02em;">Acesso Restrito</h3>
+                <p style="color: rgba(255,255,255,0.45); font-size: 0.88rem; max-width: 320px; text-align: center; line-height: 1.6; margin: 0;">
+                    Este módulo exige nível de privilégio superior. Seu cargo de Operador não permite a visualização ou edição destes dados.
+                </p>
+            </div>`;
+        }
+        throw new Error("403_HANDLED");
+    }
+    return response;
+};
+
+// ============================================================================
+// [AGENTE QA]: LÓGICA DE VISIBILIDADE CONDICIONAL
+// ============================================================================
+function enforceRBACVisibility() {
+    const userRole = window.currentUser?.role || (sessionStorage.getItem('aldeia_admin_user') ? JSON.parse(sessionStorage.getItem('aldeia_admin_user')).role : 'operador');
+    if (userRole !== 'admin') {
+        document.querySelectorAll('[data-admin-only]').forEach(el => el.remove());
+        const restrictedHashes = ['#telemetry-tab', '#logins-tab', '#cms-tab', '#settings-tab'];
+        window.addEventListener('hashchange', () => {
+            if (restrictedHashes.includes(window.location.hash)) {
+                window.location.hash = '#dashboard-tab';
+            }
+        });
+        if (restrictedHashes.includes(window.location.hash)) {
+            window.location.hash = '#dashboard-tab';
+        }
+    }
+}
+
 /* OMNI-AUDIT HARD MODE: GLOBAL FETCH INTERCEPTOR & ERROR HANDLING */
 (function() {
     const originalFetch = window.fetch;
@@ -2173,11 +2231,11 @@ body.sidebar-collapsed .nav-item.active svg { color: #fff; stroke: #fff; }
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="M3 9h18M9 21V9"></path></svg>
                         Dashboard
                     </a>
-                    <a class="nav-item" data-admin-only href="/admin/kanban" data-tab-target="trello-tab">
+                    <a class="nav-item"  href="/admin/kanban" data-tab-target="trello-tab">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h3v10H7zM14 7h3v6h-3z"/></svg>
                         Quadro Trello
                     </a>
-                    <a class="nav-item" data-admin-only href="/admin/agendamentos" data-tab-target="scheduler-tab">
+                    <a class="nav-item"  href="/admin/agendamentos" data-tab-target="scheduler-tab">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 10h18"/><rect width="18" height="18" x="3" y="4" rx="3"/><path d="m9 16 2 2 4-4"/></svg>
                         Agendamentos
                     </a>
@@ -2185,7 +2243,11 @@ body.sidebar-collapsed .nav-item.active svg { color: #fff; stroke: #fff; }
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                         Orçamentos
                     </a>
-                    <a class="nav-item" data-admin-only href="/admin/clientes" data-tab-target="clients-tab">
+                    <a class="nav-item" href="#" onclick="switchTab('whatsapp-tab'); return false;" data-tab-target="whatsapp-tab">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        WhatsApp CRM
+                    </a>
+                    <a class="nav-item"  href="/admin/clientes" data-tab-target="clients-tab">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                         Clientes
                     </a>
@@ -2193,7 +2255,7 @@ body.sidebar-collapsed .nav-item.active svg { color: #fff; stroke: #fff; }
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                         Portfólio
                     </a>
-                    <a class="nav-item" data-admin-only href="/admin/perfil" data-tab-target="profile-tab">
+                    <a class="nav-item"  href="/admin/perfil" data-tab-target="profile-tab">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         Meu Perfil
                     </a>
@@ -2248,7 +2310,7 @@ body.sidebar-collapsed .nav-item.active svg { color: #fff; stroke: #fff; }
                         <h1 class="page-title" id="current-page-title">Dashboard</h1>
                     </div>
                     <div class="page-context-actions">
-                        <button type="button" class="context-pill" data-admin-only onclick="switchTab('scheduler-tab')">
+                        <button type="button" class="context-pill"  onclick="switchTab('scheduler-tab')">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="3"/></svg>
                             Agendar
                         </button>
@@ -2384,6 +2446,563 @@ body.sidebar-collapsed .nav-item.active svg { color: #fff; stroke: #fff; }
                             </tbody>
                         </table>
                     </div>
+                </div>
+
+                <!-- TAB: WHATSAPP (VANILLA PORT) -->
+                <div id="whatsapp-tab" class="tab-content" style="padding: 0; background-color: #030303; height: 100vh; overflow: hidden; position: relative;">
+                    <!-- ALDEIA GLOW -->
+                    <div style="position: absolute; top: -128px; left: -128px; width: 600px; height: 600px; background: rgba(161,161,170,0.05); filter: blur(120px); border-radius: 50%; pointer-events: none;"></div>
+                    <div style="position: absolute; bottom: 0; right: 0; width: 400px; height: 400px; background: rgba(113,113,122,0.05); filter: blur(100px); border-radius: 50%; pointer-events: none;"></div>
+
+                    <div id="wa-root" style="display: flex; height: 100%; width: 100%; color: #d4d4d8; font-family: sans-serif; position: relative; z-index: 1;"></div>
+
+                    <script>
+                        (function() {
+                            // SVGs - Lucide Icons
+                            const icons = {
+                                bot: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>',
+                                send: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>',
+                                zap: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+                                clock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+                                checkAll: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>',
+                                alertTriangle: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+                                messageCircle: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>',
+                                plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>',
+                                spark: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>'
+                            };
+
+                            // STATE MANAGEMENT (React-like)
+                            const state = {
+                                leads: [],
+                                activeContact: null, // { id, name, phone }
+                                currentFilter: 'all',
+                                searchQuery: '',
+                                selectedForBroadcast: new Set(),
+                                waStatus: 'STARTING',
+                                localMessages: JSON.parse(localStorage.getItem('aldeia_wa_local_history') || '{}'),
+                                chatHistory: [], // Fetched history for activeContact
+                                inputValue: '',
+                                isSending: false,
+                                aiContextTag: null,
+                                aiContextLoading: false,
+                                smartReplies: []
+                            };
+
+                            // Core updater
+                            function setState(updater) {
+                                if (typeof updater === 'function') {
+                                    Object.assign(state, updater(state));
+                                } else {
+                                    Object.assign(state, updater);
+                                }
+                                render();
+                            }
+
+                            function saveLocalMsg(chatId, msgObj) {
+                                if (!state.localMessages[chatId]) state.localMessages[chatId] = [];
+                                state.localMessages[chatId].push(msgObj);
+                                localStorage.setItem('aldeia_wa_local_history', JSON.stringify(state.localMessages));
+                                setState({}); // Trigger re-render
+                            }
+
+                            function updateLocalMsgStatus(chatId, msgId, newStatus) {
+                                if (state.localMessages[chatId]) {
+                                    const msg = state.localMessages[chatId].find(m => m.id === msgId);
+                                    if (msg) msg.status = newStatus;
+                                    localStorage.setItem('aldeia_wa_local_history', JSON.stringify(state.localMessages));
+                                    setState({});
+                                }
+                            }
+
+                            // RENDER ENGINE
+                            function render() {
+                                const root = document.getElementById('wa-root');
+                                if (!root) return;
+
+                                if (state.waStatus === 'AWAITING_QR' && state.qrCode) {
+                                    root.innerHTML = `
+                                        <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#080808; color:#fff;">
+                                            <h2 style="margin-bottom:20px;">WhatsApp requer Autenticação</h2>
+                                            <p style="margin-bottom:30px; color:#a1a1aa;">Escaneie o QR Code abaixo com seu WhatsApp para conectar a Engine.</p>
+                                            <div style="padding:10px; background:#fff; border-radius:10px;">
+                                                <img src="${state.qrCode}" alt="WhatsApp QR Code" style="width:250px; height:250px; display:block;" />
+                                            </div>
+                                        </div>
+                                    `;
+                                    return;
+                                }
+
+                                // Filter leads
+                                let filtered = state.leads;
+                                if (state.searchQuery) {
+                                    filtered = filtered.filter(l => (l.name || '').toLowerCase().includes(state.searchQuery.toLowerCase()) || l.id.includes(state.searchQuery));
+                                }
+                                if (state.currentFilter === 'vacuo') {
+                                    filtered = filtered.filter(l => l.lastMessage && l.lastMessage.fromMe);
+                                }
+
+                                // Layout Split
+                                root.innerHTML = `
+                                    <!-- LEFT COLUMN -->
+                                    <div style="width: 380px; border-right: 1px solid rgba(255,255,255,0.08); background: rgba(10,10,10,0.6); backdrop-filter: blur(24px); display: flex; flex-direction: column; z-index: 10; box-shadow: 10px 0 30px -10px rgba(0,0,0,0.5);">
+                                        ${renderLeftHeader()}
+                                        <div style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+                                            ${filtered.length === 0 ? '<div style="text-align:center; color:#a1a1aa; font-size: 13px; margin-top:30px;">Carregando conversas do WhatsApp...</div>' : filtered.map(renderLeadCard).join('')}
+                                        </div>
+                                    </div>
+
+                                    <!-- RIGHT COLUMN -->
+                                    <div style="flex: 1; display: flex; flex-direction: column; position: relative; background: #080808; background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 0); background-size: 24px 24px;">
+                                        ${state.activeContact ? renderChatRoom() : renderEmptyState()}
+                                    </div>
+                                `;
+
+                                bindEvents();
+                                scrollToBottom();
+                            }
+
+                            function renderLeftHeader() {
+                                const badgeColor = state.waStatus === 'CONNECTED' ? '#4ade80' : '#fbbf24';
+                                const badgeBg = state.waStatus === 'CONNECTED' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(245, 158, 11, 0.1)';
+                                const badgeBorder = state.waStatus === 'CONNECTED' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(245, 158, 11, 0.3)';
+                                const badgeText = state.waStatus === 'CONNECTED' ? '● SYNC ON' : '● ' + state.waStatus;
+
+                                return `
+                                    <div style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(0,0,0,0.4);">
+                                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); display: flex; align-items: center; justify-content: center; color: #4ade80;">
+                                                    ${icons.messageCircle}
+                                                </div>
+                                                <h2 style="font-size: 1.15rem; font-weight: 600; color: white; margin: 0;">WhatsApp CRM</h2>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 99px; border: 1px solid ${badgeBorder}; background: ${badgeBg}; color: ${badgeColor}; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                                                ${badgeText}
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                                            <button id="btn-new-chat" style="flex: 1; padding: 10px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;">
+                                                ${icons.plus} Novo Chat
+                                            </button>
+                                            ${state.selectedForBroadcast.size > 0 ? `
+                                            <button id="btn-do-broadcast" style="padding: 10px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); cursor: pointer;">
+                                                Disparar (${state.selectedForBroadcast.size})
+                                            </button>
+                                            ` : ''}
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                                            <input type="text" id="wa-search-input" value="${state.searchQuery}" placeholder="Pesquisar contato ou número..." style="width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 0.8rem; outline: none; box-sizing: border-box;" />
+                                            <div style="display: flex; gap: 6px; background: rgba(0,0,0,0.4); padding: 3px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+                                                <button id="btn-filter-all" style="flex: 1; padding: 6px; border-radius: 8px; font-size: 0.725rem; font-weight: 600; background: ${state.currentFilter === 'all' ? '#e4e4e7' : 'transparent'}; color: ${state.currentFilter === 'all' ? '#000' : '#a1a1aa'}; border: none; cursor: pointer;">Todos</button>
+                                                <button id="btn-filter-vacuo" style="flex: 1; padding: 6px; border-radius: 8px; font-size: 0.725rem; font-weight: 600; background: ${state.currentFilter === 'vacuo' ? '#e4e4e7' : 'transparent'}; color: ${state.currentFilter === 'vacuo' ? '#000' : '#a1a1aa'}; border: none; cursor: pointer;">No Vácuo</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+
+                            function renderLeadCard(chat) {
+                                const name = chat.name || chat.id.replace('@c.us', '');
+                                const isVacuo = chat.lastMessage && chat.lastMessage.fromMe;
+                                const isChecked = state.selectedForBroadcast.has(chat.id) ? 'checked' : '';
+                                const initial = name.charAt(0).toUpperCase();
+                                const isActive = state.activeContact && state.activeContact.id === chat.id;
+                                
+                                // Temperature Indicator (Hot if active in last 15 mins)
+                                const isHot = chat.lastMessage && !chat.lastMessage.fromMe && (Math.floor(Date.now()/1000) - chat.lastMessage.timestamp < 900);
+                                const avatarBorder = isHot ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.1)';
+                                const avatarShadow = isHot ? '0 0 10px rgba(255,255,255,0.3)' : 'none';
+
+                                return `
+                                    <div class="wa-lead-card" data-id="${chat.id}" data-name="${name.replace(/'/g, "\'")}" data-phone="${chat.id.replace('@c.us','')}" style="position: relative; padding: 14px 16px; border-radius: 12px; cursor: pointer; transition: all 0.2s; border: 1px solid ${isActive ? 'rgba(34, 197, 94, 0.4)' : 'rgba(255,255,255,0.03)'}; background: ${isActive ? 'rgba(34, 197, 94, 0.08)' : 'rgba(255,255,255,0.01)'}; display: flex; align-items: center; gap: 12px;">
+                                        <input type="checkbox" class="broadcast-checkbox" data-id="${chat.id}" ${isChecked} style="width: 16px; height: 16px; accent-color: #22c55e; cursor: pointer;" />
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #27272a, #09090b); border: 1px solid ${avatarBorder}; box-shadow: ${avatarShadow}; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #e4e4e7; font-size: 0.9rem; flex-shrink: 0; aspect-ratio: 1/1;">
+                                            ${initial}
+                                        </div>
+                                        <div style="flex: 1; min-width: 0;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                                                <h4 style="color: #f4f4f5; font-weight: 500; font-size: 0.925rem; margin:0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</h4>
+                                                ${isVacuo ? '<span style="font-size: 0.65rem; color: #ef4444; background: rgba(239,68,68,0.1); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(239,68,68,0.2);">Vácuo</span>' : ''}
+                                            </div>
+                                            <p style="color: #a1a1aa; font-size: 0.775rem; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${chat.lastMessage ? chat.lastMessage.body : 'Clique para abrir o chat'}</p>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+
+                            function renderEmptyState() {
+                                return `
+                                    <div style="margin: auto; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 40px 60px; border-radius: 24px; backdrop-filter: blur(12px);">
+                                        <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(34, 197, 94, 0.1); display: flex; align-items: center; justify-content: center; color: #4ade80;">
+                                            ${icons.messageCircle}
+                                        </div>
+                                        <h3 style="color: #f4f4f5; font-weight: 500; margin: 0; font-size: 1.1rem;">Central Omnichannel</h3>
+                                        <p style="color: #a1a1aa; font-size: 0.9rem; max-width: 250px; margin: 0; line-height: 1.5;">Selecione um lead na lista à esquerda para iniciar a comunicação.</p>
+                                    </div>
+                                `;
+                            }
+
+                            function renderChatRoom() {
+                                const contact = state.activeContact;
+                                const firstName = contact.name.split(' ')[0];
+                                const initial = contact.name.charAt(0).toUpperCase();
+
+                                // Merge remote and local history
+                                const combinedHistory = [...state.chatHistory, ...(state.localMessages[contact.id] || [])];
+                                combinedHistory.sort((a, b) => a.timestamp - b.timestamp);
+
+                                return `
+                                    <!-- Header da Sala de Chat -->
+                                    <div style="padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(15,15,15,0.9); backdrop-filter: blur(16px); display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+                                        <div style="display: flex; align-items: center; gap: 14px;">
+                                            <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #27272a, #09090b); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-weight: 600; color: #e4e4e7; font-size: 1rem; flex-shrink: 0; aspect-ratio: 1/1;">
+                                                ${initial}
+                                            </div>
+                                            <div>
+                                                <h3 style="color: #f4f4f5; font-weight: 500; font-size: 1rem; margin: 0 0 2px 0;">${contact.name}</h3>
+                                                <span style="color: #a1a1aa; font-size: 0.75rem;">+${contact.phone}</span>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; gap: 8px;">
+                                            <button class="btn-quick" data-type="Apresentação" style="padding: 6px 12px; background: rgba(255,255,255,0.05); color: #d4d4d8; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">${icons.zap} Apresentação</button>
+                                            <button class="btn-quick" data-type="Follow-up" style="padding: 6px 12px; background: rgba(255,255,255,0.05); color: #d4d4d8; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">${icons.zap} Follow-up</button>
+                                            <button class="btn-quick" data-type="Orçamento" style="padding: 6px 12px; background: rgba(255,255,255,0.05); color: #d4d4d8; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">${icons.zap} Orçamento</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- AI Context Tag -->
+                                    ${state.aiContextTag ? `
+                                    <div style="position: absolute; top: 80px; left: 50%; transform: translateX(-50%); z-index: 11; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); backdrop-filter: blur(8px); padding: 6px 16px; border-radius: 99px; color: #d8b4fe; font-size: 0.75rem; font-weight: 500; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                                        ${icons.spark} IA Contexto: ${state.aiContextTag}
+                                    </div>
+                                    ` : ''}
+
+                                    <!-- Chat History Area -->
+                                    <div id="wa-chat-history" style="flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 8px; position: relative;">
+                                        ${combinedHistory.length === 0 ? `
+                                            <div style="text-align: center; margin-top: auto; padding: 20px;">
+                                                <div style="display: inline-block; padding: 8px 16px; background: rgba(255,255,255,0.05); border-radius: 99px; color: #a1a1aa; font-size: 0.775rem;">
+                                                    🔒 Conversa criptografada de ponta a ponta.
+                                                </div>
+                                            </div>
+                                        ` : combinedHistory.map(renderBubble).join('')}
+                                    </div>
+
+                                    <!-- Smart Predictors -->
+                                    ${state.smartReplies.length > 0 ? `
+                                    <div style="padding: 0 24px 12px 24px; display: flex; gap: 8px;">
+                                        ${state.smartReplies.map(reply => `
+                                            <button class="btn-smart-reply" data-text="${reply}" style="padding: 8px 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 99px; color: #e4e4e7; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;">
+                                                ${reply}
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                    ` : ''}
+
+                                    <!-- Input Area -->
+                                    <div style="padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(12,12,12,0.95); backdrop-filter: blur(20px);">
+                                        <div style="display: flex; gap: 12px; align-items: flex-end; max-width: 100%;">
+                                            <textarea id="wa-msg-input" placeholder="Digite uma mensagem para ${firstName}..." style="flex: 1; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; color: #e4e4e7; outline: none; resize: none; min-height: 52px; font-family: inherit; font-size: 0.9rem; line-height: 1.4;">${state.inputValue}</textarea>
+                                            
+                                            <button id="btn-ai-followup" title="Gerar mensagem com IA Gemini" style="height: 52px; padding: 0 16px; background: rgba(255,255,255,0.08); color: #e4e4e7; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                                                ${icons.bot} IA Follow-up
+                                            </button>
+                                            
+                                            <button id="btn-send-msg" style="height: 52px; padding: 0 24px; background: #22c55e; color: #000; font-weight: 700; font-size: 0.9rem; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);">
+                                                ${icons.send} Enviar
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+
+                            function renderBubble(msg) {
+                                const isMe = msg.fromMe;
+                                const time = new Date(msg.timestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                                
+                                let statusIcon = '';
+                                let opacity = '1';
+                                if (isMe) {
+                                    if (msg.status === 'pending') {
+                                        statusIcon = `<span style="color: #a1a1aa; margin-left: 6px; display:inline-flex; align-items:center;">${icons.clock}</span>`;
+                                        opacity = '0.6';
+                                    } else if (msg.status === 'error') {
+                                        statusIcon = `<span style="color: #ef4444; margin-left: 6px; display:inline-flex; align-items:center;">${icons.alertTriangle}</span>`;
+                                    } else {
+                                        statusIcon = `<span style="color: #a1a1aa; margin-left: 6px; display:inline-flex; align-items:center;">${icons.checkAll}</span>`;
+                                    }
+                                }
+
+                                const bg = isMe ? 'rgba(34, 197, 94, 0.15)' : '#27272a'; // bg-zinc-800
+                                const border = isMe ? '1px solid rgba(34, 197, 94, 0.3)' : '1px solid rgba(255,255,255,0.1)';
+                                const color = isMe ? '#dcfce7' : '#e4e4e7'; // text-zinc-200
+                                const alignSelf = isMe ? 'flex-end' : 'flex-start';
+                                const borderRadius = isMe ? '12px 12px 2px 12px' : '12px 12px 12px 2px';
+
+                                return `
+                                    <div style="align-self: ${alignSelf}; max-width: 75%; background: ${bg}; border: ${border}; padding: 8px 12px; border-radius: ${borderRadius}; color: ${color}; font-size: 0.9rem; line-height: 1.4; display: flex; flex-direction: column; opacity: ${opacity}; transition: opacity 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                        <div style="word-wrap: break-word; white-space: pre-wrap;">${msg.body}</div>
+                                        <div style="display: flex; align-items: center; justify-content: flex-end; margin-top: 4px;">
+                                            <span style="font-size: 0.65rem; color: #a1a1aa;">${time}</span>
+                                            ${statusIcon}
+                                        </div>
+                                    </div>
+                                `;
+                            }
+
+                            // EVENT BINDING & DOM SYNC
+                            function bindEvents() {
+                                document.getElementById('btn-new-chat')?.addEventListener('click', handleNewChat);
+
+                                document.getElementById('wa-search-input')?.addEventListener('input', (e) => {
+                                    setState({ searchQuery: e.target.value });
+                                });
+
+                                document.getElementById('btn-filter-all')?.addEventListener('click', () => setState({ currentFilter: 'all' }));
+                                document.getElementById('btn-filter-vacuo')?.addEventListener('click', () => setState({ currentFilter: 'vacuo' }));
+
+                                document.querySelectorAll('.wa-lead-card').forEach(card => {
+                                    card.addEventListener('click', (e) => {
+                                        if (e.target.tagName.toLowerCase() === 'input') return;
+                                        const id = card.getAttribute('data-id');
+                                        const name = card.getAttribute('data-name');
+                                        const phone = card.getAttribute('data-phone');
+                                        handleContactClick(id, name, phone);
+                                    });
+                                });
+
+                                document.querySelectorAll('.broadcast-checkbox').forEach(cb => {
+                                    cb.addEventListener('change', (e) => {
+                                        const id = cb.getAttribute('data-id');
+                                        const newSet = new Set(state.selectedForBroadcast);
+                                        if (e.target.checked) newSet.add(id);
+                                        else newSet.delete(id);
+                                        setState({ selectedForBroadcast: newSet });
+                                    });
+                                });
+
+                                const input = document.getElementById('wa-msg-input');
+                                if (input) {
+                                    input.addEventListener('input', (e) => { state.inputValue = e.target.value; });
+                                    input.addEventListener('keydown', (e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleSendMessage();
+                                        }
+                                    });
+                                }
+
+                                document.getElementById('btn-send-msg')?.addEventListener('click', handleSendMessage);
+                                document.getElementById('btn-ai-followup')?.addEventListener('click', handleAIFollowup);
+
+                                document.querySelectorAll('.btn-quick').forEach(btn => {
+                                    btn.addEventListener('click', (e) => {
+                                        const type = btn.getAttribute('data-type');
+                                        handleQuickReply(type);
+                                    });
+                                });
+
+                                document.querySelectorAll('.btn-smart-reply').forEach(btn => {
+                                    btn.addEventListener('click', (e) => {
+                                        const text = btn.getAttribute('data-text');
+                                        setState({ inputValue: text });
+                                    });
+                                });
+                            }
+
+                            // LOGIC CONTROLLERS
+                            function handleNewChat() {
+                                const phone = prompt("Digite o número do WhatsApp com DDD (Ex: 21999998888):");
+                                if (!phone) return;
+                                const cleanPhone = phone.replace(/\D/g, '');
+                                if (cleanPhone.length < 8) return alert("Número inválido.");
+                                const name = prompt("Digite o Nome do Contato (Opcional):") || cleanPhone;
+                                const chatId = cleanPhone + '@c.us';
+                                
+                                const newLead = {
+                                    id: chatId,
+                                    name: name,
+                                    isGroup: false,
+                                    unreadCount: 0,
+                                    timestamp: Math.floor(Date.now() / 1000),
+                                    lastMessage: { body: 'Nova conversa iniciada', fromMe: true, timestamp: Math.floor(Date.now() / 1000) }
+                                };
+                                
+                                setState(s => ({
+                                    leads: [newLead, ...s.leads],
+                                    activeContact: { id: chatId, name: name, phone: cleanPhone }
+                                }));
+                            }
+
+                            function scrollToBottom() {
+                                const historyDiv = document.getElementById('wa-chat-history');
+                                if (historyDiv) {
+                                    historyDiv.scrollTo({ top: historyDiv.scrollHeight, behavior: 'smooth' });
+                                }
+                            }
+
+                            async function handleContactClick(id, name, phone) {
+                                setState({ 
+                                    activeContact: { id, name, phone },
+                                    inputValue: '', 
+                                    aiContextTag: null,
+                                    smartReplies: []
+                                });
+
+                                try {
+                                    const historyRes = await fetch('/api/whatsapp/chats/' + encodeURIComponent(id) + '/messages', { headers: window.getWAuth ? window.getWAuth() : {} });
+                                    const historyData = await historyRes.json();
+                                    if (historyData.success && Array.isArray(historyData.messages)) {
+                                        setState({ chatHistory: historyData.messages });
+                                        requestAIContext(id);
+                                    }
+                                } catch (e) {}
+                            }
+
+                            async function requestAIContext(chatId) {
+                                try {
+                                    const res = await fetch('/api/whatsapp/ai-summary', {
+                                        method: 'POST',
+                                        headers: Object.assign({ 'Content-Type': 'application/json' }, window.getWAuth ? window.getWAuth() : {}),
+                                        body: JSON.stringify({ chatId })
+                                    });
+                                    const data = await res.json();
+                                    if (data.success) {
+                                        setState({ aiContextTag: data.tag, smartReplies: data.predictions || [] });
+                                    }
+                                } catch (e) {}
+                            }
+
+                            async function handleSendMessage() {
+                                const msg = state.inputValue.trim();
+                                if (!msg) return;
+                                const contactId = state.activeContact.id;
+                                
+                                const tempId = 'local_' + Date.now();
+                                const pendingMsg = {
+                                    id: tempId,
+                                    body: msg,
+                                    fromMe: true,
+                                    timestamp: Math.floor(Date.now() / 1000),
+                                    status: 'pending'
+                                };
+
+                                saveLocalMsg(contactId, pendingMsg);
+                                setState({ inputValue: '' });
+                                
+                                try {
+                                    const res = await fetch('/api/whatsapp/send', {
+                                        method: 'POST',
+                                        headers: Object.assign({ 'Content-Type': 'application/json' }, window.getWAuth ? window.getWAuth() : {}),
+                                        body: JSON.stringify({ phone: contactId, message: msg })
+                                    });
+                                    const data = await res.json();
+                                    
+                                    if (data.success) {
+                                        updateLocalMsgStatus(contactId, tempId, 'sent');
+                                    } else {
+                                        updateLocalMsgStatus(contactId, tempId, 'error');
+                                    }
+                                } catch (e) {
+                                    updateLocalMsgStatus(contactId, tempId, 'error');
+                                }
+                            }
+
+                            async function handleAIFollowup() {
+                                setState({ inputValue: "IA Gemini analisando contexto..." });
+                                try {
+                                    const res = await fetch('/api/whatsapp/ai-reply', {
+                                        method: 'POST',
+                                        headers: Object.assign({ 'Content-Type': 'application/json' }, window.getWAuth ? window.getWAuth() : {}),
+                                        body: JSON.stringify({ chatId: state.activeContact.id })
+                                    });
+                                    const data = await res.json();
+                                    setState({ inputValue: data.success ? data.reply : "Erro na IA: " + data.error });
+                                } catch (e) {
+                                    setState({ inputValue: "Falha ao comunicar com IA Gemini." });
+                                }
+                            }
+
+                            function handleQuickReply(type) {
+                                const firstName = state.activeContact.name.split(' ')[0];
+                                let text = '';
+                                if (type === 'Apresentação') text = `Olá ${firstName}! Tudo bem? Sou da equipe ALDEIA. Vi que você entrou em contato com a gente. Como posso te ajudar hoje?`;
+                                if (type === 'Follow-up') text = `Oi ${firstName}, passando pra saber se conseguiu dar uma olhada na nossa proposta. Posso tirar alguma dúvida?`;
+                                if (type === 'Orçamento') text = `${firstName}, o orçamento para o seu projeto ficou pronto. Gostaria que eu te enviasse por aqui ou prefere marcar uma call rápida?`;
+                                
+                                setState({ inputValue: text });
+                            }
+
+                            // BACKGROUND POLLING & INIT
+                            async function fetchStatus() {
+                                try {
+                                    const res = await fetch('/api/whatsapp/status', { headers: window.getWAuth ? window.getWAuth() : {} });
+                                    const data = await res.json();
+                                    if (data.status) {
+                                        const prevStatus = state.waStatus;
+                                        setState({ waStatus: data.status, qrCode: data.qrCode });
+                                        // If we just authenticated or connected, fetch leads
+                                        if ((data.status === 'CONNECTED' || data.status === 'AUTHENTICATED') && prevStatus === 'AWAITING_QR') {
+                                            fetchLeads();
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.log('WA Status Fetch Error:', e);
+                                }
+                            }
+
+                            async function fetchLeads() {
+                                try {
+                                    const res = await fetch('/api/whatsapp/chats', { headers: window.getWAuth ? window.getWAuth() : {} });
+                                    const data = await res.json();
+                                    if (data.success && data.chats) {
+                                        // Somente forçar status para CONNECTED se não tivermos informações mais precisas do status
+                                        if (!state.waStatus || state.waStatus === 'OFFLINE') setState({ waStatus: 'CONNECTED' });
+                                        setState({ leads: data.chats });
+                                        if (!state.activeContact && data.chats.length > 0) {
+                                            const first = data.chats[0];
+                                            handleContactClick(first.id, first.name || first.id.replace('@c.us', ''), first.id.replace('@c.us', ''));
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.log('WA Fetch Error:', e);
+                                }
+                            }
+
+                            function initSocket() {
+                                if (window.io) {
+                                    const socket = window.io();
+                                    socket.on('wa_message', (msg) => {
+                                        if (state.activeContact) {
+                                            const chatId = typeof msg.from === 'string' && msg.from.includes('@g.us') ? msg.from : (msg.fromMe ? msg.to : msg.from);
+                                            if (state.activeContact.id === chatId) {
+                                                const newMsg = {
+                                                    id: msg.id && msg.id._serialized ? msg.id._serialized : 'ws_' + Date.now(),
+                                                    body: msg.body,
+                                                    fromMe: msg.fromMe,
+                                                    timestamp: msg.timestamp || Math.floor(Date.now() / 1000),
+                                                    ack: msg.ack || 1
+                                                };
+                                                setState(s => ({
+                                                    chatHistory: [...s.chatHistory, newMsg]
+                                                }));
+                                                setTimeout(scrollToBottom, 50);
+                                            }
+                                        }
+                                        fetchLeads(); // refresh leads order
+                                    });
+                                }
+                            }
+
+                            // INITIAL RENDER IMMEDIATELY
+                            render();
+                            initSocket();
+                            fetchStatus();
+                            fetchLeads();
+                            setInterval(fetchStatus, 3000);
+                            setInterval(fetchLeads, 10000);
+                        })();
+                    </script>
                 </div>
 
                 <!-- TAB: CLIENTS -->
@@ -4900,6 +5519,7 @@ body.sidebar-collapsed .nav-item.active svg { color: #fff; stroke: #fff; }
         }
 
         function startAdminDashboard(token) {
+            enforceRBACVisibility();
             sessionToken = token;
             sessionStorage.setItem('aldeia_admin_token', token);
             document.getElementById('admin-login').style.display = 'none';
@@ -5321,7 +5941,7 @@ body.sidebar-collapsed .nav-item.active svg { color: #fff; stroke: #fff; }
             listEl.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Carregando portfólio...</td></tr>';
             
             try {
-                const res = await fetch('/api/portfolio?t=' + Date.now());
+                const res = await fetch('/api/portfolio?t=' + Date.now(), { headers: getAuthHeaders() });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 {
                     const payload = await res.json();
@@ -6198,7 +6818,7 @@ body.sidebar-collapsed .nav-item.active svg { color: #fff; stroke: #fff; }
                 if (res.ok) {
                     closeTrelloTaskModal();
                     await loadTrelloTasks();
-                } else if (res.status === 401 || res.status === 403) {
+                } else if (res.status === 401 ) {
                     sessionStorage.removeItem('aldeia_admin_token');
                     sessionStorage.removeItem('aldeia_admin_user');
                     if (formStatus) formStatus.textContent = 'Sua sessão expirou. Redirecionando para o login...';
@@ -6355,7 +6975,7 @@ body.sidebar-collapsed .nav-item.active svg { color: #fff; stroke: #fff; }
             try {
                 const res = await fetch('/api/meetings/schedule', { method:'POST', headers:getAuthHeaders(), body:JSON.stringify(payload) });
                 const result = await res.json().catch(() => ({}));
-                if (res.status === 401 || res.status === 403) {
+                if (res.status === 401 ) {
                     sessionStorage.removeItem('aldeia_admin_token');
                     sessionStorage.removeItem('aldeia_admin_user');
                     if (status) status.textContent = 'Sua sessão expirou. Redirecionando para o login...';
@@ -7342,7 +7962,7 @@ body.sidebar-collapsed .nav-item.active svg { color: #fff; stroke: #fff; }
     if (!tab || tab.dataset.premiumPortfolio === 'ready') return;
     tab.dataset.premiumPortfolio = 'ready';
     tab.innerHTML = `
-      <header class="portfolio-header"><div><p class="portfolio-eyebrow">Coleção de cases</p><h2 class="box-title">Gerenciador de Portfólio</h2><p class="portfolio-intro">Edite os dados e acompanhe a apresentação do case em tempo real.</p></div><div class="portfolio-header-actions"><button type="button" class="portfolio-button portfolio-button-secondary" data-admin-only id="portfolio-uploads-button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>Gerenciar uploads</button><button type="button" class="portfolio-button portfolio-button-primary" id="portfolio-new-button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>Novo projeto</button></div></header>
+      <header class="portfolio-header"><div><p class="portfolio-eyebrow">Coleção de cases</p><h2 class="box-title">Gerenciador de Portfólio</h2><p class="portfolio-intro">Edite os dados e acompanhe a apresentação do case em tempo real.</p></div><div class="portfolio-header-actions"><button type="button" class="portfolio-button portfolio-button-secondary"  id="portfolio-uploads-button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>Gerenciar uploads</button><button type="button" class="portfolio-button portfolio-button-primary" id="portfolio-new-button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>Novo projeto</button></div></header>
       <div class="portfolio-workspace"><form id="portfolio-form" class="portfolio-editor-form"><input type="hidden" id="port-edit-id" value=""><section class="portfolio-panel"><div class="portfolio-panel-heading"><span class="portfolio-panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z"/><path d="M8 10h8M8 14h5"/></svg></span><div><h3>Dados básicos</h3><p>Defina como o case aparece na vitrine.</p></div></div><label class="portfolio-field"><span>Título do projeto</span><input type="text" id="port-title" placeholder="Ex.: Identidade FURY" required></label><div class="portfolio-fields-grid"><label class="portfolio-field"><span>Categoria</span><select id="port-category" required><option value="artes">Artes avulsas</option><option value="identidade">Identidade visual</option><option value="social">Social media</option><option value="videos">Vídeos</option></select></label><label class="portfolio-field"><span>Formato</span><select id="port-format" required><option value="auto">Formato original</option><option value="post">Post quadrado (1:1)</option><option value="portrait">Retrato (4:5)</option><option value="story">Vertical (9:16)</option><option value="video">Paisagem (16:9)</option></select></label></div></section><section class="portfolio-panel"><div class="portfolio-panel-heading"><span class="portfolio-panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16Z"/></svg></span><div><h3>Identidade visual</h3><p>Escolha o tom que ilumina este case.</p></div></div><div class="portfolio-color-row"><input type="color" id="port-accent-color" value="#e4e4e7" aria-label="Cor de destaque"><div class="portfolio-color-presets" role="group" aria-label="Cores de destaque"><button class="portfolio-color-swatch" type="button" data-color="#e4e4e7" style="--swatch:#e4e4e7" aria-label="Prata"></button><button class="portfolio-color-swatch" type="button" data-color="#ef4444" style="--swatch:#ef4444" aria-label="Vermelho"></button><button class="portfolio-color-swatch" type="button" data-color="#3b82f6" style="--swatch:#3b82f6" aria-label="Azul"></button><button class="portfolio-color-swatch" type="button" data-color="#10b981" style="--swatch:#10b981" aria-label="Verde"></button><button class="portfolio-color-swatch" type="button" data-color="#f59e0b" style="--swatch:#f59e0b" aria-label="Ouro"></button><button class="portfolio-color-swatch" type="button" data-color="#ec4899" style="--swatch:#ec4899" aria-label="Rosa"></button></div><output id="port-color-hex">#e4e4e7</output></div></section><section class="portfolio-panel"><div class="portfolio-panel-heading"><span class="portfolio-panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8" cy="9" r="1"/><path d="m21 15-4-4L7 20"/></svg></span><div><h3>Mídia de capa</h3><p>Arraste uma imagem ou selecione do dispositivo.</p></div></div><div id="port-cover-dropzone" class="portfolio-dropzone" tabindex="0" role="button" aria-label="Enviar capa do projeto"><img src="" id="port-cover-preview" alt="Prévia da capa"><div class="portfolio-dropzone-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4m0 0L8 8m4-4 4 4"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg><strong>Solte sua imagem aqui</strong><span>ou clique para procurar</span></div><button type="button" id="port-cover-remove" class="portfolio-media-remove" aria-label="Remover capa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M8 6V4h8v2m-7 4v7m4-7v7M6 6l1 14h10l1-14"/></svg></button></div><input type="text" id="port-cover" placeholder="Nenhum arquivo enviado" readonly required class="portfolio-upload-value"><input type="file" id="port-cover-file" accept="image/*" hidden></section><section class="portfolio-panel"><div class="portfolio-panel-heading"><span class="portfolio-panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><h3>Créditos</h3><p>Associe o responsável pelo projeto.</p></div></div><div class="portfolio-credit-badge"><button type="button" class="portfolio-credit-avatar" id="port-member-photo-button" aria-label="Enviar foto do autor"><img src="" id="port-member-photo-preview" alt="Foto do autor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4m0 0L8 8m4-4 4 4"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg></button><div class="portfolio-credit-fields"><label class="portfolio-field"><span>Nome</span><input type="text" id="port-member-name" placeholder="Ex.: Japex"></label><label class="portfolio-field"><span>Cargo</span><input type="text" id="port-member-role" placeholder="Ex.: Diretor de arte"></label></div></div><input type="text" id="port-member-photo" class="portfolio-upload-value" placeholder="Foto do autor (URL ou upload)"><input type="file" id="port-member-photo-file" accept="image/*" hidden></section><section class="portfolio-panel"><div class="portfolio-panel-heading portfolio-panel-heading-inline"><div><h3>Galeria interna</h3><p>Adicione detalhes para a página do case.</p></div><button type="button" class="portfolio-text-button" id="portfolio-add-media">Adicionar mídia</button></div><div id="port-gallery-builder" class="portfolio-gallery-builder"></div></section><div class="portfolio-form-actions"><button type="submit" id="port-submit-btn" class="portfolio-button portfolio-button-primary">Salvar e publicar</button><button type="button" id="port-cancel-btn" class="portfolio-button portfolio-button-secondary" style="display:none">Cancelar</button></div></form><aside class="portfolio-live-preview" aria-label="Prévia em tempo real"><div class="portfolio-preview-top"><span>Prévia ao vivo</span><span class="portfolio-preview-status">Não publicado</span></div><div class="portfolio-preview-art" id="portfolio-live-preview-art"><img id="portfolio-live-preview-image" alt="Prévia do projeto"><div class="portfolio-preview-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m5 17 5-5 4 4 2-2 3 3"/></svg></div><div class="portfolio-preview-glow"></div></div><div class="portfolio-preview-meta"><p id="portfolio-live-preview-category">ARTES AVULSAS</p><h3 id="portfolio-live-preview-title">Seu próximo projeto</h3><div class="portfolio-preview-credit"><span id="portfolio-live-preview-avatar">A</span><div><strong id="portfolio-live-preview-author">Créditos da Aldeia</strong><small id="portfolio-live-preview-role">Direção criativa</small></div></div></div></aside></div><button type="button" id="portfolio-preview-fab" class="portfolio-preview-fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2"/></svg>Ver prévia</button><div id="portfolio-preview-modal" class="portfolio-preview-modal" hidden><div class="portfolio-preview-modal-backdrop"></div><div class="portfolio-preview-modal-card"><button type="button" id="portfolio-preview-modal-close" aria-label="Fechar prévia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div id="portfolio-preview-modal-slot"></div></div></div><div class="table-container" style="margin-top:24px"><table><thead><tr><th>Projeto</th><th>Categoria</th><th>Ações</th></tr></thead><tbody id="portfolio-list"><tr><td colspan="3">Carregando portfólio...</td></tr></tbody></table></div>`;
     const get = (id) => document.getElementById(id);
     const inputIds = ['port-title','port-category','port-format','port-accent-color','port-cover','port-member-name','port-member-role','port-member-photo'];

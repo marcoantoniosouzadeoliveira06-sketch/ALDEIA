@@ -16,5 +16,14 @@
     "active": true,
     "isRoot": false,
     "createdAt": "2026-08-11T16:06:22.389Z"
+  },
+  "teste": {
+    "username": "teste",
+    "displayName": "teste",
+    "role": "operator",
+    "passwordHash": "$2b$12$H9RFY6u0hBv8kGhTqvtJXeITYhDFYBmaBSHHFUCJXcXCySauIgtNu",
+    "active": true,
+    "isRoot": false,
+    "createdAt": "2026-08-11T23:29:48.887Z"
   }
 }

@@ -3,12 +3,10 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
 # Environment & Secrets
 .env
 .env.local
 .env.telemetry
-
 # Logs & Local Storage / Database
 *.log
 telemetry.db
@@ -17,14 +15,18 @@ login_audit.json
 submissions.json
 assets/uploads/
 *.tmp_*
-
 # System & OS Files
 .DS_Store
 Thumbs.db
-
 # Temporary Python / Backup Scripts & Reconstructed Files
 *.backup.html
 *.py
 reconstructed_*
 original_*
 normal_*
+
+# managed
+**.data.json
+**.node-persist**
+**_IGNORE_**
+# end managed

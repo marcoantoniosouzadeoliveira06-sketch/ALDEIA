@@ -339,18 +339,16 @@ async function snapshot(opts: Opts): Promise<void> {
     // Execute authentication script if provided
     if (opts.authScript) {
       console.log(`🔐 Running authentication script from ${opts.authScript}...`);
-      try {
-        const path = await import('path');
-        const authPath = path.resolve(process.cwd(), opts.authScript);
-        const authModule = await import(authPath);
-        const authFn = authModule.default || authModule;
+        try {
+          const path = await import('path');
+          const authPath = path.resolve(process.cwd(), opts.authScript);
+          const importUrl = process.platform === 'win32' ? `file:///${authPath.replace(/\\/g, '/')}` : authPath;
+          const authModule = await import(importUrl);
+          const authFn = authModule.default || authModule;
         if (typeof authFn === 'function') {
           await authFn(page);
-          console.log('   ✅ Auth script executed, re-navigating to target URL...');
-          await page.goto(opts.url!, {
-            waitUntil: 'networkidle2',
-            timeout: Math.min(30000, opts.timeout),
-          });
+          console.log('   ✅ Auth script executed. Skipping re-navigation to preserve DOM changes...');
+          // await page.goto(opts.url!, { waitUntil: 'networkidle2', timeout: Math.min(30000, opts.timeout) });
           if (opts.wait > 0) {
             await new Promise((r) => setTimeout(r, opts.wait));
           }
