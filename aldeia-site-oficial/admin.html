@@ -2505,6 +2505,24 @@ function enforceRBACVisibility() {
                                 setState({}); // Trigger re-render
                             }
 
+                            // Limpar mensagens que ficaram presas no estado 'pending' no reload
+                            function cleanupPendingLocalMessages() {
+                                let changed = false;
+                                for (const chat in state.localMessages) {
+                                    state.localMessages[chat].forEach(m => {
+                                        if (m.status === 'pending') {
+                                            m.status = 'error';
+                                            changed = true;
+                                        }
+                                    });
+                                }
+                                if (changed) {
+                                    localStorage.setItem('aldeia_wa_local_history', JSON.stringify(state.localMessages));
+                                }
+                            }
+                            // Executar na inicializacao
+                            cleanupPendingLocalMessages();
+
                             function updateLocalMsgStatus(chatId, msgId, newStatus) {
                                 if (state.localMessages[chatId]) {
                                     const msg = state.localMessages[chatId].find(m => m.id === msgId);
