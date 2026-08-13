@@ -153,6 +153,7 @@
                 </div>
 
                 <a href="#orcamento" class="btn-vamos" data-budget-trigger aria-controls="budget-modal" aria-label="Fazer um orçamento com a Agência Aldeia">Vamos?<span class="btn-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></span></a>
+<<<<<<< HEAD
                 <button type="button" class="nav-hamburger" id="nav-toggle" aria-label="Abrir menu de navegação" aria-controls="mobile-menu" aria-expanded="false">
                     <span></span><span></span><span></span>
                 </button>
@@ -645,6 +646,500 @@
                         <label class="input-label" for="m-projeto">Ideia do Projeto</label>
                         <textarea class="input-control" id="m-projeto" required placeholder="Descreva brevemente o projeto, soluções necessárias, e-sports ou identidade visual..." style="min-height: 100px; resize: vertical;"></textarea>
                     </div>
+=======
+                <button type="button" class="nav-hamburger" id="nav-toggle" aria-label="Abrir menu de navegação" aria-controls="mobile-menu" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu">
+            <nav class="mobile-nav-links" aria-label="Navegação móvel">
+                <a href="#inicio" class="mobile-nav-link">/01 Início</a>
+                <a href="#sobre" class="mobile-nav-link">/02 Sobre</a>
+                <a href="#portfolio" class="mobile-nav-link">/03 Portfólio</a>
+                <a href="#servicos" class="mobile-nav-link">/04 Soluções</a>
+                <a href="#faq" class="mobile-nav-link">/05 Dúvidas</a>
+                <a href="#fundadores" class="mobile-nav-link">/06 Fundadores</a>
+                <a href="#contato" class="mobile-nav-link">/07 Contato</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- ===== HERO ===== -->
+        <section id="inicio" class="hero-section">
+            <!-- Background Video Fullscreen in Grayscale -->
+            <div class="hero-video-bg" aria-hidden="true">
+                <video muted loop playsinline id="hero-video" preload="none" data-src="assets/hero-bg.mp4" poster="assets/portfolio/1.webp">
+                    <track kind="captions" srclang="pt-BR" label="Português" src="assets/captions-pt-br.vtt" default>
+                </video>
+                <div class="hero-video-overlay"></div>
+                <canvas id="hero-grain"></canvas>
+            </div>
+
+            <!-- Centered Cinematic Content -->
+            <div class="hero-content-centered qma-container">
+                <h1 class="hero-title-cinematic" aria-label="Agência Aldeia — Identidade Visual e Design Estratégico">
+                    <span class="line-1 reveal-line shiny-text" style="--color: rgba(255, 255, 255, 0.7); --shine-color: rgba(255, 255, 255, 0.9);" id="hero-title-l1">PROJETOS ÚNICOS</span>
+                    <span class="line-2 reveal-line shiny-text" style="--color: rgba(255, 255, 255, 0.7); --shine-color: rgba(255, 255, 255, 0.9);" id="hero-title-l2">PRECISAM DE UMA</span>
+                    <span class="line-3"><span id="typewriter-text" class="shiny-text" style="--color: rgba(255, 255, 255, 0.7); --shine-color: rgba(255, 255, 255, 0.9);">AGÊNCIA ÚNICA</span><span class="typewriter-cursor">|</span></span>
+                </h1>
+                
+                <p class="hero-subtitle-cinematic" id="hero-subtitle">
+                    Design estratégico e experiências digitais para marcas que querem ocupar um lugar único — com a confiança de grandes nomes do cenário competitivo no Brasil e no exterior.
+                </p>
+                
+                <div class="hero-scroll-cinematic">
+                    <span>ROLE PARA BAIXO</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <polyline points="19 12 12 19 5 12"></polyline>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Dual Slanted Infinity Marquee Ribbons -->
+            <div class="hero-marquee-wrapper-dual">
+                <!-- Ribbon 1 (White) -->
+                <div class="hero-marquee-container ribbon-1">
+                    <div class="hero-marquee-track">
+                        <div class="hero-marquee-content">
+                            <span>MOTION DESIGN</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>SOCIAL MEDIA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>ARTES AVULSAS</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>IDENTIDADE VISUAL</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>BRANDING</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        </div>
+                        <div class="hero-marquee-content">
+                            <span>MOTION DESIGN</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>SOCIAL MEDIA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>ARTES AVULSAS</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>IDENTIDADE VISUAL</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>BRANDING</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ribbon 2 (Silver / Reverse Scroll) -->
+                <div class="hero-marquee-container ribbon-2">
+                    <div class="hero-marquee-track">
+                        <div class="hero-marquee-content">
+                            <span>PORTFÓLIO EXCLUSIVO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>DESEMPENHO & ESTÉTICA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>PROJETOS HIGH-END</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>ALDEIA DESIGN</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>3D & ANIMATION</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        </div>
+                        <div class="hero-marquee-content">
+                            <span>PORTFÓLIO EXCLUSIVO</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>DESEMPENHO & ESTÉTICA</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>PROJETOS HIGH-END</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>ALDEIA DESIGN</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                            <span>3D & ANIMATION</span> <span class="hero-marquee-divider">&lt;/&gt;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ABOUT / SOBRE ===== -->
+        <section id="sobre" class="about-section" aria-labelledby="about-heading">
+            <div class="section-container">
+                <h2 id="about-heading" class="sr-only">Sobre a Agência Aldeia</h2>
+                <div class="section-label reveal-up">
+                    <span class="label-num">/01</span>
+                    <span class="label-text">Sobre a Aldeia</span>
+                </div>
+
+                <!-- Big animated text paragraph -->
+                <div class="about-big-text reveal-words">
+                    <p id="about-big-text">Trabalhamos com <em>designers profissionais focados em design e marketing para grandes marcas e equipes de e-sports do Brasil e do exterior</em> há cerca de <strong>1 ano</strong> e já atuamos em praticamente todas as grandes equipes de e-sports do Brasil e exterior, e dentre outros nomes del cenário competitivo. Hoje, o nosso foco é claro: <strong>criação de sites, landing pages, flyers, identidade visual, branding e muito mais,</strong> com atenção máxima à estética, experiência e tecnologia.</p>
+                </div>
+
+                <!-- Info cards with red/orange icons -->
+                <div class="about-cards">
+                    <div class="about-card reveal-up" data-delay="0.1">
+                        <div class="card-icon red">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+                        </div>
+                        <div class="about-card-copy">
+                            <span class="about-card-kicker">01 — Alcance</span>
+                            <p id="about-card1-text">Já desenvolvemos projetos para diferentes mercados e também para clientes fora do Brasil, sempre explorando identidade, ritmo visual e interação.</p>
+                        </div>
+                    </div>
+                    <div class="about-card reveal-up" data-delay="0.2">
+                        <div class="card-icon orange">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                        </div>
+                        <div class="about-card-copy">
+                            <span class="about-card-kicker">02 — Presença</span>
+                            <p id="about-card2-text">Somos de São Paulo (SP) e Rio de Janeiro (RJ), mas trabalhamos de forma remota com marcas que valorizam design bem executado e presença digital no mais alto nível.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== LOGO LOOP ===== -->
+        <section class="logos-section">
+            <div class="section-container">
+                <div class="reveal-up logos-section-header">
+                    <div class="section-label logos-section-label">
+                        <span class="label-num">/02</span>
+                        <span class="label-text">Identidade Aldeia</span>
+                    </div>
+                    <h2 class="logos-section-title">DNA DA AGÊNCIA</h2>
+                </div>
+                <div class="logoloop logoloop--scale-hover" data-speed="80" data-direction="left" data-pause-on-hover="false" style="padding: 20px 0; --logoloop-logoHeight: 48px; --logoloop-gap: 60px;">
+                    <div class="logoloop__track">
+                        <ul class="logoloop__list" style="display: flex; align-items: center; gap: 60px;">
+                            <li class="logoloop__item"><img src="assets/logo-primaria.svg" alt="Aldeia Primária" loading="lazy" decoding="async" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-marca.svg" alt="Aldeia Marca" loading="lazy" decoding="async" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-isotype.svg" alt="Aldeia Isotype" loading="lazy" decoding="async" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-tp.svg" alt="Aldeia Logo TP" loading="lazy" decoding="async" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-secundaria-icon.svg" alt="Aldeia Secundária Icon" loading="lazy" decoding="async" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                        </ul>
+                        <ul class="logoloop__list" aria-hidden="true" style="display: flex; align-items: center; gap: 60px;">
+                            <li class="logoloop__item"><img src="assets/logo-primaria.svg" alt="Aldeia Primária" loading="lazy" decoding="async" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-marca.svg" alt="Aldeia Marca" loading="lazy" decoding="async" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-isotype.svg" alt="Aldeia Isotype" loading="lazy" decoding="async" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-tp.svg" alt="Aldeia Logo TP" loading="lazy" decoding="async" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                            <li class="logoloop__item"><img src="assets/logo-secundaria-icon.svg" alt="Aldeia Secundária Icon" loading="lazy" decoding="async" style="height: 48px; opacity: 0.65; transition: all 0.3s; filter: brightness(0) invert(1);"></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== PORTFOLIO ===== -->
+        <section id="portfolio" class="portfolio-section">
+            <div class="section-container">
+                <div class="portfolio-header">
+                    <div class="reveal-up">
+                        <div class="section-label">
+                            <span class="label-num">/02</span>
+                            <span class="label-text">Projetos</span>
+                        </div>
+                        <h2 class="mega-title scroll-float">PORTFÓLIO</h2>
+                    </div>
+                    <p id="home-port-subtitle" class="section-desc reveal-up" data-delay="0.2">Projetos que elevam a percepção. Cada detalhe, interação e escolha visual é pensada para posicionar no nível certo.</p>
+                </div>
+
+                <div class="portfolio-banner-container reveal-up" data-delay="0.3">
+                    <a href="portfolio.html" class="portfolio-banner-link" aria-label="Ver o portfólio completo da Agência Aldeia">
+                        <div class="portfolio-banner-img">
+                            <img id="home-port-cover" src="assets/portfolio/1.webp" alt="Projeto em destaque no portfólio de design da Agência Aldeia" loading="lazy" decoding="async" width="2400" height="900">
+                        </div>
+                        <div class="portfolio-banner-overlay"></div>
+                        <div class="portfolio-banner-content">
+                            <span id="home-port-btn" class="btn-cta banner-btn">VEJA O PORTFÓLIO COMPLETO</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SERVICES / SOLUÇÕES ===== -->
+        <section id="servicos" class="services-section">
+            <div class="section-container">
+                <div class="services-header">
+                    <div class="reveal-up">
+                        <div class="section-label">
+                            <span class="label-num">/03</span>
+                            <span class="label-text">Serviços</span>
+                        </div>
+                        <h2 class="mega-title scroll-float">SOLUÇÕES</h2>
+                    </div>
+                    <p class="section-desc reveal-up" data-delay="0.2" id="services-desc"><strong>Não é sobre volume, é sobre nível.</strong><br>Marcas, sites e criativos desenvolvidos com estratégias, estética e intenção.</p>
+                </div>
+
+                <div class="services-accordion reveal-up" id="services-accordion-list">
+                    <!-- Populated dynamically by CMS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== FAQ ===== -->
+        <section id="faq" class="faq-section">
+            <div class="section-container">
+                <div class="faq-header">
+                    <div class="reveal-up">
+                        <div class="section-label">
+                            <span class="label-num">/04</span>
+                            <span class="label-text">FAQ</span>
+                        </div>
+                        <h2 class="mega-title scroll-float">DÚVIDAS</h2>
+                    </div>
+                    <div class="faq-desc reveal-up" data-delay="0.2" id="faq-desc-container">
+                        <p>Algumas respostas importantes antes de começarmos.</p>
+                        <p class="dim">Clareza faz parte de qualquer projeto bem executado.</p>
+                    </div>
+                </div>
+
+                <div class="faq-list reveal-up" id="faq-list-container">
+                    <!-- Populated dynamically by CMS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== FUNDADORES ===== -->
+        <section id="fundadores" class="founders-section">
+            <div class="section-container">
+                <div class="founders-header">
+                    <div class="reveal-up">
+                        <div class="section-label">
+                            <span class="label-num">/05</span>
+                            <span class="label-text">Fundadores & CEOs</span>
+                        </div>
+                        <h2 class="mega-title">MINDSET</h2>
+                    </div>
+                    <p class="section-desc reveal-up" data-delay="0.2">
+                        As mentes por trás do design e posicionamento estratégico da agência.
+                    </p>
+                </div>
+
+                <div class="founders-grid">
+                    <!-- Founder 1: Temari -->
+                    <div class="pc-card-wrapper founder-card reveal-up" data-delay="0.1" id="founder-temari">
+                        <div class="pc-behind"></div>
+                        <div class="pc-card-shell">
+                            <section class="pc-card">
+                                <div class="pc-inside">
+                                    <div class="pc-shine"></div>
+                                    <div class="pc-glare"></div>
+                                    <div class="pc-content pc-avatar-content">
+                                        <img class="avatar" src="assets/temari.webp" alt="Temari avatar" loading="lazy">
+                                        <div class="pc-user-info">
+                                            <div class="pc-user-details">
+                                                <div class="pc-mini-avatar">
+                                                    <img src="assets/temari.webp" alt="Temari mini avatar" loading="lazy">
+                                                </div>
+                                                <div class="pc-user-text">
+                                                    <span class="pc-handle">@temari</span>
+                                                    <span class="pc-status">CEO & Design</span>
+                                                </div>
+                                            </div>
+                                            <a href="https://wa.me/5511959737873?text=Olá!%20Vim%20pelo%20site%20da%20Aldeia%20e%20gostaria%20de%20falar%20com%20a%20Temari." target="_blank" rel="noopener noreferrer" class="pc-contact-btn">Contato</a>
+                                        </div>
+                                    </div>
+                                    <div class="pc-content">
+                                        <div class="pc-details">
+                                            <h3>Temari</h3>
+                                            <p>Designer & CEO</p>
+                                            <span class="pc-bio">Diretora Criativa focada em branding e identidade visual de alto impacto.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                    <!-- Founder 2: Japex -->
+                    <div class="pc-card-wrapper founder-card reveal-up" data-delay="0.2" id="founder-japex">
+                        <div class="pc-behind"></div>
+                        <div class="pc-card-shell">
+                            <section class="pc-card">
+                                <div class="pc-inside">
+                                    <div class="pc-shine"></div>
+                                    <div class="pc-glare"></div>
+                                    <div class="pc-content pc-avatar-content">
+                                        <img class="avatar" src="assets/japex.webp" alt="Japex avatar" loading="lazy">
+                                        <div class="pc-user-info">
+                                            <div class="pc-user-details">
+                                                <div class="pc-mini-avatar">
+                                                    <img src="assets/japex.webp" alt="Japex mini avatar" loading="lazy">
+                                                </div>
+                                                <div class="pc-user-text">
+                                                    <span class="pc-handle">@japex</span>
+                                                    <span class="pc-status">CEO & Tech</span>
+                                                </div>
+                                            </div>
+                                            <a href="https://wa.me/5521980638271?text=Olá!%20Vim%20pelo%20site%20da%20Aldeia%20e%20gostaria%20de%20falar%20com%20o%20Japex." target="_blank" rel="noopener noreferrer" class="pc-contact-btn">Contato</a>
+                                        </div>
+                                    </div>
+                                    <div class="pc-content">
+                                        <div class="pc-details">
+                                            <h3>Japex</h3>
+                                            <p>Designer & CEO</p>
+                                            <span class="pc-bio">Especialista em interfaces digitais, UI/UX design gráfico e desenvolvimento web.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== CTA BANNER ===== -->
+        <section id="contato" class="cta-banner">
+            <div class="cta-video-bg">
+                <video id="cta-video" preload="none" muted loop playsinline aria-hidden="true" data-src="assets/hero-bg.mp4">
+                    <track kind="captions" srclang="pt-BR" label="Português" src="assets/captions-pt-br.vtt" default>
+                </video>
+                <div class="cta-overlay"></div>
+            </div>
+            <div class="cta-inner qma-container" id="orcamento">
+                <div class="logo-contact-wrap reveal-up">
+                    <div class="logo-contact-circle">
+                        <img src="assets/logo-isotype.svg" class="logo-contact" alt="ALDEIA Icon">
+                    </div>
+                </div>
+                <div class="cta-left reveal-up" data-delay="0.1">
+                    <p>Vamos <strong>tirar isso do rascunho</strong> e levar para...</p>
+                </div>
+                <a href="#orcamento" class="btn-cta reveal-up" data-budget-trigger data-delay="0.2" aria-controls="budget-modal" aria-label="Abrir formulário para fazer um orçamento">Faça um orçamento<span class="btn-arrow-icon">→</span></a>
+            </div>
+        </section>
+
+        <!-- ===== O FUTURO? ===== -->
+        <section class="future-section">
+            <div class="section-container">
+                <div class="future-inner reveal-up">
+                    <div class="future-title-wrapper">
+                        <div class="metallic-paint" 
+                             id="future-metallic" 
+                             data-text="O FUTURO?" 
+                             data-font="Clash Display" 
+                             data-size="220"
+                             data-scale="4"
+                             data-refraction="0.015"
+                             data-blur="0.008"
+                             data-liquid="0.25"
+                             data-speed="0.25"
+                             data-brightness="1.5"
+                             data-contrast="1.0"
+                             data-chroma="0.0"
+                             data-light-color="#e9d5ff"
+                             data-dark-color="#090014"
+                             data-tint="#2a004f"
+                             data-mouse="false"
+                             data-wave="0.4"
+                             >
+                        </div>
+                    </div>
+                    <div class="future-text">
+                        <p id="future-subtitle">Se você quer algo <strong>acima do padrão,</strong> estou pronto para construir.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-col footer-brand">
+                <div class="footer-logo-wrap">
+                    <img src="assets/logo-tp.svg" class="logo-footer" alt="ALDEIA Logo">
+                </div>
+                <p id="footer-desc">Buscando algo <strong>fora do padrão?</strong><br>Vamos conversar.</p>
+                <a href="#orcamento" class="btn-cta btn-cta-sm" data-budget-trigger aria-controls="budget-modal" aria-label="Abrir formulário para fazer um orçamento">Faça um orçamento<span class="btn-arrow-icon">→</span></a>
+            </div>
+            <div class="footer-col">
+                <h4>Navegação</h4>
+                <nav aria-label="Navegação do rodapé">
+                    <a href="#inicio">/01 Início</a>
+                    <a href="#portfolio">/02 Portfólio</a>
+                    <a href="#servicos">/03 Soluções</a>
+                    <a href="#faq">/04 Dúvidas</a>
+                    <a href="#fundadores">/05 Fundadores</a>
+                </nav>
+            </div>
+            <div class="footer-col">
+                <h4>Redes</h4>
+                <nav aria-label="Redes sociais da Agência Aldeia">
+                    <a href="https://instagram.com" id="footer-instagram" target="_blank" rel="noopener">Instagram <span class="ext">↗</span></a>
+                    <a href="https://facebook.com" target="_blank" rel="noopener">Facebook <span class="ext">↗</span></a>
+                    <a href="https://tiktok.com" target="_blank" rel="noopener">TikTok <span class="ext">↗</span></a>
+                    <a href="https://behance.net" id="footer-behance" target="_blank" rel="noopener">Behance <span class="ext">↗</span></a>
+                </nav>
+            </div>
+            <div class="footer-col">
+                <h4>Contato</h4>
+                <nav aria-label="Canais de contato">
+                    <a href="tel:+5521980638271" id="footer-phone">+55 (21) 98063-8271</a>
+                    <a href="mailto:contato@aldeiadesign.com.br" id="footer-email">contato@aldeiadesign.com.br</a>
+                </nav>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>Aldeia Studio © <strong>2026.</strong> Todos os direitos reservados.</span>
+        </div>
+    </footer>
+
+    <!-- SVG Filter for Gooey Navigation Effect -->
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display: none;">
+        <defs>
+            <filter id="gooey-nav-filter">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo" />
+            </filter>
+        </defs>
+    </svg>
+
+    <script src="assets/translator.js?v=71"></script>
+    <script src="app.js?v=79"></script>
+    <script>
+      (() => {
+        const toggle = document.getElementById('nav-toggle');
+        const menu = document.getElementById('mobile-menu');
+        if (!toggle || !menu || toggle.dataset.mobileNavBound === 'true') return;
+        const setState = (open) => {
+          toggle.classList.toggle('active', open);
+          menu.classList.toggle('active', open);
+          toggle.setAttribute('aria-expanded', String(open));
+          toggle.setAttribute('aria-label', open ? 'Fechar menu de navegação' : 'Abrir menu de navegação');
+          document.body.classList.toggle('mobile-menu-open', open);
+          document.body.style.overflow = open ? 'hidden' : '';
+        };
+        toggle.addEventListener('click', () => setState(!menu.classList.contains('active')));
+        menu.querySelectorAll('.mobile-nav-link').forEach((link) => link.addEventListener('click', () => setState(false)));
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') setState(false); });
+      })();
+    </script>
+    <script>setTimeout(function(){var p=document.getElementById('preloader');if(p&&!p.classList.contains('loaded')){p.classList.add('loaded');setTimeout(function(){p.style.display='none';if(window.lenis)window.lenis.start()},400)}},1400);</script>
+
+    <!-- MODAL ORÇAMENTO -->
+    <div id="budget-modal">
+        <div class="modal-content">
+            <button class="modal-close" type="button" data-budget-close aria-label="Fechar orçamento"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+            <div id="modal-success-screen" style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                <svg style="width: 64px; height: 64px; stroke: #ffffff; margin-bottom: 24px; fill: none;" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <h3 style="font-family: var(--font-h); font-size: 1.8rem; margin-bottom: 12px; text-transform: uppercase;">Cadastro Enviado!</h3>
+                <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 30px; max-width: 320px; line-height: 1.6;">Recebemos suas informações com sucesso.</p>
+                <a href="" id="modal-wa-btn" target="_blank" class="btn-cta" style="padding: 14px 28px; width: auto; font-size: 0.95rem;">Falar Conosco via WhatsApp <span style="margin-left: 6px;">↗</span></a>
+            </div>
+            <div id="modal-form-screen">
+                <h2 style="font-family: var(--font-h); font-size: 2rem; font-weight: 600; text-transform: uppercase; margin-bottom: 10px;">Faça seu Orçamento</h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 30px; line-height: 1.5;">Conte-nos sua ideia e vamos dar vida ao seu projeto.</p>
+                <form id="modal-cadastro-form">
+                    <div class="input-group">
+                        <label class="input-label" for="m-nome">Nome Completo</label>
+                        <input class="input-control" type="text" id="m-nome" required placeholder="Ex: João Silva">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="m-email">E-mail de Contato</label>
+                        <input class="input-control" type="email" id="m-email" required placeholder="Ex: joao@empresa.com">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="m-telefone">WhatsApp</label>
+                        <input class="input-control" type="tel" id="m-telefone" required placeholder="Ex: (21) 98063-8271">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="m-instagram">Instagram (Opcional)</label>
+                        <input class="input-control" type="text" id="m-instagram" placeholder="Ex: @sua.marca ou @seu.perfil">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label" for="m-projeto">Ideia do Projeto</label>
+                        <textarea class="input-control" id="m-projeto" required placeholder="Descreva brevemente o projeto, soluções necessárias, e-sports ou identidade visual..." style="min-height: 100px; resize: vertical;"></textarea>
+                    </div>
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
                     <label style="display:flex; gap:10px; align-items:flex-start; margin:0 0 18px; color:var(--text-muted); font-size:.78rem; line-height:1.45; cursor:pointer;">
                         <input id="m-location-consent" type="checkbox" style="margin-top:3px; accent-color:#fff;">
                         <span>Aceito o uso de localização aproximada para melhoria do site.</span>
@@ -707,6 +1202,7 @@
             aspect-ratio: 1 / 1;
             border-radius: 50%;
             color: var(--text-muted);
+<<<<<<< HEAD
             cursor: pointer;
             transition: color 0.3s;
             background: rgba(255,255,255,.05);
@@ -922,6 +1418,223 @@
             const telefone = document.getElementById('m-telefone').value;
             const instagram = document.getElementById('m-instagram') ? document.getElementById('m-instagram').value : '';
             const projeto = document.getElementById('m-projeto').value;
+=======
+            cursor: pointer;
+            transition: color 0.3s;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.1);
+        }
+        .modal-close:hover {
+            color: #fff;
+        }
+        #budget-modal .input-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        #budget-modal .input-label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        #budget-modal .input-control {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-family: var(--font-b);
+            font-size: 0.9rem;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+        #budget-modal .input-control:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        #budget-modal .btn-submit:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+        }
+        #budget-modal .btn-submit:disabled .m-spinner {
+            display: inline-block !important;
+        }
+    </style>
+
+    <script>
+        /* ============================================
+           ALDEIA TELEMETRY MODULE — Zero-CLS Tracker
+           AES-256-CBC | sendBeacon | performance.now
+           ============================================ */
+        (function() {
+            const TELEMETRY_URL = `/api/telemetry`;
+
+            // Session state
+            window.__aldeiaTelemetry = {
+                sessionId: null,
+                modalOpenTime: null,
+                converted: false,
+                initialized: false
+            };
+
+            // Generate anonymous session ID
+            function generateSessionId() {
+                const arr = new Uint8Array(16);
+                crypto.getRandomValues(arr);
+                return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            // Send telemetry (non-blocking)
+            function sendTelemetry(eventType, converted) {
+                if (localStorage.getItem('aldeia_cookie_consent') !== 'accepted') return;
+                const t = window.__aldeiaTelemetry;
+                if (!t.modalOpenTime) return;
+
+                const dwellTime = parseFloat(((performance.now() - t.modalOpenTime) / 1000).toFixed(2));
+                const payload = {
+                    session_id: t.sessionId,
+                    event_type: eventType,
+                    converted: converted,
+                    dwell_time: dwellTime,
+                    page_url: window.location.pathname
+                };
+
+                const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(TELEMETRY_URL, blob);
+                } else {
+                    fetch(TELEMETRY_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                        keepalive: true
+                    }).catch(() => {});
+                }
+            }
+
+            // Initialize on page load
+            window.__aldeiaTelemetry.sessionId = generateSessionId();
+            window.__aldeiaTelemetry.initialized = true;
+
+            // Abandonment on page unload
+            window.addEventListener('beforeunload', function() {
+                if (localStorage.getItem('aldeia_cookie_consent') !== 'accepted') return;
+                const t = window.__aldeiaTelemetry;
+                if (t.modalOpenTime && !t.converted) {
+                    const dwellTime = parseFloat(((performance.now() - t.modalOpenTime) / 1000).toFixed(2));
+                    const payload = {
+                        session_id: t.sessionId,
+                        event_type: 'abandonment',
+                        converted: false,
+                        dwell_time: dwellTime,
+                        page_url: window.location.pathname
+                    };
+                    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                    navigator.sendBeacon(TELEMETRY_URL, blob);
+                }
+            });
+
+            window.sendTelemetry = sendTelemetry;
+        })();
+
+        function openBudgetModal() {
+            document.getElementById('orcamento')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const modal = document.getElementById('budget-modal');
+            const formScreen = document.getElementById('modal-form-screen');
+            const successScreen = document.getElementById('modal-success-screen');
+            
+            formScreen.style.display = 'block';
+            successScreen.style.display = 'none';
+            document.getElementById('modal-cadastro-form').reset();
+            
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+                document.getElementById('m-nome')?.focus({ preventScroll: true });
+            }, 10);
+            
+            if (window.lenis) window.lenis.stop();
+
+            // [TELEMETRY] Start tracking dwell time
+            window.__aldeiaTelemetry.modalOpenTime = performance.now();
+            window.__aldeiaTelemetry.converted = false;
+        }
+
+        function closeBudgetModal() {
+            const modal = document.getElementById('budget-modal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 400);
+            
+            if (window.lenis) {
+                window.lenis.start();
+                requestAnimationFrame(() => window.lenis?.start());
+            }
+
+            // [TELEMETRY] Track abandonment if not converted
+            const t = window.__aldeiaTelemetry;
+            if (t.modalOpenTime && !t.converted) {
+                sendTelemetry('abandonment', false);
+                t.modalOpenTime = null;
+            }
+        }
+
+        const modalForm = document.getElementById('modal-cadastro-form');
+        const modalSubmitBtn = document.getElementById('m-btn-envio');
+        const modalBtnText = document.getElementById('m-btn-text');
+
+        async function capturarLocalizacaoDupla() {
+            let geoCoords = null;
+            let ipData = null;
+            if (navigator.geolocation) {
+                try {
+                    geoCoords = await new Promise((resolve, reject) => {
+                        navigator.geolocation.getCurrentPosition(
+                            pos => resolve(`${pos.coords.latitude},${pos.coords.longitude}`),
+                            err => reject(err),
+                            { timeout: 4000 }
+                        );
+                    });
+                } catch (e) {}
+            }
+            try {
+                const ipRes = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) });
+                if (ipRes.ok) {
+                    const data = await ipRes.json();
+                    ipData = {
+                        cidade: data.city || 'Cidade Desconhecida',
+                        estado: data.region || '',
+                        ip: data.ip || '0.0.0.0',
+                        fallbackCoords: `${data.latitude},${data.longitude}`
+                    };
+                }
+            } catch (e) {}
+            return {
+                locationString: ipData ? `${ipData.cidade}${ipData.estado ? ' - ' + ipData.estado : ''}` : "Localização Indisponível",
+                ip: ipData ? ipData.ip : "0.0.0.0",
+                coordinates: geoCoords || (ipData ? ipData.fallbackCoords : null)
+            };
+        }
+        
+        modalForm.dataset.submitBound = 'true';
+        modalForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            modalSubmitBtn.disabled = true;
+            modalBtnText.textContent = 'Enviando...';
+
+            const nome = document.getElementById('m-nome').value;
+            const email = document.getElementById('m-email').value;
+            const telefone = document.getElementById('m-telefone').value;
+            const instagram = document.getElementById('m-instagram') ? document.getElementById('m-instagram').value : '';
+            const projeto = document.getElementById('m-projeto').value;
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
             const wantsLocation = document.getElementById('m-location-consent')?.checked === true;
             const locData = wantsLocation ? await capturarLocalizacaoDupla() : { locationString: "Localização Indisponível", ip: "0.0.0.0", coordinates: null };
 
@@ -1113,6 +1826,7 @@
                     }
                     if (content.heroSubtitle) {
                         setSafeCmsRichText(document.getElementById('hero-subtitle'), content.heroSubtitle);
+<<<<<<< HEAD
                     }
 
                     // About
@@ -1132,6 +1846,27 @@
                         setSafeCmsRichText(sDesc, content.services.desc || '');
                         
                         const sAccordion = document.getElementById('services-accordion-list');
+=======
+                    }
+
+                    // About
+                    if (content.about) {
+                        const ab = content.about;
+                        const abText = document.getElementById('about-big-text');
+                        setSafeCmsRichText(abText, ab.bigText || '');
+                        const c1Text = document.getElementById('about-card1-text');
+                        if (c1Text) c1Text.textContent = ab.card1;
+                        const c2Text = document.getElementById('about-card2-text');
+                        if (c2Text) c2Text.textContent = ab.card2;
+                    }
+
+                    // Services
+                    if (content.services) {
+                        const sDesc = document.getElementById('services-desc');
+                        setSafeCmsRichText(sDesc, content.services.desc || '');
+                        
+                        const sAccordion = document.getElementById('services-accordion-list');
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
                         if (sAccordion && Array.isArray(content.services.items)) {
                             sAccordion.replaceChildren();
                             content.services.items.forEach((item, index) => {
@@ -1153,6 +1888,7 @@
                                 const close = document.createElement('button'); close.type = 'button'; close.className = 'svc-close'; close.setAttribute('aria-label', 'Fechar serviço'); close.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
                                 media.append(image, close); body.append(copy, media); row.append(header, body); sAccordion.appendChild(row);
                             });
+<<<<<<< HEAD
                             bindAccordionTriggers();
                         }
                     }
@@ -1161,6 +1897,16 @@
                     if (Array.isArray(content.faqs)) {
                         const faqContainer = document.getElementById('faq-list-container');
                         if (faqContainer) {
+=======
+                            bindAccordionTriggers();
+                        }
+                    }
+
+                    // FAQs
+                    if (Array.isArray(content.faqs)) {
+                        const faqContainer = document.getElementById('faq-list-container');
+                        if (faqContainer) {
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
                             faqContainer.replaceChildren();
                             content.faqs.forEach((faq, index) => {
                                 const num = String(index + 1).padStart(2, '0');
@@ -1171,6 +1917,7 @@
                                 const icon = document.createElement('span'); icon.className = 'faq-icon'; icon.append(document.createElement('span'), document.createElement('span'));
                                 const answer = document.createElement('div'); answer.className = 'faq-answer'; setSafeCmsRichText(answer, faq?.a || '');
                                 button.append(number, question, icon); row.append(button, answer); faqContainer.appendChild(row);
+<<<<<<< HEAD
                             });
                             bindFaqTriggers();
                         }
@@ -1370,11 +2117,213 @@
 
 
     <aside id="cookie-consent-banner" role="dialog" aria-live="polite" aria-label="Preferências de privacidade" style="display:none; position:fixed; z-index:1200; left:24px; right:24px; bottom:24px; max-width:680px; margin:auto; padding:20px; border:1px solid rgba(255,255,255,.14); border-radius:20px; background:rgba(10,10,10,.94); box-shadow:0 18px 60px rgba(0,0,0,.45); backdrop-filter:blur(18px);">
+=======
+                            });
+                            bindFaqTriggers();
+                        }
+                    }
+
+                    // Future Section & WebGL
+                    if (content.future) {
+                        const fut = content.future;
+                        const sub = document.getElementById('future-subtitle');
+                        if (sub) sub.textContent = fut.subtitle || '';
+                        
+                        const paint = document.getElementById('future-metallic');
+                        if (paint) {
+                            paint.setAttribute('data-text', fut.text || 'O FUTURO?');
+                            paint.setAttribute('data-scale', fut.scale);
+                            paint.setAttribute('data-refraction', fut.refraction);
+                            paint.setAttribute('data-blur', fut.blur);
+                            paint.setAttribute('data-liquid', fut.liquid);
+                            paint.setAttribute('data-speed', fut.speed);
+                            paint.setAttribute('data-brightness', fut.brightness);
+                            paint.setAttribute('data-contrast', fut.contrast);
+                            paint.setAttribute('data-chroma', fut.chroma);
+                            paint.setAttribute('data-light-color', fut.lightColor);
+                            paint.setAttribute('data-dark-color', fut.darkColor);
+                            paint.setAttribute('data-tint', fut.tint);
+                            paint.setAttribute('data-wave', fut.wave);
+                            
+                            if (typeof window.initMetallicPaint === 'function') {
+                                window.initMetallicPaint();
+                            }
+                        }
+                    }
+
+                    // Founders
+                    if (content.founders) {
+                        const temari = content.founders.temari;
+                        if (temari) {
+                            const rootT = document.getElementById('founder-temari');
+                            if (rootT) {
+                                rootT.querySelector('.avatar').src = temari.image;
+                                rootT.querySelector('.pc-mini-avatar img').src = temari.image;
+                                rootT.querySelector('.pc-handle').textContent = temari.handle;
+                                rootT.querySelector('.pc-status').textContent = temari.status;
+                                rootT.querySelector('h3').textContent = temari.name;
+                                rootT.querySelector('p').textContent = temari.role;
+                                rootT.querySelector('.pc-bio').textContent = temari.bio;
+                            }
+                        }
+
+                        const japex = content.founders.japex;
+                        if (japex) {
+                            const rootJ = document.getElementById('founder-japex');
+                            if (rootJ) {
+                                rootJ.querySelector('.avatar').src = japex.image;
+                                rootJ.querySelector('.pc-mini-avatar img').src = japex.image;
+                                rootJ.querySelector('.pc-handle').textContent = japex.handle;
+                                rootJ.querySelector('.pc-status').textContent = japex.status;
+                                rootJ.querySelector('h3').textContent = japex.name;
+                                rootJ.querySelector('p').textContent = japex.role;
+                                rootJ.querySelector('.pc-bio').textContent = japex.bio;
+                            }
+                        }
+                    }
+
+                    // Home Portfolio
+                    if (content.homePortfolio) {
+                        const hp = content.homePortfolio;
+                        const t = document.getElementById('home-port-title');
+                        if (t && hp.title) t.textContent = hp.title;
+                        const st = document.getElementById('home-port-subtitle');
+                        if (st && hp.subtitle) st.textContent = hp.subtitle;
+                        const btn = document.getElementById('home-port-btn');
+                        if (btn && hp.buttonText) btn.textContent = hp.buttonText;
+                        const cov = document.getElementById('home-port-cover');
+                        if (cov && hp.cover) cov.src = hp.cover;
+                    }
+
+                    // Portfolio Gallery Dome
+                    if (content.portfolio && content.portfolio.length > 0) {
+                        window.aldeiaPortfolioImages = content.portfolio;
+                        if (typeof window.initDomeGallery === 'function') {
+                            window.initDomeGallery();
+                        }
+                    }
+
+                    // Footer
+                    if (content.footer) {
+                        const foot = content.footer;
+                        const fDesc = document.getElementById('footer-desc');
+                        if (fDesc) fDesc.textContent = foot.desc || '';
+                        
+                        const fPhone = document.getElementById('footer-phone');
+                        if (fPhone) {
+                            fPhone.href = `tel:${foot.phone}`;
+                            fPhone.textContent = foot.phoneDisplay;
+                        }
+                        
+                        const fEmail = document.getElementById('footer-email');
+                        if (fEmail) {
+                            fEmail.href = `mailto:${foot.email}`;
+                            fEmail.textContent = foot.email;
+                        }
+                        
+                        const fInsta = document.getElementById('footer-instagram');
+                        if (fInsta) fInsta.href = foot.instagram;
+                        
+                        const fBehance = document.getElementById('footer-behance');
+                        if (fBehance) fBehance.href = foot.behance;
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to load dynamic content:', err);
+            }
+        }
+        loadContent();
+        setInterval(() => {
+            if (document.visibilityState === 'visible') loadContent();
+        }, 120000);
+
+        // --- DECRYPT TEXT EFFECT ---
+        function decryptText(element, duration = 800) {
+            const originalText = element.getAttribute('data-original-text') || element.textContent;
+            if (!element.getAttribute('data-original-text')) {
+                element.setAttribute('data-original-text', originalText);
+            }
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%-+*';
+            let start = null;
+            
+            function step(timestamp) {
+                if (!start) start = timestamp;
+                const progress = timestamp - start;
+                const percentage = Math.min(progress / duration, 1);
+                
+                let result = '';
+                for (let i = 0; i < originalText.length; i++) {
+                    if (originalText[i] === ' ') {
+                        result += ' ';
+                        continue;
+                    }
+                    if (i / originalText.length < percentage) {
+                        result += originalText[i];
+                    } else {
+                        result += chars[Math.floor(Math.random() * chars.length)];
+                    }
+                }
+                element.textContent = result;
+                if (progress < duration) {
+                    requestAnimationFrame(step);
+                }
+            }
+            requestAnimationFrame(step);
+        }
+
+        document.querySelectorAll('.decrypt-hover').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                decryptText(el);
+            });
+        });
+
+        // Scroll to Top Button Toggle
+        const scrollTopBtn = document.getElementById('scroll-to-top-btn');
+        if (scrollTopBtn) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 400) {
+                    scrollTopBtn.classList.add('visible');
+                } else {
+                    scrollTopBtn.classList.remove('visible');
+                }
+            });
+            scrollTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        // Phone Input Mask (Brazilian (XX) XXXXX-XXXX)
+        const phoneInput = document.getElementById('m-telefone');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 11) value = value.substring(0, 11);
+                
+                let formatted = '';
+                if (value.length > 0) {
+                    formatted = '(' + value.substring(0, 2);
+                    if (value.length > 2) {
+                        formatted += ') ' + value.substring(2, 7);
+                        if (value.length > 7) {
+                            formatted += '-' + value.substring(7, 11);
+                        }
+                    }
+                }
+                e.target.value = formatted;
+            });
+        }
+
+    </script>
+
+
+    <aside id="cookie-consent-banner" role="dialog" aria-live="polite" aria-label="Preferências de privacidade" style="display:none; position:fixed; z-index:1200; left:24px; right:24px; bottom:24px; max-width:680px; margin:auto; padding:20px; border:1px solid rgba(255,255,255,.14); border-radius:20px; background:rgba(10,10,10,.94); box-shadow:0 18px 60px rgba(0,0,0,.45); backdrop-filter:blur(18px);">
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
         <strong style="display:block; margin-bottom:6px; font-family:var(--font-h); letter-spacing:.02em;">Cookies e privacidade</strong>
         <p style="margin:0; color:var(--text-muted); font-size:.84rem; line-height:1.5;">Usamos cookies opcionais para melhorar o site e medir acessos.</p>
         <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:16px;">
             <button type="button" id="cookie-reject" class="btn-cta" style="padding:10px 16px; background:transparent; color:#fff; border:1px solid rgba(255,255,255,.2);">Recusar</button>
             <button type="button" id="cookie-accept" class="btn-cta" style="padding:10px 16px;">Aceitar</button>
+<<<<<<< HEAD
         </div>
     </aside>
     <button type="button" id="cookie-settings" aria-label="Gerenciar preferências de cookies" style="position:fixed; z-index:1100; left:18px; bottom:18px; display:none; border:1px solid rgba(255,255,255,.14); border-radius:999px; padding:9px 12px; background:rgba(10,10,10,.9); color:#fff; cursor:pointer;">Cookies</button>
@@ -1449,6 +2398,82 @@
                     const originalText = submitBtn ? submitBtn.innerText : 'ENVIAR';
                     if (submitBtn) submitBtn.innerText = 'ENVIANDO...';
 
+=======
+        </div>
+    </aside>
+    <button type="button" id="cookie-settings" aria-label="Gerenciar preferências de cookies" style="position:fixed; z-index:1100; left:18px; bottom:18px; display:none; border:1px solid rgba(255,255,255,.14); border-radius:999px; padding:9px 12px; background:rgba(10,10,10,.9); color:#fff; cursor:pointer;">Cookies</button>
+
+    <script>
+        (() => {
+            const key = 'aldeia_cookie_consent';
+            const banner = document.getElementById('cookie-consent-banner');
+            const settings = document.getElementById('cookie-settings');
+            const save = (choice) => {
+                localStorage.setItem(key, choice);
+                document.cookie = `${key}=${choice}; Max-Age=15552000; Path=/; SameSite=Lax`;
+                banner.style.display = 'none';
+                settings.style.display = 'inline-flex';
+                if (choice === 'accepted') window.location.reload();
+            };
+            const saved = localStorage.getItem(key);
+            banner.style.display = saved ? 'none' : 'block';
+            settings.style.display = saved ? 'inline-flex' : 'none';
+            document.getElementById('cookie-accept')?.addEventListener('click', () => save('accepted'));
+            document.getElementById('cookie-reject')?.addEventListener('click', () => save('rejected'));
+            settings?.addEventListener('click', () => { banner.style.display = 'block'; settings.style.display = 'none'; });
+        })();
+    </script>
+
+    <!-- FLOATING WIDGETS -->
+    <a href="#orcamento" id="floating-whatsapp-widget" class="floating-cta" data-budget-trigger aria-label="Fazer Orçamento" aria-controls="budget-modal">
+        <svg class="silver-svg" viewBox="0 0 24 24" width="34" height="34">
+            <defs>
+                <linearGradient id="silverGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#94a3b8" />
+                    <stop offset="50%" stop-color="#cbd5e1" />
+                    <stop offset="100%" stop-color="#94a3b8" />
+                </linearGradient>
+            </defs>
+            <circle cx="12" cy="12" r="8" fill="url(#silverGradient)" />
+            <path fill="url(#silverGradient)" d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 001.37 5.054L2 22l5.077-1.331a9.907 9.907 0 004.93 1.317h.005c5.507 0 9.99-4.478 9.99-9.986 0-2.67-1.037-5.178-2.923-7.067C17.195 3.044 14.685 2 12.012 2zm5.794 13.916c-.246.695-1.206 1.272-1.666 1.34-.46.069-.884.288-2.946-.527-2.615-1.033-4.24-3.708-4.37-3.882-.132-.174-1.077-1.431-1.077-2.731 0-1.3 0-1.879-.383-2.274-.383-.395-.838-.493-1.07-.493-.23 0-.495.033-.709.247-.215.214-.82.802-.82 1.954 0 1.152.838 2.261.955 2.418.118.158 1.616 2.467 3.973 3.483 2.357 1.016 2.357.677 2.784.637.428-.04 1.38-.564 1.576-1.11.196-.546.196-1.016.138-1.115-.058-.1-.214-.158-.474-.288-.26-.13-1.536-.757-1.774-.842-.238-.085-.411-.13-.585.13-.174.26-.673.842-.825 1.016-.152.174-.304.196-.564.066-.26-.13-1.101-.407-2.096-1.293-.775-.69-1.3-1.547-1.452-1.807-.152-.26-.016-.4.113-.529.117-.116.26-.304.39-.456.13-.152.173-.26.26-.434.086-.174.043-.326-.021-.456-.065-.13-.585-1.41-.801-1.93-.216-.52-.452-.45-.618-.45h-.52c-.173 0-.455.065-.693.321C7.39 6.26 6.57 7.04 6.57 8.602c0 1.562 1.134 3.076 1.286 3.28 1.48 1.996 3.328 3.056 5.518 3.86 2.19.804 2.19.536 2.628.496.438-.04 1.41-.577 1.61-1.139a2.023 2.023 0 00.138-1.12c-.058-.099-.214-.157-.474-.287z"/>
+        </svg>
+    </a>
+
+    <button id="scroll-to-top-btn" class="scroll-to-top" aria-label="Voltar ao Topo">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </button>
+
+    <!-- TELEMETRIA DE CHECKOUT (Conversão, Dwell-Time, Anti-Spoofing) -->
+    <!-- HEADLESS CMS INTEGRATION SCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 1. Fetch Text Content CMS
+            try {
+                const res = await fetch('/api/content');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && Object.keys(data).length > 0) {
+                        for (const [id, value] of Object.entries(data)) {
+                            if (typeof value === 'object' && value !== null) continue;
+                            const el = document.getElementById(id);
+                            if (el) el.innerText = value;
+                        }
+                    }
+                }
+            } catch (e) { console.error('CMS Content Error', e); }
+
+            // 2. Form Submission Integration
+            const cForm = document.getElementById('modal-cadastro-form');
+            if (cForm && cForm.dataset.submitBound !== 'true') {
+                cForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const submitBtn = cForm.querySelector('button[type="submit"]');
+                    const originalText = submitBtn ? submitBtn.innerText : 'ENVIAR';
+                    if (submitBtn) submitBtn.innerText = 'ENVIANDO...';
+
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
                     const payload = {
                         nome: document.getElementById('m-nome')?.value,
                         email: document.getElementById('m-email')?.value,
@@ -1458,6 +2483,7 @@
                     };
                     const whatsappName = String(payload.nome || '').trim();
                     const whatsappProject = String(payload.projeto || 'Projeto').trim();
+<<<<<<< HEAD
 
                     try {
                         const res = await fetch('/api/cadastro', {
@@ -1466,6 +2492,16 @@
                             body: JSON.stringify(payload)
                         });
                         
+=======
+
+                    try {
+                        const res = await fetch('/api/cadastro', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
                         const result = await res.json().catch(() => ({}));
                         if (res.ok && result?.status !== 'error') {
                             cForm.reset();
@@ -1474,15 +2510,24 @@
                             // Automatically open WhatsApp!
                             const message = `Olá, meu nome é ${whatsappName}. Eu quero conversar sobre ${whatsappProject} com a Agência ALDEIA. Como posso fazer?`;
                             const waUrl = `https://wa.me/5521980638271?text=${encodeURIComponent(message)}`;
+<<<<<<< HEAD
                             
                             setTimeout(() => {
                                 window.location.href = waUrl;
                                 if (submitBtn) submitBtn.innerText = originalText;
                             }, 1500);
+=======
+                            
+                            setTimeout(() => {
+                                window.location.href = waUrl;
+                                if (submitBtn) submitBtn.innerText = originalText;
+                            }, 1500);
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
                         } else {
                             if (submitBtn) submitBtn.innerText = 'ERRO NO ENVIO';
                             const feedback = document.getElementById('modal-form-feedback');
                             if (feedback) feedback.textContent = String(result?.message || 'Não foi possível enviar. Tente novamente.');
+<<<<<<< HEAD
                             setTimeout(() => { if (submitBtn) submitBtn.innerText = originalText; }, 3000);
                         }
                     } catch (err) {
@@ -1571,3 +2616,93 @@
     </script>
 </body>
 </html>
+=======
+                            setTimeout(() => { if (submitBtn) submitBtn.innerText = originalText; }, 3000);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        if (submitBtn) submitBtn.innerText = 'ERRO DE CONEXÃO';
+                        setTimeout(() => { if (submitBtn) submitBtn.innerText = originalText; }, 3000);
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- Aldeia Analytics Tracker (Rabbit Max V9) -->
+    <script>
+        (function() {
+            if (localStorage.getItem('aldeia_cookie_consent') !== 'accepted') {
+                window.__aldeiaTracker = { trackEvent: function () {} };
+                return;
+            }
+            let sessionId = localStorage.getItem('aldeia_session');
+            if (!sessionId) {
+                sessionId = 's_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+                localStorage.setItem('aldeia_session', sessionId);
+            }
+
+            let eventsBuffer = [];
+            const FLUSH_INTERVAL = 15000;
+
+            function trackEvent(eventType, path, elementId, x, y) {
+                eventsBuffer.push({
+                    sessionId,
+                    eventType,
+                    path: path || window.location.pathname,
+                    elementId: elementId || '',
+                    x: Math.round(x || 0),
+                    y: Math.round(y || 0),
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            function flushEvents() {
+                if (eventsBuffer.length === 0) return;
+                const payload = [...eventsBuffer];
+                eventsBuffer = [];
+                
+                try {
+                    if (navigator.sendBeacon) {
+                        navigator.sendBeacon('/api/analytics', JSON.stringify({ events: payload }));
+                    } else {
+                        fetch('/api/analytics', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ events: payload })
+                        }).catch(() => {});
+                    }
+                } catch (e) {}
+            }
+
+            // Track Clicks
+            document.addEventListener('click', (e) => {
+                const el = e.target.closest('a, button, .case-card, .item');
+                let elId = '';
+                if (el) {
+                    elId = el.id || el.getAttribute('href') || el.className;
+                }
+                
+                // Track percentage of width/height instead of absolute pixels for better responsive heatmap
+                const xPct = (e.clientX / window.innerWidth) * 100;
+                const yPct = ((e.clientY + window.scrollY) / document.documentElement.scrollHeight) * 100;
+                
+                trackEvent('click', window.location.pathname, elId, xPct, yPct);
+            });
+
+            // Track Page View
+            trackEvent('pageview', window.location.pathname, '', 0, 0);
+
+            // Flush on interval and on page unload
+            setInterval(flushEvents, FLUSH_INTERVAL);
+            window.addEventListener('beforeunload', flushEvents);
+            window.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden') flushEvents();
+            });
+            
+            window.__aldeiaTracker = { trackEvent };
+        })();
+    </script>
+</body>
+</html>
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812

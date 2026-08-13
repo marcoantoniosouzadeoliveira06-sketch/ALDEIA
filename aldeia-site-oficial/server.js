@@ -1468,6 +1468,7 @@ app.get('/api/whatsapp/status', requireAuth, requireRole(['admin', 'operator']),
     return res.json({
         status: whatsappService.status,
         qrCode: whatsappService.status === 'AWAITING_QR' ? whatsappService.qrCodeBase64 : null
+<<<<<<< HEAD
     });
 });
 
@@ -1498,6 +1499,152 @@ app.get('/api/whatsapp/chats/:id/messages', requireAuth, requireRole(['admin', '
     } catch (error) {
         console.error('[WHATSAPP HISTORY]', error?.message || 'Falha desconhecida');
         return res.status(503).json({ success: false, messages: [], message: 'Histórico indisponível no momento.' });
+    }
+});
+
+app.post('/api/whatsapp/ai-summary', requireAuth, requireRole(['admin', 'operator']), validate(whatsappAIRequestSchema), async (req, res) => {
+    try {
+        const messages = await whatsappService.getChatHistory(req.validatedBody.chatId, 30);
+        const transcript = messages.map((item) => `${item?.fromMe ? 'ALDEIA' : 'CLIENTE'}: ${sanitizePlainText(item?.body || '')}`).join('\n').slice(-12_000);
+        const summary = await generateAIContent(
+            'Resuma a conversa comercial em uma frase curta, sem dados sensíveis e sem inventar fatos.',
+            transcript || 'Conversa ainda sem mensagens.'
+        );
+        return res.json({
+            success: true,
+            tag: sanitizePlainText(summary || 'Conversa sem contexto suficiente').slice(0, 240),
+            predictions: ['Posso esclarecer alguma dúvida?', 'Quer avançar com o próximo passo?', 'Prefere agendar uma conversa rápida?']
+        });
+    } catch (error) {
+        console.error('[WHATSAPP AI SUMMARY]', error?.message || 'Falha desconhecida');
+        return res.status(503).json({ success: false, message: 'Resumo por IA indisponível.' });
+    }
+});
+
+app.post('/api/whatsapp/ai-reply', requireAuth, requireRole(['admin', 'operator']), validate(whatsappAIRequestSchema), async (req, res) => {
+    try {
+        const messages = await whatsappService.getChatHistory(req.validatedBody.chatId, 30);
+        const transcript = messages.map((item) => `${item?.fromMe ? 'ALDEIA' : 'CLIENTE'}: ${sanitizePlainText(item?.body || '')}`).join('\n').slice(-12_000);
+        const reply = await generateAIContent(
+            'Crie uma resposta comercial breve e cordial em português do Brasil. Não invente preços, prazos ou condições.',
+            transcript || 'Inicie uma conversa profissional e breve.'
+        );
+        return res.json({ success: true, reply: sanitizePlainText(reply).slice(0, 2000) });
+    } catch (error) {
+        console.error('[WHATSAPP AI REPLY]', error?.message || 'Falha desconhecida');
+        return res.status(503).json({ success: false, message: 'Resposta por IA indisponível.' });
+    }
+});
+
+async function listActiveAdminUsers() {
+    const merged = new Map();
+    if (isMongoConnected) {
+        try {
+            const mongoUsers = await UserProfileModel.find({ active: { $ne: false } }).sort({ createdAt: 1 }).lean();
+            mongoUsers.forEach(user => {
+                const safe = sanitizeProfileResponse(user, user.username);
+                if (isSupportedPasswordHash(user.passwordHash) || safe.isRoot || safe.username.toLowerCase() === 'admin') {
+                    merged.set(safe.username.toLowerCase(), safe);
+                }
+            });
+        } catch (error) { console.error('[ADMIN USERS LIST MONGO]', error.message); }
+    }
+    const localUsers = safeReadJSON('user_profiles.json', {});
+    Object.values(localUsers).forEach(user => {
+        const safe = sanitizeProfileResponse(user, user?.username || 'Admin');
+        if (safe.active && (isSupportedPasswordHash(user?.passwordHash) || safe.isRoot || safe.username.toLowerCase() === 'admin')) {
+            merged.set(safe.username.toLowerCase(), safe);
+        }
+=======
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
+    });
+});
+
+app.post('/api/whatsapp/send', requireAuth, requireRole(['admin', 'operator']), validate(whatsappSendSchema), async (req, res) => {
+    try {
+<<<<<<< HEAD
+        const passwordHash = await bcrypt.hash(initialPassword, 12);
+        const createdAt = new Date().toISOString();
+        const userRecord = { username, displayName, role, passwordHash, active: true, isRoot: false, createdAt };
+        let mongoSaved = false;
+        if (isMongoConnected) {
+            await UserProfileModel.create(userRecord);
+            mongoSaved = true;
+        }
+        await mutateJSON('user_profiles.json', {}, (storedProfiles) => {
+            const profiles = storedProfiles && typeof storedProfiles === 'object' && !Array.isArray(storedProfiles) ? storedProfiles : {};
+            if (Object.keys(profiles).some(key => key.toLowerCase() === username.toLowerCase())) {
+                const duplicateError = new Error('Este login já está em uso.');
+                duplicateError.statusCode = 409;
+                throw duplicateError;
+            }
+            profiles[username] = userRecord;
+            return profiles;
+        });
+        const localSaved = true;
+        if (!mongoSaved && !localSaved) throw new Error('user persistence failed');
+        return res.status(201).json({ status: 'success', user: sanitizeProfileResponse(userRecord, username) });
+    } catch (error) {
+        if (error?.code === 11000 || error?.statusCode === 409) return res.status(409).json({ status: 'error', message: 'Este login já está em uso.' });
+        console.error('[ADMIN USER CREATE]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Não foi possível criar o usuário.' });
+=======
+        const result = await whatsappService.sendMessage(req.validatedBody.phone, req.validatedBody.message);
+        return res.json({ success: true, id: sanitizePlainText(result?.id?._serialized || '') });
+    } catch (error) {
+        console.error('[WHATSAPP SEND]', error?.message || 'Falha desconhecida');
+        return res.status(503).json({ success: false, message: 'WhatsApp indisponível no momento.' });
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
+    }
+});
+
+app.get('/api/whatsapp/chats', requireAuth, requireRole(['admin', 'operator']), async (req, res) => {
+    try {
+<<<<<<< HEAD
+        if (isMongoConnected) await UserProfileModel.updateOne({ username: new RegExp(`^${escapeRegExp(username)}$`, 'i') }, { $set: { role: nextRole } });
+        await mutateJSON('user_profiles.json', {}, (storedProfiles) => {
+            const profiles = storedProfiles && typeof storedProfiles === 'object' && !Array.isArray(storedProfiles) ? storedProfiles : {};
+            const key = Object.keys(profiles).find(item => item.toLowerCase() === username) || username;
+            profiles[key] = { ...(profiles[key] || account), username: account.username, role: nextRole };
+            return profiles;
+        });
+        invalidateUserSessions(account.username);
+        return res.json({ status: 'success', user: sanitizeProfileResponse({ ...account, role: nextRole }, account.username) });
+    } catch (error) {
+        console.error('[ADMIN USER ROLE]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Não foi possível alterar o cargo.' });
+=======
+        const chats = await whatsappService.getAllChats();
+        return res.json({ success: true, chats: Array.isArray(chats) ? chats.slice(0, 500) : [] });
+    } catch (error) {
+        console.error('[WHATSAPP CHATS]', error?.message || 'Falha desconhecida');
+        return res.status(503).json({ success: false, chats: [], message: 'Conversas indisponíveis no momento.' });
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
+    }
+});
+
+app.get('/api/whatsapp/chats/:id/messages', requireAuth, requireRole(['admin', 'operator']), validate(whatsappChatParamsSchema, 'params'), async (req, res) => {
+    try {
+<<<<<<< HEAD
+        if (isMongoConnected) await UserProfileModel.deleteOne({ username: new RegExp(`^${escapeRegExp(username)}$`, 'i') });
+        await mutateJSON('user_profiles.json', {}, (storedProfiles) => {
+            const profiles = storedProfiles && typeof storedProfiles === 'object' && !Array.isArray(storedProfiles) ? storedProfiles : {};
+            const key = Object.keys(profiles).find(item => item.toLowerCase() === username);
+            if (key) delete profiles[key];
+            return profiles;
+        });
+        invalidateUserSessions(account.username);
+        return res.json({ status: 'success', message: 'Acesso revogado.' });
+    } catch (error) {
+        console.error('[ADMIN USER DELETE]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Não foi possível revogar o acesso.' });
+=======
+        const messages = await whatsappService.getChatHistory(req.validatedParams.id, 50);
+        return res.json({ success: true, messages: Array.isArray(messages) ? messages : [] });
+    } catch (error) {
+        console.error('[WHATSAPP HISTORY]', error?.message || 'Falha desconhecida');
+        return res.status(503).json({ success: false, messages: [], message: 'Histórico indisponível no momento.' });
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
     }
 });
 
@@ -1703,6 +1850,7 @@ app.delete('/api/reset', requireAuth, requireRole(['admin']), validate(z.object(
         return res.status(503).json({ success: false, message: 'Não foi possível resetar os dados agora.' });
     }
 });
+<<<<<<< HEAD
 
 // ===== ROTAS DE CONTEÚDO CMS =====
 app.get('/api/content', async (req, res) => {
@@ -1754,6 +1902,59 @@ function createVisitorFingerprint(req) {
         .digest('hex');
 }
 
+=======
+
+// ===== ROTAS DE CONTEÚDO CMS =====
+app.get('/api/content', async (req, res) => {
+    if (isMongoConnected) {
+        try {
+            const doc = await SiteContentModel.findOne({ key: 'main' }).lean();
+            if (doc && doc.content) {
+                return res.json(sanitizeCmsContent(doc.content));
+            }
+        } catch (e) {
+            console.error('[CONTENT GET MONGO]', e.message);
+        }
+    }
+    const content = safeReadJSON('site_content.json', {});
+    res.json(sanitizeCmsContent(content));
+});
+
+app.post('/api/content', requireAuth, requireRole(['admin']), validate(cmsContentSchema), async (req, res) => {
+    const contentData = req.validatedBody;
+    let saved = false;
+
+    if (isMongoConnected) {
+        try {
+            await SiteContentModel.findOneAndUpdate(
+                { key: 'main' },
+                { content: contentData },
+                { upsert: true, new: true }
+            );
+            saved = true;
+        } catch (e) {
+            console.error('[CONTENT POST MONGO]', e.message);
+        }
+    }
+
+    const jsonSuccess = await safeWriteJSON('site_content.json', contentData).then(() => true);
+    if (saved || jsonSuccess) {
+        res.json({ status: 'success', message: 'Conteúdo atualizado com sucesso' });
+    } else {
+        res.status(503).json({ status: 'error', message: 'Erro ao salvar conteúdo' });
+    }
+});
+
+// ===== ROTAS DE PORTFÓLIO =====
+function createVisitorFingerprint(req) {
+    const ip = sanitizePlainText(req.ip || req.socket?.remoteAddress || 'unknown');
+    const userAgent = sanitizePlainText(req.get('user-agent') || 'unknown');
+    return crypto.createHmac('sha256', VIEW_FINGERPRINT_SECRET || 'aldeia-view-window-v1')
+        .update(`${ip}|${userAgent}`)
+        .digest('hex');
+}
+
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
 async function recordLocalProjectView(projectId, visitorHash, viewedAt, persistEvent = true) {
     const nowMs = viewedAt.getTime();
     const windowKey = `${projectId}:${visitorHash}`;
@@ -1793,6 +1994,7 @@ async function recordLocalProjectView(projectId, visitorHash, viewedAt, persistE
     }
     return true;
 }
+<<<<<<< HEAD
 
 async function recordUniqueProjectView(projectId, req) {
     const visitorHash = createVisitorFingerprint(req);
@@ -1825,6 +2027,40 @@ async function recordUniqueProjectView(projectId, req) {
     const accepted = mongoUnavailable ? acceptedLocally : acceptedByMongo;
     if (!accepted) return false;
 
+=======
+
+async function recordUniqueProjectView(projectId, req) {
+    const visitorHash = createVisitorFingerprint(req);
+    const viewedAt = new Date();
+    let acceptedByMongo = false;
+    let mongoUnavailable = !isMongoConnected;
+
+    if (isMongoConnected) {
+        try {
+            const expiresAt = new Date(viewedAt.getTime() + 24 * 60 * 60 * 1000);
+            await ProjectViewWindowModel.findOneAndUpdate(
+                {
+                    projectId,
+                    visitorHash,
+                    $or: [{ expiresAt: { $lte: viewedAt } }, { expiresAt: { $exists: false } }]
+                },
+                { $set: { expiresAt } },
+                { upsert: true, new: true }
+            );
+            acceptedByMongo = true;
+        } catch (error) {
+            if (error?.code !== 11000) {
+                mongoUnavailable = true;
+                console.error('[PROJECT VIEW WINDOW]', error.message);
+            }
+        }
+    }
+
+    const acceptedLocally = await recordLocalProjectView(projectId, visitorHash, viewedAt, mongoUnavailable || acceptedByMongo);
+    const accepted = mongoUnavailable ? acceptedLocally : acceptedByMongo;
+    if (!accepted) return false;
+
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
     if (isMongoConnected && acceptedByMongo) {
         try {
             await Promise.all([
@@ -1839,6 +2075,7 @@ async function recordUniqueProjectView(projectId, req) {
         }
     }
     return mongoUnavailable ? acceptedLocally : acceptedByMongo;
+<<<<<<< HEAD
 }
 
 app.get('/api/portfolio', async (req, res) => {
@@ -2272,6 +2509,465 @@ function encryptGoogleRefreshToken(refreshToken) {
 function decryptGoogleRefreshToken(value) {
     const key = getGoogleTokenCipherKey();
     if (!key || !value || typeof value !== 'object') return '';
+=======
+}
+
+app.get('/api/portfolio', async (req, res) => {
+    if (isMongoConnected) {
+        try {
+            const projects = await ProjectModel.find().sort({ createdAt: -1 }).lean();
+            return res.json(projects.map(sanitizeProjectResponse));
+        } catch (e) {
+            console.error('[PORTFOLIO GET MONGO]', e.message);
+        }
+    }
+    const portfolio = safeReadJSON('portfolio.json', []);
+    res.json(portfolio.map(sanitizeProjectResponse));
+});
+
+app.get('/api/projects/:id', projectViewLimiter, validate(idParamsSchema, 'params'), async (req, res) => {
+    const projectId = req.validatedParams.id;
+    let project = null;
+    if (isMongoConnected) {
+        try { project = await ProjectModel.findOne({ id: projectId }).lean(); }
+        catch (error) { console.error('[PROJECT DETAIL MONGO]', error.message); }
+    }
+    if (!project) project = safeReadJSON('portfolio.json', []).find(item => item.id === projectId) || null;
+    if (!project) return res.status(404).json({ status: 'error', message: 'Projeto nao encontrado.' });
+
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
+    try {
+        await recordUniqueProjectView(projectId, req);
+    } catch (error) {
+        // A telemetria nunca pode impedir a abertura do projeto público.
+        console.error('[PROJECT VIEW RECORD]', error.message);
+    }
+    if (isMongoConnected) {
+        try { project = await ProjectModel.findOne({ id: projectId }).lean() || project; } catch (_) {}
+    } else {
+        project = safeReadJSON('portfolio.json', []).find(item => item.id === projectId) || project;
+    }
+    return res.json(sanitizeProjectResponse(project));
+});
+
+app.post('/api/portfolio', requireAuth, requireRole(['admin', 'operator']), validate(projectPayloadSchema), async (req, res) => {
+    const payload = req.validatedBody;
+    req.body = payload;
+    const format = payload.format || 'post';
+    const aspectRatio = payload.aspectRatio || (format === 'story' ? '9:16' : format === 'video' ? '16:9' : '1:1');
+    
+    const newProject = {
+        id: 'p' + Date.now(),
+        title: req.body.title || 'Sem Título',
+        category: req.body.category || 'artes',
+        categoryLabel: req.body.categoryLabel || 'Artes Avulsas',
+        format: format,
+        aspectRatio: aspectRatio,
+        accentColor: payload.accentColor || '#ffffff',
+        cover: payload.cover,
+        assets: payload.assets,
+        member: payload.member || null
+    };
+
+    let savedInMongo = false;
+    if (isMongoConnected) {
+        try {
+            await ProjectModel.create(newProject);
+            savedInMongo = true;
+        } catch (e) {
+            console.error('[PORTFOLIO POST MONGO]', e.message);
+        }
+    }
+
+    const jsonSuccess = await mutateJSON('portfolio.json', [], (data) => {
+        const projects = Array.isArray(data) ? data : [];
+        projects.push(newProject);
+        return projects;
+    }).then(() => true);
+
+    if (savedInMongo || jsonSuccess) {
+        res.json({ status: 'success', project: sanitizeProjectResponse(newProject) });
+    } else {
+        res.status(503).json({ status: 'error', message: 'Erro ao salvar projeto' });
+    }
+});
+
+app.put('/api/portfolio/:id', requireAuth, requireRole(['admin', 'operator']), validate(idParamsSchema, 'params'), validate(projectPayloadSchema), async (req, res) => {
+    const projId = req.validatedParams.id;
+    const payload = req.validatedBody;
+    let updatedProj = null;
+
+    if (isMongoConnected) {
+        try {
+            updatedProj = await ProjectModel.findOneAndUpdate(
+                { id: projId },
+                { ...payload, id: projId },
+                { new: true }
+            ).lean();
+        } catch (e) {
+            console.error('[PORTFOLIO PUT MONGO]', e.message);
+        }
+    }
+
+    await mutateJSON('portfolio.json', [], (data) => {
+        const projects = Array.isArray(data) ? data : [];
+        const index = projects.findIndex(p => p.id === projId);
+        if (index !== -1) {
+            projects[index] = { ...projects[index], ...payload, id: projId };
+            if (!updatedProj) updatedProj = projects[index];
+        }
+        return projects;
+    });
+
+    if (updatedProj) {
+        res.json({ status: 'success', project: sanitizeProjectResponse(updatedProj) });
+    } else {
+        res.status(404).json({ status: 'error', message: 'Projeto não encontrado' });
+    }
+});
+
+app.delete('/api/portfolio/:id', requireAuth, requireRole(['admin', 'operator']), validate(idParamsSchema, 'params'), async (req, res) => {
+    const projId = req.validatedParams.id;
+    let deletedMongo = false;
+
+    if (isMongoConnected) {
+        try {
+            const resDel = await ProjectModel.deleteOne({ id: projId });
+            if (resDel.deletedCount > 0) deletedMongo = true;
+        } catch (e) {
+            console.error('[PORTFOLIO DELETE MONGO]', e.message);
+        }
+    }
+
+    let deletedJson = false;
+    await mutateJSON('portfolio.json', [], (data) => {
+        const projects = Array.isArray(data) ? data : [];
+        const filtered = projects.filter(p => p.id !== projId);
+        deletedJson = filtered.length < projects.length;
+        return filtered;
+    });
+
+    if (deletedMongo || deletedJson) {
+        res.json({ status: 'success' });
+    } else {
+        res.status(404).json({ status: 'error', message: 'Projeto não encontrado' });
+    }
+});
+
+// ===== ROTAS DE CLIENTES / CRM =====
+app.get('/api/clients', requireAuth, requireRole(['admin', 'operator']), async (req, res) => {
+    if (isMongoConnected) {
+        try {
+            const clients = await ClientModel.find().sort({ createdAt: -1 }).lean();
+            return res.json(clients.map(sanitizeClientResponse));
+        } catch (e) {
+            console.error('[CLIENTS GET MONGO]', e.message);
+        }
+    }
+    const clients = safeReadJSON('clients.json', []);
+    res.json(clients.map(sanitizeClientResponse));
+});
+
+app.post('/api/clients', requireAuth, requireRole(['admin', 'operator']), validate(clientPayloadSchema), async (req, res) => {
+    const body = req.validatedBody;
+    let resultClients = [];
+
+    if (Array.isArray(body)) {
+        resultClients = body;
+        if (isMongoConnected) {
+            try {
+                await ClientModel.deleteMany({});
+                await ClientModel.insertMany(body);
+            } catch (e) { console.error('[CLIENTS BULK MONGO]', e.message); }
+        }
+        await safeWriteJSON('clients.json', resultClients);
+    } else {
+        const leadId = body.leadId || null;
+        let exists = false;
+        if (isMongoConnected && leadId) {
+            const existing = await ClientModel.findOne({ leadId }).lean();
+            if (existing) exists = true;
+        }
+        if (!exists && leadId) {
+            const localClients = safeReadJSON('clients.json', []);
+            if (localClients.some(c => c.leadId === leadId)) exists = true;
+        }
+
+        if (exists) {
+            return res.status(400).json({ status: 'error', message: 'Este lead já foi convertido em cliente.' });
+        }
+
+        const newClient = {
+            id: body.id || ('c_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7)),
+            leadId: leadId,
+            nome: body.nome || 'Cliente Sem Nome',
+            email: body.email || '',
+            telefone: body.telefone || '',
+            projeto: body.projeto || 'Projeto Padrão',
+            status: body.status || 'Ativo',
+            createdAt: new Date().toISOString()
+        };
+
+        if (isMongoConnected) {
+            try { await ClientModel.create(newClient); } catch (e) { console.error('[CLIENT POST MONGO]', e.message); }
+        }
+        const clients = await mutateJSON('clients.json', [], (data) => {
+            const items = Array.isArray(data) ? data : [];
+            if (leadId && items.some(client => client.leadId === leadId)) {
+                const duplicateError = new Error('Este lead já foi convertido em cliente.');
+                duplicateError.statusCode = 409;
+                throw duplicateError;
+            }
+            items.push(newClient);
+            return items;
+        });
+        if (leadId) {
+            if (isMongoConnected) {
+                try { await SubmissionModel.deleteOne({ id: leadId }); }
+                catch (error) { console.error('[CLIENT CONVERSION LEAD DELETE]', error.message); }
+            }
+            await mutateJSON('submissions.json', [], (submissions) =>
+                (Array.isArray(submissions) ? submissions : []).filter((submission) => submission.id !== leadId)
+            );
+        }
+        resultClients = clients;
+    }
+
+    res.json({ status: 'success', clients: resultClients.map(sanitizeClientResponse) });
+});
+
+app.put('/api/clients/:id', requireAuth, requireRole(['admin', 'operator']), validate(idParamsSchema, 'params'), validate(clientUpdateSchema), async (req, res) => {
+    const clientId = req.validatedParams.id;
+    const payload = req.validatedBody;
+    let updatedClient = null;
+
+    if (isMongoConnected) {
+        try {
+            updatedClient = await ClientModel.findOneAndUpdate(
+                { id: clientId },
+                { ...payload, id: clientId },
+                { new: true }
+            ).lean();
+        } catch (e) { console.error('[CLIENT PUT MONGO]', e.message); }
+    }
+
+    await mutateJSON('clients.json', [], (clients) => {
+        const items = Array.isArray(clients) ? clients : [];
+        const index = items.findIndex(c => c.id === clientId);
+        if (index !== -1) {
+            items[index] = { ...items[index], ...payload, id: clientId };
+            if (!updatedClient) updatedClient = items[index];
+        }
+        return items;
+    });
+
+    if (updatedClient) {
+        res.json({ status: 'success', client: sanitizeClientResponse(updatedClient) });
+    } else {
+        res.status(404).json({ status: 'error', message: 'Cliente não encontrado' });
+    }
+});
+
+app.delete('/api/clients/:id', requireAuth, requireRole(['admin', 'operator']), validate(idParamsSchema, 'params'), async (req, res) => {
+    const clientId = req.validatedParams.id;
+    let deleted = false;
+
+    if (isMongoConnected) {
+        try {
+            const r = await ClientModel.deleteOne({ id: clientId });
+            if (r.deletedCount > 0) deleted = true;
+        } catch (e) { console.error('[CLIENT DELETE MONGO]', e.message); }
+    }
+
+    await mutateJSON('clients.json', [], (clients) => {
+        const items = Array.isArray(clients) ? clients : [];
+        const filtered = items.filter(c => c.id !== clientId);
+        if (filtered.length < items.length) deleted = true;
+        return filtered;
+    });
+
+    if (deleted) {
+        res.json({ status: 'success' });
+    } else {
+        res.status(404).json({ status: 'error', message: 'Cliente não encontrado' });
+    }
+});
+
+// ===== ROTAS DE TRELLO (KANBAN DA EQUIPE) =====
+app.get('/api/trello', requireAuth, requireRole(['admin', 'operator']), async (req, res) => {
+    if (isMongoConnected) {
+        try {
+            const tasks = await TrelloTaskModel.find().sort({ createdAt: -1 }).lean();
+            return res.json(tasks.map(sanitizeTrelloResponse));
+        } catch (e) { console.error('[TRELLO GET MONGO]', e.message); }
+    }
+    const tasks = safeReadJSON('trello_tasks.json', []);
+    res.json(tasks.map(sanitizeTrelloResponse));
+});
+
+app.post('/api/trello', requireAuth, requireRole(['admin', 'operator']), validate(trelloPayloadSchema), async (req, res) => {
+    req.body = req.validatedBody;
+    const assignee = await resolveActiveKanbanAssignee(req.body.assignedTo);
+    if (req.body.assignedTo && !assignee) {
+        return res.status(400).json({ status: 'error', message: 'Selecione uma conta ativa da equipe.' });
+    }
+    const newTask = {
+        id: 't_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        title: req.body.title || 'Nova Tarefa',
+        description: req.body.description || '',
+        status: req.body.status || 'backlog',
+        assignedTo: assignee?.username || '',
+        priority: req.body.priority || 'média',
+        clientName: req.body.clientName || '',
+        dueDate: req.body.dueDate || '',
+        subtasks: req.body.subtasks || [],
+        assets: req.body.assets || [],
+        timeSpentSeconds: req.body.timeSpentSeconds || 0,
+        timerStartedAt: req.body.timerStartedAt || ''
+    };
+
+    if (isMongoConnected) {
+        try { await TrelloTaskModel.create(newTask); } catch (e) { console.error('[TRELLO POST MONGO]', e.message); }
+    }
+
+    await mutateJSON('trello_tasks.json', [], (tasks) => {
+        const items = Array.isArray(tasks) ? tasks : [];
+        items.unshift(newTask);
+        return items;
+    });
+    res.json({ status: 'success', task: sanitizeTrelloResponse(newTask) });
+});
+
+app.put('/api/trello/:id', requireAuth, requireRole(['admin', 'operator']), validate(idParamsSchema, 'params'), validate(trelloUpdateSchema), async (req, res) => {
+    const taskId = req.validatedParams.id;
+    const payload = { ...req.validatedBody };
+    if (Object.hasOwn(payload, 'assignedTo')) {
+        const assignee = await resolveActiveKanbanAssignee(payload.assignedTo);
+        if (payload.assignedTo && !assignee) {
+            return res.status(400).json({ status: 'error', message: 'Selecione uma conta ativa da equipe.' });
+        }
+        payload.assignedTo = assignee?.username || '';
+    }
+    let updatedTask = null;
+
+    if (isMongoConnected) {
+        try {
+            updatedTask = await TrelloTaskModel.findOneAndUpdate(
+                { id: taskId },
+                { ...payload, id: taskId },
+                { new: true }
+            ).lean();
+        } catch (e) { console.error('[TRELLO PUT MONGO]', e.message); }
+    }
+
+    await mutateJSON('trello_tasks.json', [], (tasks) => {
+        const items = Array.isArray(tasks) ? tasks : [];
+        const index = items.findIndex(t => t.id === taskId);
+        if (index !== -1) {
+            items[index] = { ...items[index], ...payload, id: taskId };
+            if (!updatedTask) updatedTask = items[index];
+        }
+        return items;
+    });
+<<<<<<< HEAD
+
+    if (isMongoConnected) {
+        const ids = incoming.map(event => event.googleEventId);
+        const existingItems = await MeetingModel.find({ googleEventId: { $in: ids } }).lean();
+        const existingByGoogleId = new Map(existingItems.map(item => [item.googleEventId, item]));
+        let imported = 0;
+        let updated = 0;
+        const operations = incoming.map(event => {
+            const existing = existingByGoogleId.get(event.googleEventId) || {};
+            if (existing.id) updated += 1; else imported += 1;
+            return {
+                updateOne: {
+                    filter: { googleEventId: event.googleEventId },
+                    update: { $set: mergeEvent(event, existing) },
+                    upsert: true
+                }
+            };
+        });
+        if (operations.length) await MeetingModel.bulkWrite(operations, { ordered: false });
+        return { imported, updated };
+    }
+
+=======
+
+    if (updatedTask) {
+        res.json({ status: 'success', task: sanitizeTrelloResponse(updatedTask) });
+    } else {
+        res.status(404).json({ status: 'error', message: 'Tarefa não encontrada' });
+    }
+});
+
+app.delete('/api/trello/:id', requireAuth, requireRole(['admin', 'operator']), validate(idParamsSchema, 'params'), async (req, res) => {
+    const taskId = req.validatedParams.id;
+    let deleted = false;
+
+    if (isMongoConnected) {
+        try {
+            const r = await TrelloTaskModel.deleteOne({ id: taskId });
+            if (r.deletedCount > 0) deleted = true;
+        } catch (e) { console.error('[TRELLO DELETE MONGO]', e.message); }
+    }
+
+    await mutateJSON('trello_tasks.json', [], (tasks) => {
+        const items = Array.isArray(tasks) ? tasks : [];
+        const filtered = items.filter(t => t.id !== taskId);
+        if (filtered.length < items.length) deleted = true;
+        return filtered;
+    });
+
+    if (deleted) {
+        res.json({ status: 'success' });
+    } else {
+        res.status(404).json({ status: 'error', message: 'Tarefa não encontrada' });
+    }
+});
+
+// ===== AGENDAMENTOS + GOOGLE CALENDAR / MEET =====
+const GOOGLE_CALENDAR_ID = String(process.env.GOOGLE_CALENDAR_ID || 'primary').trim();
+const GOOGLE_CLIENT_ID = String(process.env.GOOGLE_CLIENT_ID || '').trim();
+const GOOGLE_CLIENT_SECRET = String(process.env.GOOGLE_CLIENT_SECRET || '').trim();
+const GOOGLE_REFRESH_TOKEN = String(process.env.GOOGLE_REFRESH_TOKEN || '').trim();
+const GOOGLE_OAUTH_REDIRECT_URI = String(process.env.GOOGLE_OAUTH_REDIRECT_URI || '').trim();
+const GOOGLE_TOKEN_ENCRYPTION_KEY = String(process.env.GOOGLE_TOKEN_ENCRYPTION_KEY || '').trim();
+const GOOGLE_TOKEN_STORAGE_FILE = 'google_calendar_tokens.json';
+const GOOGLE_OAUTH_STATE_TTL = 10 * 60 * 1000;
+const RESEND_API_KEY = String(process.env.RESEND_API_KEY || '').trim();
+const EMAIL_FROM = String(process.env.EMAIL_FROM || '').trim();
+const ADMIN_NOTIFICATION_EMAIL = String(process.env.ADMIN_NOTIFICATION_EMAIL || '').trim();
+const MEETING_SHARE_COOLDOWN_MS = 45 * 1000;
+
+function pruneGoogleOAuthStates(now = Date.now()) {
+    for (const [state, entry] of pendingGoogleOAuthStates.entries()) {
+        if (!entry || Number(entry.expiresAt) <= now) pendingGoogleOAuthStates.delete(state);
+    }
+}
+
+function getGoogleTokenCipherKey() {
+    if (GOOGLE_TOKEN_ENCRYPTION_KEY.length < 32) return null;
+    return crypto.createHash('sha256').update(GOOGLE_TOKEN_ENCRYPTION_KEY, 'utf8').digest();
+}
+
+function encryptGoogleRefreshToken(refreshToken) {
+    const key = getGoogleTokenCipherKey();
+    if (!key) throw new Error('GOOGLE_TOKEN_ENCRYPTION_KEY ausente');
+    const iv = crypto.randomBytes(12);
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+    const ciphertext = Buffer.concat([cipher.update(String(refreshToken), 'utf8'), cipher.final()]);
+    return {
+        version: 1,
+        iv: iv.toString('base64url'),
+        tag: cipher.getAuthTag().toString('base64url'),
+        ciphertext: ciphertext.toString('base64url')
+    };
+}
+
+function decryptGoogleRefreshToken(value) {
+    const key = getGoogleTokenCipherKey();
+    if (!key || !value || typeof value !== 'object') return '';
     try {
         const iv = Buffer.from(String(value.iv || ''), 'base64url');
         const tag = Buffer.from(String(value.tag || ''), 'base64url');
@@ -2543,6 +3239,7 @@ async function upsertGoogleCalendarEvents(events) {
         return { imported, updated };
     }
 
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
     let imported = 0;
     let updated = 0;
     await mutateJSON('meetings.json', [], (stored) => {
@@ -2562,6 +3259,7 @@ async function upsertGoogleCalendarEvents(events) {
         return meetings;
     });
     return { imported, updated };
+<<<<<<< HEAD
 }
 
 async function insertGoogleCalendarMeeting(meeting) {
@@ -2586,10 +3284,37 @@ async function insertGoogleCalendarMeeting(meeting) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 12_000);
     try {
+=======
+}
+
+async function insertGoogleCalendarMeeting(meeting) {
+    const accessToken = await getGoogleCalendarAccessToken();
+    const requestId = crypto.randomUUID();
+    const fallbackDescription = `${meeting.eventType === 'work' ? 'Bloco de trabalho' : 'Reunião'} agendado pelo CRM ALDEIA${meeting.clientName ? ` — Cliente: ${meeting.clientName}` : ''}`;
+    const eventPayload = {
+        summary: meeting.title,
+        description: meeting.description || fallbackDescription,
+        start: { dateTime: meeting.startAt, timeZone: 'America/Sao_Paulo' },
+        end: { dateTime: meeting.endAt, timeZone: 'America/Sao_Paulo' },
+        attendees: meeting.attendees.map(email => ({ email }))
+    };
+    if (meeting.eventType === 'meeting') {
+        eventPayload.conferenceData = {
+            createRequest: {
+                requestId,
+                conferenceSolutionKey: { type: 'hangoutsMeet' }
+            }
+        };
+    }
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12_000);
+    try {
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
         // O CRM libera o Meet apenas na janela da reunião. O participante é
         // registrado no evento, mas o Google não recebe permissão para enviar
         // o link antecipadamente por e-mail.
         const calendarUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GOOGLE_CALENDAR_ID)}/events?${meeting.eventType === 'meeting' ? 'conferenceDataVersion=1&' : ''}sendUpdates=none`;
+<<<<<<< HEAD
         const calendarResponse = await fetch(calendarUrl, {
             method: 'POST',
             headers: {
@@ -2730,11 +3455,154 @@ app.post('/api/meetings/schedule', requireAuth, requireRole(['admin', 'operator'
     if (isMongoConnected) {
         try { await MeetingModel.create(meeting); } catch (error) { console.error('[MEETINGS POST MONGO]', error.message); }
     }
+=======
+        const calendarResponse = await fetch(calendarUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(eventPayload),
+            signal: controller.signal
+        });
+        if (!calendarResponse.ok) throw new Error(`Google Calendar respondeu HTTP ${calendarResponse.status}`);
+        return calendarResponse.json();
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+app.get('/api/google-calendar/status', requireAuth, requireRole(['admin', 'operator']), (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ status: 'success', ...getGoogleCalendarStatus() });
+});
+
+app.post('/api/google-calendar/connect', requireAuth, requireRole(['admin', 'operator']), (req, res) => {
+    if (!isGoogleOAuthReady()) {
+        return res.status(409).json({
+            status: 'error',
+            message: 'A conexao OAuth do Google ainda nao foi configurada no servidor.'
+        });
+    }
+    const state = createGoogleOAuthState(req.user);
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ status: 'success', authorizationUrl: getGoogleOAuthAuthorizationUrl(state) });
+});
+
+app.get('/api/google-calendar/oauth/callback', async (req, res) => {
+    const state = String(req.query?.state || '');
+    const code = String(req.query?.code || '');
+    const pending = pendingGoogleOAuthStates.get(state);
+    pendingGoogleOAuthStates.delete(state);
+
+    const finish = (statusCode, title, description) => {
+        res.status(statusCode).type('html').send(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ALDEIA | Google Calendar</title><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#050505;color:#fff;font-family:Arial,sans-serif"><main style="max-width:420px;margin:24px;padding:32px;border:1px solid rgba(255,255,255,.1);border-radius:24px;background:rgba(255,255,255,.03);text-align:center"><h1 style="margin:0 0 12px;font-size:24px">${title}</h1><p style="margin:0;color:rgba(255,255,255,.62);line-height:1.55">${description}</p></main></body></html>`);
+    };
+
+    if (!pending || pending.expiresAt <= Date.now() || !/^[A-Za-z0-9_-]{32,128}$/.test(state) || !code) {
+        return finish(400, 'Conexao invalida', 'Esta tentativa expirou ou ja foi utilizada. Volte ao CRM e inicie a conexao novamente.');
+    }
+    if (!isGoogleOAuthReady()) {
+        return finish(409, 'Configuracao pendente', 'A conexao OAuth do Google nao esta pronta neste servidor.');
+    }
+    try {
+        const tokenData = await exchangeGoogleOAuthCode(code);
+        const refreshToken = String(tokenData?.refresh_token || getGoogleRefreshToken() || '').trim();
+        if (!refreshToken) throw new Error('OAuth Google nao retornou refresh_token');
+        await storeGoogleRefreshToken(refreshToken, { username: pending.userId });
+        lastGoogleCalendarSyncAt = new Date().toISOString();
+        return res.redirect(303, '/admin/agendamentos?google=connected');
+    } catch (error) {
+        console.error('[GOOGLE OAUTH CALLBACK]', error.message);
+        return finish(502, 'Conexao nao concluida', 'Nao foi possivel concluir a conexao com o Google Calendar.');
+    }
+});
+
+app.post('/api/google-calendar/sync', requireAuth, requireRole(['admin', 'operator']), async (req, res) => {
+    if (!isGoogleCalendarConfigured()) {
+        return res.status(409).json({
+            status: 'error',
+            message: 'Google Calendar ainda nao esta conectado.'
+        });
+    }
+    try {
+        const events = await listGoogleCalendarEvents();
+        const changes = await upsertGoogleCalendarEvents(events);
+        lastGoogleCalendarSyncAt = new Date().toISOString();
+        res.setHeader('Cache-Control', 'no-store');
+        res.json({
+            status: 'success',
+            events: events.map(event => redactMeetingForClient(event)),
+            ...changes,
+            syncedAt: lastGoogleCalendarSyncAt
+        });
+    } catch (error) {
+        console.error('[GOOGLE CALENDAR SYNC]', error.message);
+        res.status(503).json({ status: 'error', message: 'Nao foi possivel sincronizar o Google Calendar agora.' });
+    }
+});
+
+app.get('/api/meetings', requireAuth, requireRole(['admin', 'operator']), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (isMongoConnected) {
+        try {
+            const meetings = await MeetingModel.find().sort({ startAt: 1 }).limit(300).lean();
+            return res.json(meetings.map(meeting => redactMeetingForClient(meeting)));
+        } catch (error) { console.error('[MEETINGS GET MONGO]', error.message); }
+    }
+    const storedMeetings = safeReadJSON('meetings.json', []);
+    const meetings = Array.isArray(storedMeetings) ? storedMeetings : [];
+    res.json(meetings.map(meeting => redactMeetingForClient(meeting)).sort((a, b) => new Date(a.startAt) - new Date(b.startAt)));
+});
+
+app.post('/api/meetings/schedule', requireAuth, requireRole(['admin', 'operator']), validate(meetingPayloadSchema), async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    const payload = req.validatedBody;
+    const attendees = [...new Set([payload.clientEmail, ...payload.attendees].filter(Boolean))];
+    const meeting = {
+        id: `meet_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
+        title: payload.title,
+        description: payload.description || '',
+        eventType: payload.eventType,
+        clientId: payload.clientId || '',
+        clientName: payload.clientName || '',
+        clientEmail: payload.clientEmail || '',
+        startAt: payload.startAt,
+        endAt: payload.endAt,
+        attendees,
+        sendInvite: payload.sendInvite !== false,
+        meetLink: '',
+        googleEventId: '',
+        source: 'aldeia',
+        integrationStatus: isGoogleCalendarConfigured() ? 'failed' : 'not_configured',
+        createdBy: sanitizePlainText(req.user?.displayName || req.user?.username || 'Admin'),
+        createdAt: new Date().toISOString()
+    };
+
+    let syncWarning = '';
+    if (isGoogleCalendarConfigured()) {
+        try {
+            const googleEvent = await insertGoogleCalendarMeeting(meeting);
+            meeting.googleEventId = sanitizePlainText(googleEvent?.id || '');
+            meeting.meetLink = String(googleEvent?.hangoutLink || googleEvent?.conferenceData?.entryPoints?.find(point => point.entryPointType === 'video')?.uri || '').trim();
+            meeting.integrationStatus = 'connected';
+        } catch (error) {
+            console.error('[GOOGLE CALENDAR SCHEDULE]', error.message);
+            meeting.integrationStatus = 'failed';
+            syncWarning = 'O evento foi salvo no CRM, mas não foi possível enviá-lo ao Google Calendar.';
+        }
+    }
+
+    if (isMongoConnected) {
+        try { await MeetingModel.create(meeting); } catch (error) { console.error('[MEETINGS POST MONGO]', error.message); }
+    }
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
     await mutateJSON('meetings.json', [], (storedMeetings) => {
         const meetings = Array.isArray(storedMeetings) ? storedMeetings : [];
         meetings.push(meeting);
         return meetings;
     });
+<<<<<<< HEAD
     res.status(201).json({ status: 'success', meeting: redactMeetingForClient(meeting), warning: syncWarning });
 });
 
@@ -3028,12 +3896,308 @@ app.delete('/api/meetings/:id', requireAuth, requireRole(['admin', 'operator']),
         }
     }
 
+=======
+    res.status(201).json({ status: 'success', meeting: redactMeetingForClient(meeting), warning: syncWarning });
+});
+
+async function findMeetingForShare(meetingId) {
+    if (isMongoConnected) {
+        try {
+            const meeting = await MeetingModel.findOne({ id: meetingId }).lean();
+            if (meeting) return sanitizeMeetingResponse(meeting);
+        } catch (error) {
+            console.error('[MEETING SHARE LOOKUP]', error.message);
+        }
+    }
+
+    const storedMeetings = safeReadJSON('meetings.json', []);
+    const meetings = Array.isArray(storedMeetings) ? storedMeetings : [];
+    const meeting = meetings.find(item => String(item?.id || '') === meetingId);
+    return meeting ? sanitizeMeetingResponse(meeting) : null;
+}
+
+function parseEmailAddress(value) {
+    const result = z.string().trim().email().max(254).safeParse(String(value || ''));
+    return result.success ? result.data : '';
+}
+
+async function resolveMeetingClientEmail(meeting) {
+    const storedEmail = parseEmailAddress(meeting?.clientEmail);
+    if (storedEmail) return storedEmail;
+
+    const clientId = SAFE_ID.test(String(meeting?.clientId || '')) ? String(meeting.clientId) : '';
+    if (!clientId) return '';
+
+    if (isMongoConnected) {
+        try {
+            const [client, submission] = await Promise.all([
+                ClientModel.findOne({ id: clientId }).select({ email: 1, _id: 0 }).lean(),
+                SubmissionModel.findOne({ id: clientId }).select({ email: 1, _id: 0 }).lean()
+            ]);
+            const databaseEmail = parseEmailAddress(client?.email || submission?.email);
+            if (databaseEmail) return databaseEmail;
+        } catch (error) {
+            console.error('[MEETING SHARE CONTACT LOOKUP]', error.message);
+        }
+    }
+
+    const localClients = safeReadJSON('clients.json', []);
+    const localSubmissions = safeReadJSON('submissions.json', []);
+    const localContacts = [
+        ...(Array.isArray(localClients) ? localClients : []),
+        ...(Array.isArray(localSubmissions) ? localSubmissions : [])
+    ];
+    const localContact = localContacts.find(item => String(item?.id || '') === clientId);
+    return parseEmailAddress(localContact?.email);
+}
+
+function getSafeGoogleMeetLink(value) {
+    try {
+        const url = new URL(String(value || '').trim());
+        if (url.protocol !== 'https:' || url.hostname.toLowerCase() !== 'meet.google.com') return '';
+        return url.toString();
+    } catch (_) {
+        return '';
+    }
+}
+
+const MEETING_ACCESS_GRACE_MS = 30 * 60 * 1000;
+
+function getMeetingAccessState(meeting, nowValue = Date.now()) {
+    const value = sanitizeMeetingResponse(meeting);
+    const nowMs = Number.isFinite(Number(nowValue)) ? Number(nowValue) : Date.now();
+    const startMs = Date.parse(value.startAt);
+    const endMs = Date.parse(value.endAt);
+    const hasValidWindow = Number.isFinite(startMs) && Number.isFinite(endMs) && endMs > startMs;
+    const unlockAt = hasValidWindow ? new Date(startMs).toISOString() : null;
+    const expiresAt = hasValidWindow ? new Date(endMs + MEETING_ACCESS_GRACE_MS).toISOString() : null;
+    const meetLink = getSafeGoogleMeetLink(value.meetLink);
+
+    let status = 'unavailable';
+    if (value.eventType === 'meeting' && meetLink && hasValidWindow) {
+        if (nowMs < startMs) status = 'locked';
+        else if (nowMs <= endMs + MEETING_ACCESS_GRACE_MS) status = 'available';
+        else status = 'expired';
+    }
+
+    return {
+        status,
+        serverNow: new Date(nowMs).toISOString(),
+        unlockAt,
+        expiresAt,
+        ...(status === 'available' ? { meetLink } : {})
+    };
+}
+
+function redactMeetingForClient(meeting, nowValue = Date.now()) {
+    const value = sanitizeMeetingResponse(meeting);
+    const publicMeeting = { ...value };
+    delete publicMeeting.meetLink;
+    const access = getMeetingAccessState(value, nowValue);
+    return {
+        ...publicMeeting,
+        accessStatus: access.status,
+        serverNow: access.serverNow,
+        unlockAt: access.unlockAt,
+        expiresAt: access.expiresAt,
+        ...(access.status === 'available' ? { meetLink: access.meetLink } : {})
+    };
+}
+
+app.get(
+    '/api/meetings/:id/access',
+    requireAuth,
+    requireRole(['admin']),
+    validate(idParamsSchema, 'params'),
+    async (req, res) => {
+        res.setHeader('Cache-Control', 'no-store');
+        const meeting = await findMeetingForShare(req.validatedParams.id);
+        if (!meeting) {
+            return res.status(404).json({ status: 'error', message: 'Agendamento não encontrado.' });
+        }
+        return res.json(getMeetingAccessState(meeting));
+    }
+);
+
+function formatMeetingDateForEmail(value) {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return 'Horário não informado';
+    return new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'full',
+        timeStyle: 'short',
+        timeZone: 'America/Sao_Paulo'
+    }).format(date);
+}
+
+async function sendMeetingEmail({ to, subject, text }) {
+    if (!RESEND_API_KEY || !EMAIL_FROM) {
+        const error = new Error('Serviço de e-mail não configurado');
+        error.code = 'EMAIL_NOT_CONFIGURED';
+        throw error;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+    try {
+        const response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${RESEND_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ from: EMAIL_FROM, to: [to], subject, text }),
+            signal: controller.signal
+        });
+        if (!response.ok) throw new Error(`Provedor de e-mail respondeu HTTP ${response.status}`);
+        return response.json().catch(() => ({}));
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+app.post(
+    '/api/meetings/:id/share-email',
+    requireAuth,
+    requireRole(['admin']),
+    meetingShareLimiter,
+    validate(idParamsSchema, 'params'),
+    validate(meetingSharePayloadSchema),
+    async (req, res) => {
+        res.setHeader('Cache-Control', 'no-store');
+        const meetingId = req.validatedParams.id;
+        const recipientType = req.validatedBody.recipient;
+        const meeting = await findMeetingForShare(meetingId);
+        if (!meeting) {
+            return res.status(404).json({ status: 'error', message: 'Agendamento não encontrado.' });
+        }
+
+        const access = getMeetingAccessState(meeting);
+        if (access.status !== 'available') {
+            const accessMessage = {
+                locked: 'O link do Google Meet será liberado no horário de início da reunião.',
+                expired: 'A janela de acesso desta reunião já foi encerrada.',
+                unavailable: 'Este agendamento não possui um link do Google Meet disponível.'
+            }[access.status];
+            return res.status(409).json({
+                status: 'error',
+                accessStatus: access.status,
+                serverNow: access.serverNow,
+                unlockAt: access.unlockAt,
+                expiresAt: access.expiresAt,
+                message: accessMessage
+            });
+        }
+        const meetLink = access.meetLink;
+
+        const recipientEmail = recipientType === 'client'
+            ? await resolveMeetingClientEmail(meeting)
+            : parseEmailAddress(ADMIN_NOTIFICATION_EMAIL);
+        if (!recipientEmail) {
+            const message = recipientType === 'client'
+                ? 'O cliente não possui um e-mail válido neste agendamento.'
+                : 'O e-mail administrativo ainda não foi configurado no servidor.';
+            return res.status(409).json({ status: 'error', message });
+        }
+
+        const shareKey = `${String(req.user?.username || 'admin').toLowerCase()}:${meetingId}:${recipientType}`;
+        if (Number(recentMeetingShares.get(shareKey) || 0) > Date.now()) {
+            return res.status(429).json({ status: 'error', message: 'Este convite acabou de ser enviado. Aguarde alguns segundos.' });
+        }
+        recentMeetingShares.set(shareKey, Date.now() + MEETING_SHARE_COOLDOWN_MS);
+
+        const safeTitle = sanitizePlainText(meeting.title || 'Reunião ALDEIA').replace(/[\r\n]+/g, ' ').slice(0, 180);
+        const clientGreeting = meeting.clientName ? `Olá, ${sanitizePlainText(meeting.clientName)}.` : 'Olá.';
+        const subject = `Agência ALDEIA | ${safeTitle}`;
+        const text = recipientType === 'client'
+            ? [
+                clientGreeting,
+                '',
+                `Sua reunião “${safeTitle}” está marcada para ${formatMeetingDateForEmail(meeting.startAt)}.`,
+                `Acesse o Google Meet: ${meetLink}`,
+                '',
+                'Agência ALDEIA'
+            ].join('\n')
+            : [
+                'Novo compartilhamento de reunião no CRM ALDEIA.',
+                '',
+                `Reunião: ${safeTitle}`,
+                `Cliente: ${sanitizePlainText(meeting.clientName || 'Não informado')}`,
+                `Horário: ${formatMeetingDateForEmail(meeting.startAt)}`,
+                `Google Meet: ${meetLink}`,
+                `Criado por: ${sanitizePlainText(meeting.createdBy || 'Admin')}`
+            ].join('\n');
+
+        try {
+            await sendMeetingEmail({ to: recipientEmail, subject, text });
+            console.info('[MEETING SHARE]', { meetingId, recipient: recipientType, sentBy: req.user?.username || 'admin' });
+            return res.json({ status: 'success', recipient: recipientType });
+        } catch (error) {
+            recentMeetingShares.delete(shareKey);
+            console.error('[MEETING SHARE SEND]', error.message);
+            const statusCode = error.code === 'EMAIL_NOT_CONFIGURED' ? 503 : 502;
+            return res.status(statusCode).json({
+                status: 'error',
+                message: statusCode === 503
+                    ? 'O serviço de e-mail ainda não foi configurado.'
+                    : 'Não foi possível enviar o e-mail agora.'
+            });
+        }
+    }
+);
+
+async function cancelGoogleCalendarEvent(googleEventId) {
+    if (!googleEventId || !isGoogleCalendarConfigured()) return { cancelled: false, skipped: true };
+    const accessToken = await getGoogleCalendarAccessToken();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+    try {
+        const url = new URL(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(GOOGLE_CALENDAR_ID)}/events/${encodeURIComponent(googleEventId)}`);
+        url.searchParams.set('sendUpdates', 'all');
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${accessToken}` },
+            signal: controller.signal
+        });
+        if ([204, 404, 410].includes(response.status)) return { cancelled: true, skipped: false };
+        throw new Error(`Google Calendar HTTP ${response.status}`);
+    } finally {
+        clearTimeout(timeout);
+    }
+}
+
+app.delete('/api/meetings/:id', requireAuth, requireRole(['admin', 'operator']), validate(idParamsSchema, 'params'), async (req, res) => {
+    const meetingId = req.validatedParams.id;
+    const meeting = await findMeetingForShare(meetingId);
+    if (!meeting) return res.status(404).json({ status: 'error', message: 'Agendamento não encontrado' });
+
+    let googleWarning = '';
+    if (meeting.googleEventId) {
+        try {
+            await cancelGoogleCalendarEvent(meeting.googleEventId);
+        } catch (error) {
+            googleWarning = 'O item foi removido do CRM, mas não foi possível confirmar o cancelamento no Google Calendar.';
+            console.error('[MEETINGS DELETE GOOGLE]', { meetingId, message: error.message });
+        }
+    }
+
+    let deleted = false;
+    if (isMongoConnected) {
+        try {
+            const result = await MeetingModel.deleteOne({ id: meetingId });
+            deleted = result.deletedCount > 0;
+        } catch (error) {
+            console.error('[MEETINGS DELETE MONGO]', { meetingId, message: error.message });
+        }
+    }
+
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
     await mutateJSON('meetings.json', [], (storedMeetings) => {
         const meetings = Array.isArray(storedMeetings) ? storedMeetings : [];
         const remaining = meetings.filter(item => item?.id !== meetingId);
         if (remaining.length !== meetings.length) deleted = true;
         return remaining;
     });
+<<<<<<< HEAD
 
     if (!deleted) return res.status(503).json({ status: 'error', message: 'Não foi possível remover o agendamento agora.' });
     res.setHeader('Cache-Control', 'no-store');
@@ -3077,6 +4241,51 @@ app.put('/api/profile', requireAuth, validate(profilePayloadSchema), async (req,
         } catch (e) { console.error('[PROFILE PUT MONGO]', e.message); }
     }
 
+=======
+
+    if (!deleted) return res.status(503).json({ status: 'error', message: 'Não foi possível remover o agendamento agora.' });
+    res.setHeader('Cache-Control', 'no-store');
+    return res.json({ status: 'success', deletedId: meetingId, warning: googleWarning || undefined });
+});
+
+// ===== ROTAS DE PERFIL DE USUÁRIO =====
+app.get('/api/profile', requireAuth, async (req, res) => {
+    const username = (req.user && req.user.username) ? req.user.username : 'Admin';
+    if (isMongoConnected) {
+        try {
+            const profile = await UserProfileModel.findOne({ username: new RegExp(`^${escapeRegExp(username)}$`, 'i') }).lean();
+            if (profile) return res.json(sanitizeProfileResponse(profile, username));
+        } catch (e) { console.error('[PROFILE GET MONGO]', e.message); }
+    }
+    const profiles = safeReadJSON('user_profiles.json', {});
+    const prof = profiles[username.toLowerCase()] || {
+        username: username,
+        displayName: username,
+        avatar: '/assets/japex.webp',
+        role: normalizeAccountRole('', username)
+    };
+    res.json(sanitizeProfileResponse(prof, username));
+});
+
+app.put('/api/profile', requireAuth, validate(profilePayloadSchema), async (req, res) => {
+    const username = (req.user && req.user.username) ? req.user.username : 'Admin';
+    const { displayName, avatar } = req.validatedBody;
+
+    const updateFields = {};
+    if (displayName) updateFields.displayName = displayName;
+    if (avatar) updateFields.avatar = avatar;
+
+    if (isMongoConnected) {
+        try {
+            await UserProfileModel.findOneAndUpdate(
+                { username: new RegExp(`^${escapeRegExp(username)}$`, 'i') },
+                { username: username, ...updateFields },
+                { upsert: true, new: true }
+            );
+        } catch (e) { console.error('[PROFILE PUT MONGO]', e.message); }
+    }
+
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
     const key = username.toLowerCase();
     let updatedProfile = null;
     await mutateJSON('user_profiles.json', {}, (storedProfiles) => {
@@ -3090,6 +4299,7 @@ app.put('/api/profile', requireAuth, validate(profilePayloadSchema), async (req,
     });
 
     res.json({ status: 'success', message: 'Perfil atualizado com sucesso', profile: sanitizeProfileResponse(updatedProfile, username) });
+<<<<<<< HEAD
 });
 
 // ===== UPLOADS DE MÍDIA (HYBRID CLOUDINARY + LOCAL FALLBACK) =====
@@ -3111,12 +4321,36 @@ app.put('/api/profile/password', requireAuth, validate(passwordChangeSchema), as
             );
         }
 
+=======
+});
+
+// ===== UPLOADS DE MÍDIA (HYBRID CLOUDINARY + LOCAL FALLBACK) =====
+app.put('/api/profile/password', requireAuth, validate(passwordChangeSchema), async (req, res) => {
+    try {
+        const username = req.user?.username || 'Admin';
+        const { currentPassword, newPassword } = req.validatedBody;
+        const account = await authenticateUser(username, currentPassword);
+        if (!account) {
+            return res.status(401).json({ status: 'error', message: 'Senha atual incorreta.' });
+        }
+
+        const passwordHash = await bcrypt.hash(newPassword, 12);
+        if (isMongoConnected) {
+            await UserProfileModel.findOneAndUpdate(
+                { username: new RegExp(`^${escapeRegExp(username)}$`, 'i') },
+                { $set: { username, passwordHash } },
+                { upsert: true, new: true }
+            );
+        }
+
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
         const key = username.toLowerCase();
         await mutateJSON('user_profiles.json', {}, (storedProfiles) => {
             const profiles = storedProfiles && typeof storedProfiles === 'object' && !Array.isArray(storedProfiles) ? storedProfiles : {};
             profiles[key] = { ...(profiles[key] || { username, role: normalizeAccountRole('', username) }), passwordHash };
             return profiles;
         });
+<<<<<<< HEAD
 
         invalidateUserSessions(username);
         const token = createAdminToken({ ...account, passwordHash });
@@ -3269,12 +4503,167 @@ app.post('/api/cadastro/click-link', validate(z.object({ id: z.string().trim().r
                 updated = true;
                 return { ...sub, whatsappClicked: "Sim" };
             }
+=======
+
+        invalidateUserSessions(username);
+        const token = createAdminToken({ ...account, passwordHash });
+        return res.json({ status: 'success', message: 'Senha atualizada. Outras sessoes foram encerradas.', token, username });
+    } catch (error) {
+        console.error('[PROFILE PASSWORD]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Nao foi possivel atualizar a credencial.' });
+    }
+});
+
+const UPLOADS_DIR = path.join(ROOT_DIR, 'assets', 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) {
+    try { fs.mkdirSync(UPLOADS_DIR, { recursive: true }); } catch (_) {}
+}
+
+async function saveLocalUpload(file) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const filename = `media_${Date.now()}_${crypto.randomUUID().slice(0, 8)}${ext}`;
+    await fs.promises.writeFile(path.join(UPLOADS_DIR, filename), file.buffer);
+    return `/assets/uploads/${filename}`;
+}
+
+function uploadToCloudinary(file) {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream({
+            folder: 'aldeia_uploads',
+            resource_type: 'auto',
+            allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'gif', 'mp4', 'webm', 'mov']
+        }, (error, result) => error ? reject(error) : resolve(result));
+        stream.end(file.buffer);
+    });
+}
+
+app.post('/api/upload', requireAuth, uploadLimiter, (req, res) => {
+    upload.single('file')(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ status: 'error', message: 'Arquivo inválido ou maior que o limite permitido.' });
+        }
+        if (!req.file?.buffer) {
+            return res.status(400).json({ status: 'error', message: 'Nenhum arquivo enviado.' });
+        }
+
+        try {
+            const isCloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
+            const url = isCloudinaryConfigured
+                ? (await uploadToCloudinary(req.file)).secure_url
+                : await saveLocalUpload(req.file);
+            return res.json({ status: 'success', url });
+        } catch (uploadError) {
+            console.error('[UPLOAD]', uploadError?.message || 'Falha desconhecida');
+            try {
+                const url = await saveLocalUpload(req.file);
+                return res.json({ status: 'success', url, storage: 'local' });
+            } catch (localError) {
+                console.error('[UPLOAD FALLBACK]', localError?.message || 'Falha desconhecida');
+                return res.status(503).json({ status: 'error', message: 'Não foi possível concluir o upload. Tente novamente.' });
+            }
+        }
+    });
+});
+
+// ===== ROTAS DE LEADS / FORMULÁRIO DE CONTATO =====
+app.post('/api/cadastro', async (req, res) => {
+    const body = scrubNoSql(req.body || {});
+    let projeto = body.projeto || '';
+    if (!projeto) {
+        const parts = [];
+        if (body.service_type) parts.push(body.service_type);
+        if (body.project_details) parts.push(body.project_details);
+        projeto = parts.join(' - ');
+    }
+    const leadResult = leadPayloadSchema.safeParse({
+        nome: body.nome || body.name || body.client_name || '',
+        email: body.email || body.mail || '',
+        telefone: body.telefone || body.phone || body.tel || body.celular || '',
+        instagram: body.instagram || body.insta || '',
+        projeto,
+        utmSource: body.utmSource,
+        utmMedium: body.utmMedium,
+        utmCampaign: body.utmCampaign,
+        visits: body.visits,
+        firstVisit: body.firstVisit,
+        locationConsent: body.locationConsent,
+        locationString: body.locationString,
+        coordinates: body.coordinates,
+        ipAddress: body.ipAddress
+    });
+    if (!leadResult.success) {
+        return res.status(400).json({ status: 'error', message: 'Dados de contato inválidos.' });
+    }
+    const { nome, email, telefone, instagram, projeto: projetoSeguro, utmSource, utmMedium, utmCampaign, visits, firstVisit, locationConsent, locationString, coordinates, ipAddress } = leadResult.data;
+    const locationCoords = coordinates || '';
+
+    const newSubmission = {
+        id: crypto.randomUUID(),
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        nome: nome || '',
+        email: email || '',
+        telefone: telefone || '',
+        instagram: instagram || '',
+        projeto: projetoSeguro,
+        whatsappClicked: "Não",
+        utmSource: utmSource || 'Direto',
+        utmMedium: utmMedium || '',
+        utmCampaign: utmCampaign || '',
+        visits: visits || 1,
+        firstVisit: firstVisit || '',
+        ipCountry: '',
+        ipRegion: '',
+        ipCity: '',
+        ipISP: '',
+        ipCoords: '',
+        locationConsent,
+        locationCoords,
+        locationString: locationString || 'Localização Indisponível',
+        ipAddress: ipAddress || '0.0.0.0'
+    };
+
+    if (isMongoConnected) {
+        try {
+            await SubmissionModel.create(newSubmission);
+        } catch (e) {
+            console.error('[SUBMISSION MONGO]', e.message);
+        }
+    }
+
+    await mutateJSON('submissions.json', [], (submissions) => {
+        const items = Array.isArray(submissions) ? submissions : [];
+        items.push(newSubmission);
+        return items;
+    });
+
+    res.json({ status: 'success', message: 'Cadastro recebido com sucesso', id: newSubmission.id });
+});
+
+app.post('/api/cadastro/click-link', validate(z.object({ id: z.string().trim().regex(SAFE_ID) }).strict()), async (req, res) => {
+    const { id } = req.validatedBody;
+    let updated = false;
+
+    if (isMongoConnected && id) {
+        try {
+            const r = await SubmissionModel.findOneAndUpdate({ id }, { whatsappClicked: "Sim" });
+            if (r) updated = true;
+        } catch (e) { console.error('[SUBMISSION CLICK MONGO]', e.message); }
+    }
+
+    await mutateJSON('submissions.json', [], (submissions) =>
+        (Array.isArray(submissions) ? submissions : []).map(sub => {
+            if (sub.id === id) {
+                updated = true;
+                return { ...sub, whatsappClicked: "Sim" };
+            }
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
             return sub;
         })
     );
 
     if (updated) {
         return res.json({ status: 'success', message: 'Clique registrado' });
+<<<<<<< HEAD
     }
     res.status(404).json({ status: 'error', message: 'Lead não encontrado' });
 });
@@ -3328,10 +4717,66 @@ async function persistAnalyticsEvents(events) {
         await AnalyticsModel.insertMany(normalizedEvents);
         return { storage: 'mongo', events: normalizedEvents };
     }
+=======
+    }
+    res.status(404).json({ status: 'error', message: 'Lead não encontrado' });
+});
+
+// ==========================================
+// ANALYTICS & TRACKER API
+// ==========================================
+function parseAnalyticsBeacon(req, res, next) {
+    if (typeof req.body !== 'string') return next();
+    try {
+        req.body = JSON.parse(req.body);
+        return next();
+    } catch {
+        return res.status(400).json({ status: 'error', message: 'Eventos inválidos.' });
+    }
+}
+
+const analyticsDeduplication = new Map();
+function pruneAnalyticsDeduplication(now = Date.now()) {
+    const cutoff = now - 5000;
+    for (const [key, createdAt] of analyticsDeduplication) {
+        if (createdAt < cutoff) analyticsDeduplication.delete(key);
+    }
+}
+function removeDuplicateAnalyticsEvents(req, res, next) {
+    const now = Date.now();
+    pruneAnalyticsDeduplication(now);
+
+    const accepted = req.validatedBody.events.filter((event) => {
+        const key = `${event.sessionId}|${event.eventType}|${event.path}|${event.elementId}`;
+        if (analyticsDeduplication.has(key)) return false;
+        analyticsDeduplication.set(key, now);
+        return true;
+    });
+
+    if (accepted.length === 0) return res.status(202).json({ status: 'duplicate_ignored' });
+    req.validatedBody.events = accepted;
+    return next();
+}
+
+async function persistAnalyticsEvents(events) {
+    const resetAt = getAnalyticsResetAt();
+    const normalizedEvents = events
+        .filter((event) => Date.parse(event.timestamp) >= resetAt)
+        .map((event) => ({ ...event, timestamp: new Date().toISOString() }));
+
+    if (normalizedEvents.length === 0) {
+        return { storage: isMongoConnected ? 'mongo' : 'local', events: [] };
+    }
+    if (isMongoConnected) {
+        await AnalyticsModel.insertMany(normalizedEvents);
+        return { storage: 'mongo', events: normalizedEvents };
+    }
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
     await mutateJSON('analytics.json', [], (storedEvents) => [
         ...normalizedEvents,
         ...(Array.isArray(storedEvents) ? storedEvents : [])
     ].slice(0, 1000));
+<<<<<<< HEAD
     return { storage: 'local', events: normalizedEvents };
 }
 
@@ -3566,6 +5011,242 @@ app.delete('/api/admin/data', requireAuth, requireRole(['admin']), validate(admi
     if (scopes.has('clients')) mongoActions.push(ClientModel.deleteMany({}));
     if (scopes.has('tasks')) mongoActions.push(TrelloTaskModel.deleteMany({}));
     if (scopes.has('meetings')) mongoActions.push(MeetingModel.deleteMany({}));
+=======
+    return { storage: 'local', events: normalizedEvents };
+}
+
+async function readAnalyticsEvents() {
+    if (isMongoConnected) {
+        try {
+            return await AnalyticsModel.find().sort({ timestamp: -1 }).limit(1000).lean();
+        } catch (error) {
+            console.error('[ANALYTICS GET MONGO]', error.message);
+        }
+    }
+    return safeReadJSON('analytics.json', []).slice(0, 1000);
+}
+
+app.post('/api/analytics', analyticsEventLimiter, parseAnalyticsBeacon, validate(analyticsPayloadSchema), removeDuplicateAnalyticsEvents, async (req, res) => {
+    try {
+        const result = await persistAnalyticsEvents(req.validatedBody.events);
+        return res.json({ status: 'success', storage: result.storage, accepted: result.events.length });
+    } catch (error) {
+        console.error('[ANALYTICS POST]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Analytics indisponível no momento.' });
+    }
+    // Fallback local: mantém um histórico limitado para o Analytics continuar útil sem MongoDB.
+});
+
+app.get('/api/analytics', requireAuth, requireRole(['admin']), async (req, res) => {
+    return res.json(await readAnalyticsEvents());
+});
+
+app.get('/api/analytics/dashboard', requireAuth, requireRole(['admin']), async (req, res) => {
+    const events = await readAnalyticsEvents();
+    const pageviews = events.filter((event) => event?.eventType === 'pageview').length;
+    const clicks = events.filter((event) => event?.eventType === 'click').length;
+    const sessions = new Set(events.map((event) => event?.sessionId).filter(Boolean)).size;
+    return res.json({
+        metrics: { totalEvents: events.length, pageviews, clicks, sessions },
+        events: events.slice(0, 100)
+    });
+});
+
+app.post('/api/telemetry', analyticsEventLimiter, parseAnalyticsBeacon, validate(telemetryPayloadSchema), async (req, res) => {
+    const telemetry = req.validatedBody;
+    const event = {
+        sessionId: telemetry.session_id,
+        eventType: telemetry.event_type,
+        path: telemetry.page_url,
+        elementId: telemetry.converted ? 'converted' : 'abandoned',
+        x: 0,
+        y: 0,
+        timestamp: new Date().toISOString()
+    };
+    pruneAnalyticsDeduplication();
+    const key = `${event.sessionId}|${event.eventType}|${event.path}|${event.elementId}`;
+    if (analyticsDeduplication.has(key)) return res.status(202).json({ status: 'duplicate_ignored' });
+    analyticsDeduplication.set(key, Date.now());
+    try {
+        const result = await persistAnalyticsEvents([event]);
+        return res.json({ status: 'success', storage: result.storage });
+    } catch (error) {
+        console.error('[TELEMETRY POST]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Telemetria indisponível no momento.' });
+    }
+});
+
+function serializeLeadsForRole(leads, role) {
+    return leads.map((lead) => {
+        const safeLead = sanitizeLeadResponse(lead);
+        if (role !== 'admin') {
+            safeLead.locationConsent = false;
+            safeLead.locationCoords = '';
+        }
+        return safeLead;
+    });
+}
+
+app.get('/api/submissions', requireAuth, async (req, res) => {
+    if (isMongoConnected) {
+        try {
+            const subs = await SubmissionModel.find().sort({ createdAt: -1 }).lean();
+            return res.json(serializeLeadsForRole(subs, req.user.role));
+        } catch (e) { console.error('[SUBMISSIONS GET MONGO]', e.message); }
+    }
+    const submissions = safeReadJSON('submissions.json', []);
+    res.json(serializeLeadsForRole(submissions, req.user.role));
+});
+
+// ===== EXPORTAÇÕES (SQL & CSV) =====
+function buildSevenDaySeries(events) {
+    const days = Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(Date.now() - (6 - index) * 24 * 60 * 60 * 1000);
+        return date.toISOString().slice(0, 10);
+    });
+    const counts = new Map(days.map(day => [day, 0]));
+    events.forEach(event => {
+        const eventDate = new Date(event?.viewedAt);
+        if (!Number.isFinite(eventDate.getTime())) return;
+        const day = eventDate.toISOString().slice(0, 10);
+        if (counts.has(day)) counts.set(day, counts.get(day) + 1);
+    });
+    return days.map(day => ({ date: day, count: counts.get(day) || 0 }));
+}
+
+app.get('/api/admin/project-views/metrics', requireAuth, async (req, res) => {
+    const now = Date.now();
+    const ninetyDaysAgo = new Date(now - 90 * 24 * 60 * 60 * 1000);
+    let projects = [];
+    let events = [];
+    if (isMongoConnected) {
+        try {
+            [projects, events] = await Promise.all([
+                ProjectModel.find().select({ id: 1, title: 1, cover: 1, category: 1, views: 1 }).lean(),
+                ProjectViewEventModel.find({ viewedAt: { $gte: ninetyDaysAgo } }).select({ projectId: 1, visitorHash: 1, viewedAt: 1 }).lean()
+            ]);
+        } catch (error) {
+            console.error('[ADMIN VIEW METRICS]', error.message);
+        }
+    }
+    if (projects.length === 0) projects = safeReadJSON('portfolio.json', []);
+    if (events.length === 0) events = safeReadJSON('project_view_events.json', []);
+
+    const last24Hours = now - 24 * 60 * 60 * 1000;
+    const unique24h = new Set(events
+        .filter(event => new Date(event.viewedAt).getTime() >= last24Hours)
+        .map(event => `${event.projectId}:${event.visitorHash}`)).size;
+    const topProjects = projects
+        .map(sanitizeProjectResponse)
+        .sort((left, right) => right.views - left.views)
+        .slice(0, 6)
+        .map(project => ({ id: project.id, title: project.title, cover: project.cover, category: project.category, views: project.views }));
+
+    return res.json({
+        unique24h,
+        totalViews: projects.reduce((total, project) => total + Math.max(0, Number(project.views || 0)), 0),
+        series7d: buildSevenDaySeries(events).map(point => ({ date: point.date, value: point.count })),
+        topProjects
+    });
+});
+
+async function readAdminSettings() {
+    if (isMongoConnected) {
+        try {
+            const settings = await AdminSettingsModel.findOne({ key: 'main' }).lean();
+            if (settings) return {
+                externalAnalytics: settings.externalAnalytics !== false,
+                sidebarLogo: typeof settings.sidebarLogo === 'string' ? settings.sidebarLogo : ''
+            };
+        } catch (error) { console.error('[ADMIN SETTINGS GET]', error.message); }
+    }
+    const settings = safeReadJSON('admin_settings.json', { externalAnalytics: true, sidebarLogo: '' });
+    return {
+        externalAnalytics: settings.externalAnalytics !== false,
+        sidebarLogo: typeof settings.sidebarLogo === 'string' ? settings.sidebarLogo : ''
+    };
+}
+
+app.get('/api/admin/settings', requireAuth, async (req, res) => {
+    return res.json(await readAdminSettings());
+});
+
+app.put('/api/admin/settings', requireAuth, requireRole(['admin']), validate(adminSettingsPayloadSchema), async (req, res) => {
+    const currentSettings = await readAdminSettings();
+    const settings = {
+        externalAnalytics: req.validatedBody.externalAnalytics,
+        sidebarLogo: req.validatedBody.sidebarLogo ?? currentSettings.sidebarLogo
+    };
+    if (isMongoConnected) {
+        try {
+            await AdminSettingsModel.findOneAndUpdate(
+                { key: 'main' },
+                { $set: { ...settings, updatedBy: req.user.username } },
+                { upsert: true, new: true }
+            );
+        } catch (error) {
+            console.error('[ADMIN SETTINGS PUT]', error.message);
+            return res.status(503).json({ status: 'error', message: 'Configuracoes indisponiveis.' });
+        }
+    }
+    await safeWriteJSON('admin_settings.json', settings);
+    return res.json({ status: 'success', settings });
+});
+
+app.post('/api/admin/maintenance', requireAuth, requireRole(['admin']), validate(maintenanceActionSchema), async (req, res) => {
+    const { action, confirmation } = req.validatedBody;
+    if (action === 'clear_telemetry' && confirmation !== 'Aldeia') {
+        return res.status(400).json({ status: 'error', message: 'Confirmacao obrigatoria.' });
+    }
+
+    try {
+        if (action === 'clear_api_cache') {
+            memoryCache.clear();
+            return res.json({ status: 'success', message: 'Cache da API limpo.' });
+        }
+        if (action === 'sync_cloudinary') {
+            const configured = Boolean(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
+            if (!configured) return res.status(503).json({ status: 'error', message: 'Cloudinary nao configurado.' });
+            await cloudinary.api.ping();
+            return res.json({ status: 'success', message: 'Cloudinary sincronizado.' });
+        }
+        if (action === 'optimize_indexes') {
+            if (!isMongoConnected) return res.status(503).json({ status: 'error', message: 'MongoDB indisponivel.' });
+            await Promise.all([
+                ProjectModel, ClientModel, SubmissionModel, AnalyticsModel, SiteContentModel,
+                AuditLogModel, TrelloTaskModel, MeetingModel, UserProfileModel, ProjectViewWindowModel,
+                ProjectViewEventModel, AdminSettingsModel, GoogleCalendarIntegrationModel
+            ].map(model => model.createIndexes()));
+            return res.json({ status: 'success', message: 'Indices do MongoDB verificados.' });
+        }
+        if (action === 'clear_telemetry') {
+            if (isMongoConnected) await Promise.all([AnalyticsModel.deleteMany({}), ProjectViewEventModel.deleteMany({}), ProjectViewWindowModel.deleteMany({})]);
+            await Promise.all([
+                safeWriteJSON('analytics.json', []),
+                safeWriteJSON('visits.json', []),
+                safeWriteJSON('project_view_events.json', []),
+                safeWriteJSON('project_view_windows.json', {})
+            ]);
+            await markAnalyticsReset();
+            return res.json({ status: 'success', message: 'Logs de telemetria limpos.' });
+        }
+        return res.status(400).json({ status: 'error', message: 'Acao invalida.' });
+    } catch (error) {
+        console.error('[ADMIN MAINTENANCE]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Operacao administrativa indisponivel.' });
+    }
+});
+
+app.delete('/api/admin/data', requireAuth, requireRole(['admin']), validate(adminPurgeSchema), async (req, res) => {
+    const scopes = new Set(req.validatedBody.scopes);
+    const mongoActions = [];
+    if (scopes.has('analytics')) mongoActions.push(AnalyticsModel.deleteMany({}));
+    if (scopes.has('audit')) mongoActions.push(AuditLogModel.deleteMany({}));
+    if (scopes.has('submissions')) mongoActions.push(SubmissionModel.deleteMany({}));
+    if (scopes.has('clients')) mongoActions.push(ClientModel.deleteMany({}));
+    if (scopes.has('tasks')) mongoActions.push(TrelloTaskModel.deleteMany({}));
+    if (scopes.has('meetings')) mongoActions.push(MeetingModel.deleteMany({}));
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
     if (scopes.has('views')) mongoActions.push(ProjectViewEventModel.deleteMany({}), ProjectViewWindowModel.deleteMany({}));
     try {
         if (isMongoConnected) await Promise.all(mongoActions);
@@ -3587,6 +5268,7 @@ app.delete('/api/admin/data', requireAuth, requireRole(['admin']), validate(admi
         }
         await Promise.all(localActions);
         return res.json({ status: 'success', removedScopes: [...scopes] });
+<<<<<<< HEAD
     } catch (error) {
         console.error('[ADMIN DATA PURGE]', error.message);
         return res.status(503).json({ status: 'error', message: 'Nao foi possivel excluir os dados.' });
@@ -3603,11 +5285,30 @@ app.get('/api/admin/export/backup', requireAuth, requireRole(['admin']), async (
         submissions: safeReadJSON('submissions.json', []).map(sanitizeLeadResponse),
         clients: safeReadJSON('clients.json', []).map(sanitizeClientResponse),
         tasks: safeReadJSON('trello_tasks.json', []).map(sanitizeTrelloResponse),
+=======
+    } catch (error) {
+        console.error('[ADMIN DATA PURGE]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Nao foi possivel excluir os dados.' });
+    }
+});
+
+app.get('/api/admin/export/backup', requireAuth, requireRole(['admin']), async (req, res) => {
+    const profiles = safeReadJSON('user_profiles.json', {});
+    const safeProfiles = Object.fromEntries(Object.entries(profiles).map(([key, profile]) => [key, sanitizeProfileResponse(profile, key)]));
+    const backup = {
+        generatedAt: new Date().toISOString(),
+        content: sanitizeCmsContent(safeReadJSON('site_content.json', {})),
+        portfolio: safeReadJSON('portfolio.json', []).map(sanitizeProjectResponse),
+        submissions: safeReadJSON('submissions.json', []).map(sanitizeLeadResponse),
+        clients: safeReadJSON('clients.json', []).map(sanitizeClientResponse),
+        tasks: safeReadJSON('trello_tasks.json', []).map(sanitizeTrelloResponse),
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
         meetings: safeReadJSON('meetings.json', []).map((meeting) => {
             const safeMeeting = sanitizeMeetingResponse(meeting);
             delete safeMeeting.meetLink;
             return safeMeeting;
         }),
+<<<<<<< HEAD
         profiles: safeProfiles,
         settings: await readAdminSettings()
     };
@@ -3690,11 +5391,96 @@ app.get('/api/admin/export/csv', requireAuth, requireRole(['admin']), async (req
 
     let csv = `ID,Data,Nome,Email,Telefone,Projeto,WhatsApp Clicado\n`;
     subs.forEach(s => {
+=======
+        profiles: safeProfiles,
+        settings: await readAdminSettings()
+    };
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename=aldeia-backup-${new Date().toISOString().slice(0, 10)}.json`);
+    return res.send(JSON.stringify(backup, null, 2));
+});
+
+app.get('/api/admin/export/sql', requireAuth, requireRole(['admin']), async (req, res) => {
+    let sql = `-- ALDEIA DATABASE DUMP (SQL EXPORT FROM MONGODB/JSON)\n`;
+    sql += `-- Gerado em: ${new Date().toISOString()}\n\n`;
+
+    sql += `CREATE TABLE IF NOT EXISTS submissions (\n`;
+    sql += `    id VARCHAR(50) PRIMARY KEY,\n`;
+    sql += `    timestamp DATETIME,\n`;
+    sql += `    nome VARCHAR(255),\n`;
+    sql += `    email VARCHAR(255),\n`;
+    sql += `    telefone VARCHAR(100),\n`;
+    sql += `    projeto TEXT,\n`;
+    sql += `    whatsapp_clicked VARCHAR(10)\n`;
+    sql += `);\n\n`;
+
+    let subs = [];
+    if (isMongoConnected) {
+        try { subs = await SubmissionModel.find().lean(); } catch (_) {}
+    }
+    if (subs.length === 0) subs = safeReadJSON('submissions.json', []);
+
+    subs.forEach(s => {
+        const id = (s.id || '').replace(/'/g, "''");
+        const ts = (s.timestamp || '').replace(/'/g, "''");
+        const nome = (s.nome || '').replace(/'/g, "''");
+        const email = (s.email || '').replace(/'/g, "''");
+        const tel = (s.telefone || '').replace(/'/g, "''");
+        const proj = (s.projeto || '').replace(/'/g, "''");
+        const wa = (s.whatsappClicked || 'Não').replace(/'/g, "''");
+        sql += `INSERT INTO submissions (id, timestamp, nome, email, telefone, projeto, whatsapp_clicked) VALUES ('${id}', '${ts}', '${nome}', '${email}', '${tel}', '${proj}', '${wa}');\n`;
+    });
+
+    sql += `\nCREATE TABLE IF NOT EXISTS clients (\n`;
+    sql += `    id VARCHAR(50) PRIMARY KEY,\n`;
+    sql += `    lead_id VARCHAR(50),\n`;
+    sql += `    nome VARCHAR(255),\n`;
+    sql += `    email VARCHAR(255),\n`;
+    sql += `    telefone VARCHAR(100),\n`;
+    sql += `    projeto TEXT,\n`;
+    sql += `    status VARCHAR(50),\n`;
+    sql += `    created_at DATETIME\n`;
+    sql += `);\n\n`;
+
+    let clients = [];
+    if (isMongoConnected) {
+        try { clients = await ClientModel.find().lean(); } catch (_) {}
+    }
+    if (clients.length === 0) clients = safeReadJSON('clients.json', []);
+
+    clients.forEach(c => {
+        const id = (c.id || '').replace(/'/g, "''");
+        const leadId = (c.leadId || '').replace(/'/g, "''");
+        const nome = (c.nome || '').replace(/'/g, "''");
+        const email = (c.email || '').replace(/'/g, "''");
+        const tel = (c.telefone || '').replace(/'/g, "''");
+        const proj = (c.projeto || '').replace(/'/g, "''");
+        const status = (c.status || 'Ativo').replace(/'/g, "''");
+        const ca = (c.createdAt || '').replace(/'/g, "''");
+        sql += `INSERT INTO clients (id, lead_id, nome, email, telefone, projeto, status, created_at) VALUES ('${id}', '${leadId}', '${nome}', '${email}', '${tel}', '${proj}', '${status}', '${ca}');\n`;
+    });
+
+    res.setHeader('Content-Type', 'application/sql; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename=aldeia_database_dump.sql');
+    res.send(sql);
+});
+
+app.get('/api/admin/export/csv', requireAuth, requireRole(['admin']), async (req, res) => {
+    let subs = [];
+    if (isMongoConnected) {
+        try { subs = await SubmissionModel.find().lean(); } catch (_) {}
+    }
+    if (subs.length === 0) subs = safeReadJSON('submissions.json', []);
+
+    let csv = `ID,Data,Nome,Email,Telefone,Projeto,WhatsApp Clicado\n`;
+    subs.forEach(s => {
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
         const escapeCSV = (field) => {
             let value = String(field ?? '').replace(/[\r\n]+/g, ' ');
             if (/^[=+\-@\t]/.test(value)) value = `'${value}`;
             return `"${value.replace(/"/g, '""')}"`;
         };
+<<<<<<< HEAD
         csv += `${escapeCSV(s.id)},${escapeCSV(s.timestamp)},${escapeCSV(s.nome)},${escapeCSV(s.email)},${escapeCSV(s.telefone)},${escapeCSV(s.projeto)},${escapeCSV(s.whatsappClicked || 'Não')}\n`;
     });
 
@@ -3704,6 +5490,17 @@ app.get('/api/admin/export/csv', requireAuth, requireRole(['admin']), async (req
 });
 
 app.use((req, res, next) => {
+=======
+        csv += `${escapeCSV(s.id)},${escapeCSV(s.timestamp)},${escapeCSV(s.nome)},${escapeCSV(s.email)},${escapeCSV(s.telefone)},${escapeCSV(s.projeto)},${escapeCSV(s.whatsappClicked || 'Não')}\n`;
+    });
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename=aldeia_leads.csv');
+    res.send(csv);
+});
+
+app.use((req, res, next) => {
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
     if (req.method === 'GET' && (req.path === '/' || req.path === '/index.html' || req.path === '/portfolio.html')) {
         const visit = {
             timestamp: new Date().toISOString(),
@@ -3714,6 +5511,40 @@ app.use((req, res, next) => {
             const items = Array.isArray(visits) ? visits : [];
             items.push(visit);
             return items.slice(-10_000);
+<<<<<<< HEAD
+        });
+    }
+    next();
+});
+
+app.get('/api/visits/stats', requireAuth, (req, res) => {
+    const visits = safeReadJSON('visits.json', []);
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const todayCount = visits.filter(v => (v.timestamp || '').startsWith(todayStr)).length;
+    const weekCount = visits.filter(v => new Date(v.timestamp) >= sevenDaysAgo).length;
+    const totalCount = visits.length;
+
+    res.json({
+        today: todayCount,
+        week: weekCount,
+        total: totalCount
+    });
+});
+
+app.get('/api/security/stats', requireAuth, requireRole(['admin']), (req, res) => {
+    const statsList = [];
+    const now = Date.now();
+    for (const [ip, timestamps] of ipRequests.entries()) {
+        const valid = timestamps.filter(t => t > now - 60000);
+        statsList.push({
+            ip: ip,
+            requests: valid.length,
+            isBlocked: valid.length >= 120
+=======
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
         });
     }
     next();
@@ -3791,7 +5622,27 @@ app.get('/health', (req, res) => {
         durableStorageReady
     });
 });
+<<<<<<< HEAD
 
+app.get('/health', (req, res) => {
+    const cloudinaryConfigured = Boolean(
+        process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
+    );
+    const durableStorageReady = !IS_PRODUCTION || (isMongoConnected && cloudinaryConfigured);
+    return res.status(durableStorageReady ? 200 : 503).json({
+        status: durableStorageReady ? 'ok' : 'degraded',
+        uptime: process.uptime(),
+        mongoConnected: isMongoConnected,
+        cloudinaryConfigured,
+        durableStorageReady
+    });
+});
+
+=======
+
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
 app.use((req, res, next) => {
     if (!req.path.startsWith('/api/') && req.accepts('html')) {
         res.status(404).sendFile(path.join(ROOT_DIR, 'index.html'));
@@ -3812,11 +5663,16 @@ app.use((err, req, res, next) => {
         : 'Erro interno no servidor.';
     res.status(status).json({ status: 'error', message: publicMessage });
 });
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
 // ===== INICIAR SERVIDOR =====
 let server;
 bootstrapUserProfiles()
     .then(() => {
+<<<<<<< HEAD
         server = app.listen(PORT, () => {
             console.log(`\n======================================================`);
             console.log(`  ALDEIA Servidor Backend Unificado (Node.js + Express)`);
@@ -3850,6 +5706,41 @@ bootstrapUserProfiles()
             console.log(`[Socket.io] CRM conectado: ${sanitizePlainText(socket.user?.username || 'usuÃ¡rio')}`);
         });
 
+=======
+        server = app.listen(PORT, () => {
+            console.log(`\n======================================================`);
+            console.log(`  ALDEIA Servidor Backend Unificado (Node.js + Express)`);
+            console.log(`  Porta: ${PORT}`);
+            console.log(`  Banco de Dados: MongoDB Atlas (Nuvem) + Fallback JSON`);
+            console.log(`  Uploads: Cloudinary`);
+            console.log(`======================================================\n`);
+        });
+
+        const { Server } = require('socket.io');
+        const io = new Server(server, {
+            cors: {
+                origin(origin, callback) {
+                    const isLocalDevelopment = process.env.NODE_ENV !== 'production' && localDevelopmentOrigin.test(origin || '');
+                    if (!origin || allowedOrigins.has(origin) || isLocalDevelopment) return callback(null, true);
+                    return callback(new Error('Origem nÃ£o permitida.'));
+                },
+                methods: ['GET', 'POST']
+            }
+        });
+
+        io.use((socket, next) => {
+            const token = String(socket.handshake?.auth?.token || '').trim();
+            const user = verifyToken({ headers: { authorization: token ? `Bearer ${token}` : '' } });
+            if (!user || !['admin', 'operator'].includes(user.role)) return next(new Error('NÃ£o autorizado.'));
+            socket.user = user;
+            return next();
+        });
+
+        io.on('connection', (socket) => {
+            console.log(`[Socket.io] CRM conectado: ${sanitizePlainText(socket.user?.username || 'usuÃ¡rio')}`);
+        });
+
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
         whatsappService.on('message', (message) => {
             io.emit('wa_message', {
                 id: sanitizePlainText(message?.id?._serialized || message?.id || ''),
@@ -3859,6 +5750,33 @@ bootstrapUserProfiles()
                 ack: Number(message?.ack) || 0,
                 from: sanitizePlainText(message?.from || ''),
                 to: sanitizePlainText(message?.to || '')
+<<<<<<< HEAD
+            });
+        });
+
+        // O cliente automatizado usa um navegador embutido; exige opt-in explícito.
+        if (String(process.env.WHATSAPP_ENABLED || 'false').toLowerCase() === 'true') {
+            void whatsappService.initialize().catch((error) => {
+                console.error('[WHATSAPP INIT]', error?.message || 'Falha ao iniciar o WhatsApp.');
+            });
+        }
+    })
+    .catch((err) => {
+        console.error('[AUTH] Inicialização abortada:', err?.message || 'Falha no bootstrap de usuários.');
+        process.exitCode = 1;
+    });
+
+function shutdown() {
+    if (!server) return process.exit(0);
+    console.log('\n[SERVER] Encerrando servidor com segurança...');
+    if (isMongoConnected) {
+        mongoose.connection.close(false, () => {
+            console.log('[MONGODB] Conexão encerrada com sucesso.');
+            server.close(() => {
+                console.log('[SERVER] Servidor encerrado.');
+                process.exit(0);
+=======
+>>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
             });
         });
 
