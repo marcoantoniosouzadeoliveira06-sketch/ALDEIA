@@ -1820,6 +1820,21 @@
     window.initMetallicPaint = initMetallicPaint;
 
     // ===== CARREGAMENTO DINÂMICO DO CMS (SITE CONTENT) =====
+    function setSafeDynamicRichText(element, value) {
+        if (!element) return;
+        const template = document.createElement('template');
+        template.innerHTML = String(value ?? '');
+        const allowedTags = new Set(['STRONG', 'EM', 'BR', 'UL', 'OL', 'LI', 'P', 'SPAN']);
+        [...template.content.querySelectorAll('*')].forEach((node) => {
+            if (!allowedTags.has(node.tagName)) {
+                node.replaceWith(document.createTextNode(node.textContent || ''));
+                return;
+            }
+            [...node.attributes].forEach((attribute) => node.removeAttribute(attribute.name));
+        });
+        element.replaceChildren(template.content.cloneNode(true));
+    }
+
     async function loadDynamicCMSContent() {
         // Home e Portfólio já têm um carregador CMS próprio, que preserva a estrutura visual da página.
         if (document.body?.dataset.cmsOwner === 'page') return;
@@ -1841,13 +1856,13 @@
                 }
                 if (data.heroSubtitle) {
                     const el = document.getElementById('hero-subtitle');
-                    if (el) el.innerHTML = data.heroSubtitle;
+                    setSafeDynamicRichText(el, data.heroSubtitle);
                 }
             }
 
             if (data.about && data.about.bigText) {
                 const el = document.querySelector('.about-big-text');
-                if (el) el.innerHTML = data.about.bigText;
+                setSafeDynamicRichText(el, data.about.bigText);
             }
 
             if (data.services && data.services.items && data.services.items.length > 0) {
@@ -1865,17 +1880,27 @@
             if (data.faqs && data.faqs.length > 0) {
                 const faqContainer = document.querySelector('.faq-list');
                 if (faqContainer) {
-                    faqContainer.innerHTML = data.faqs.map(faq => `
-                        <div class="faq-item">
-                            <button class="faq-question">
-                                <span>${faq.q}</span>
-                                <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
-                            </button>
-                            <div class="faq-answer">
-                                <p>${faq.a}</p>
-                            </div>
-                        </div>
-                    `).join('');
+                    faqContainer.replaceChildren();
+                    data.faqs.forEach((faq) => {
+                        const item = document.createElement('div');
+                        item.className = 'faq-item';
+
+                        const question = document.createElement('button');
+                        question.className = 'faq-question';
+                        question.type = 'button';
+                        const label = document.createElement('span');
+                        label.textContent = String(faq?.q ?? 'Pergunta');
+                        question.appendChild(label);
+                        question.insertAdjacentHTML('beforeend', '<svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 9l-7 7-7-7"/></svg>');
+
+                        const answer = document.createElement('div');
+                        answer.className = 'faq-answer';
+                        const answerText = document.createElement('p');
+                        setSafeDynamicRichText(answerText, faq?.a ?? 'Resposta indisponível.');
+                        answer.appendChild(answerText);
+                        item.append(question, answer);
+                        faqContainer.appendChild(item);
+                    });
                     initFaqAccordion();
                 }
             }
@@ -1889,8 +1914,17 @@
 
                 if (titleEl && hp.title) titleEl.textContent = hp.title;
                 if (subEl && hp.subtitle) subEl.textContent = hp.subtitle;
-                if (btnEl && hp.buttonText) btnEl.innerHTML = `${hp.buttonText}<span class="btn-arrow-icon">→</span>`;
-                if (coverEl && hp.cover) coverEl.src = hp.cover;
+                if (btnEl && hp.buttonText) {
+                    btnEl.replaceChildren(document.createTextNode(String(hp.buttonText)));
+                    const arrow = document.createElement('span');
+                    arrow.className = 'btn-arrow-icon';
+                    arrow.textContent = '→';
+                    arrow.setAttribute('aria-hidden', 'true');
+                    btnEl.appendChild(arrow);
+                }
+                if (coverEl && hp.cover && /^(?:https?:\/\/|\/?assets\/)/i.test(String(hp.cover))) {
+                    coverEl.src = String(hp.cover);
+                }
             }
         } catch (e) {
             console.warn('[CMS] Erro ao carregar conteúdo dinâmico:', e);
@@ -2039,7 +2073,13 @@
             if (!wrap) return;
             const realSrc = wrap.querySelector('img')?.src;
             if (realSrc && frame) {
-                frame.innerHTML = `<img src="${realSrc}" alt="Ampliação" style="max-width: 90vw; max-height: 85vh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); object-fit: contain;">`;
+                frame.replaceChildren();
+                if (!/^(?:https?:\/\/|\/?assets\/|data:image\/)/i.test(String(realSrc || ''))) return;
+                const preview = document.createElement('img');
+                preview.src = realSrc;
+                preview.alt = 'Ampliação';
+                preview.style.cssText = 'max-width:90vw;max-height:85vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.8);object-fit:contain;';
+                frame.appendChild(preview);
                 root.classList.add('enlarged');
             }
         });

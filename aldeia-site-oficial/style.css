@@ -4242,7 +4242,7 @@ body.light-theme .scroll-to-top:hover {
 .project-hero-bg {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at top, var(--accent-glow, rgba(168, 85, 247, 0.25)), transparent 70%);
+    background: radial-gradient(circle at top, var(--accent-glow, rgba(212, 212, 216, 0.18)), transparent 70%);
     pointer-events: none;
 }
 

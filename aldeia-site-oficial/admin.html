@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <base href="/">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ALDEIA | CRM Administrativo</title>
     <meta name="theme-color" content="#050505">
@@ -2172,13 +2173,19 @@ function showToast(message, type = 'info') {
         transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
     `;
 
-    toast.innerHTML = `
-        <div style="flex-shrink: 0; display: flex;">${iconSvg}</div>
-        <div style="flex-grow: 1; line-height: 1.4;">${message}</div>
-        <button onclick="this.parentElement.remove()" style="flex-shrink: 0; background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; margin-right: -4px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-    `;
+    const icon = document.createElement('div');
+    icon.style.cssText = 'flex: 0 0 auto; display: flex;';
+    icon.innerHTML = iconSvg;
+    const copy = document.createElement('div');
+    copy.style.cssText = 'flex: 1 1 auto; min-width: 0; line-height: 1.4; overflow-wrap: anywhere;';
+    copy.textContent = String(message ?? '');
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Fechar notificação');
+    close.style.cssText = 'width: 32px; height: 32px; flex: 0 0 32px; aspect-ratio: 1; border-radius: 999px; background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 8px; display: flex; align-items: center; justify-content: center;';
+    close.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+    close.addEventListener('click', () => toast.remove());
+    toast.append(icon, copy, close);
 
     container.appendChild(toast);
 
@@ -2207,49 +2214,50 @@ function showToast(message, type = 'info') {
     }, 4500);
 }
 
+function requestTextInput({ title, label, placeholder = '', value = '' }) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay active';
+        overlay.style.cssText = 'display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.72);backdrop-filter:blur(18px);z-index:100000;';
+        const form = document.createElement('form');
+        form.className = 'qma-glass';
+        form.style.cssText = 'width:min(100%,440px);padding:24px;border:1px solid rgba(255,255,255,.1);border-radius:24px;background:rgba(10,10,10,.94);box-shadow:0 28px 80px rgba(0,0,0,.55);';
+        const heading = document.createElement('h3');
+        heading.textContent = String(title ?? 'Preencher informação');
+        heading.style.cssText = 'margin:0 0 18px;color:#fff;font-size:1.1rem;letter-spacing:-.02em;';
+        const caption = document.createElement('label');
+        caption.textContent = String(label ?? 'Valor');
+        caption.style.cssText = 'display:grid;gap:8px;color:rgba(255,255,255,.58);font-size:.75rem;';
+        const input = document.createElement('input');
+        input.className = 'qma-input';
+        input.value = String(value ?? '');
+        input.placeholder = String(placeholder ?? '');
+        input.style.cssText = 'width:100%;min-height:46px;padding:0 14px;border:1px solid rgba(255,255,255,.12);border-radius:13px;background:rgba(0,0,0,.55);color:#fff;outline:none;';
+        const actions = document.createElement('div');
+        actions.style.cssText = 'display:flex;justify-content:flex-end;gap:10px;margin-top:20px;';
+        const cancel = document.createElement('button');
+        cancel.type = 'button'; cancel.textContent = 'Cancelar'; cancel.className = 'qma-btn';
+        const accept = document.createElement('button');
+        accept.type = 'submit'; accept.textContent = 'Continuar'; accept.className = 'qma-btn accent';
+        actions.append(cancel, accept); caption.append(input); form.append(heading, caption, actions); overlay.append(form); document.body.append(overlay);
+        const finish = (result) => { overlay.remove(); resolve(result); };
+        cancel.addEventListener('click', () => finish(null));
+        overlay.addEventListener('click', event => { if (event.target === overlay) finish(null); });
+        form.addEventListener('submit', event => { event.preventDefault(); finish(input.value.trim()); });
+        input.focus();
+    });
+}
+
 // Interceptar alertas nativos (Anti-Amadorismo)
-window.alert = function(msg) {
-    let type = 'info';
-    let lowerMsg = (msg||'').toLowerCase();
-    if (lowerMsg.includes('sucesso') || lowerMsg.includes('salvo') || lowerMsg.includes('atualizad')) type = 'success';
-    else if (lowerMsg.includes('erro') || lowerMsg.includes('inválido') || lowerMsg.includes('falha') || lowerMsg.includes('não')) type = 'error';
-    
-    showToast(msg, type);
-};
-
-// ============================================================================
-// [AGENTE UX/UI]: TRATAMENTO CIRÚRGICO DE 403 E EMPTY STATE
-// ============================================================================
-const originalFetch = window.fetch;
-window.fetch = async function(...args) {
-    const response = await originalFetch.apply(this, args);
-    if (response.status === 403) {
-        const activeTab = document.querySelector('.tab-content.active') || document.querySelector('.crm-content');
-        if (activeTab) {
-            activeTab.innerHTML = `
-            <div class="qma-glass" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 50vh; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 24px; backdrop-filter: blur(16px); animation: fadeIn 0.4s ease;">
-                <div style="background: rgba(255,255,255,0.04); padding: 20px; border-radius: 50%; margin-bottom: 24px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);">
-                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                </div>
-                <h3 style="color: #fff; font-size: 1.35rem; font-weight: 600; margin: 0 0 10px 0; letter-spacing: -0.02em;">Acesso Restrito</h3>
-                <p style="color: rgba(255,255,255,0.45); font-size: 0.88rem; max-width: 320px; text-align: center; line-height: 1.6; margin: 0;">
-                    Este módulo exige nível de privilégio superior. Seu cargo de Operador não permite a visualização ou edição destes dados.
-                </p>
-            </div>`;
-        }
-        throw new Error("403_HANDLED");
-    }
-    return response;
-};
-
 // ============================================================================
 // [AGENTE QA]: LÓGICA DE VISIBILIDADE CONDICIONAL
 // ============================================================================
 function enforceRBACVisibility() {
-    const userRole = window.currentUser?.role || (sessionStorage.getItem('aldeia_admin_user') ? JSON.parse(sessionStorage.getItem('aldeia_admin_user')).role : 'operador');
+    let storedRole = 'operator';
+    try {
+        storedRole = JSON.parse(sessionStorage.getItem('aldeia_admin_user') || '{}')?.role || 'operator';
+    } catch (_) {}
+    const userRole = window.currentUser?.role || storedRole;
     if (userRole !== 'admin') {
         document.querySelectorAll('[data-admin-only]').forEach(el => el.remove());
         const restrictedHashes = ['#telemetry-tab', '#logins-tab', '#cms-tab', '#settings-tab'];
@@ -2264,75 +2272,7 @@ function enforceRBACVisibility() {
     }
 }
 
-/* OMNI-AUDIT HARD MODE: GLOBAL FETCH INTERCEPTOR & ERROR HANDLING */
-(function() {
-    const originalFetch = window.fetch;
-    window.fetch = async function() {
-        try {
-            const response = await originalFetch.apply(this, arguments);
-            // Ignore auth verify silent fails
-            const handledLocally = ['/api/auth/login', '/api/trello', '/api/meetings'].some(path => response.url.includes(path));
-            if (!response.ok && !response.url.includes('/api/auth/verify') && !handledLocally) {
-                showToastError(`Falha HTTP: ${response.status}`);
-            }
-            return response;
-        } catch (err) {
-            showToastError("Falha de Rede: Não foi possível conectar ao servidor.");
-            window.dispatchEvent(new Event('fetchError'));
-            throw err;
-        }
-    };
-
-    window.showToastError = function(msg) {
-        const toast = document.createElement('div');
-        toast.className = 'toast-error';
-        toast.textContent = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 4000);
-    };
-
-    // Observer para renderizar Empty States em listas dinâmicas se estiverem vazias
-    const observer = new MutationObserver(() => {
-        const lists = document.querySelectorAll('.clients-list, .trello-board, .portfolio-grid');
-        lists.forEach(list => {
-            if (list.children.length === 0 && !list.innerHTML.includes('Carregando')) {
-                list.innerHTML = `<div class="empty-state">Nenhum dado encontrado para exibição.</div>`;
-            }
-        });
-    });
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        observer.observe(document.body, { childList: true, subtree: true });
-    });
-
-    // Anti-Griefing: UI State Lock Reverser
-    window.addEventListener('fetchError', () => {
-        document.querySelectorAll('button:disabled').forEach(btn => {
-            if (btn.innerText.includes('Carregando') || btn.innerText.includes('Enviando') || btn.innerText.includes('Salvando')) {
-                btn.disabled = false;
-                btn.innerHTML = btn.getAttribute('data-original-text') || 'Salvar';
-            }
-        });
-    });
-    document.addEventListener('click', e => {
-        const btn = e.target.closest('button');
-        if (btn && !btn.hasAttribute('data-original-text')) {
-            btn.setAttribute('data-original-text', btn.innerHTML);
-        }
-    });
-
-    // Anti-Griefing: Data Parsing Bottleneck (Limitar Arrays gigantes a 5000 itens)
-    const originalParse = JSON.parse;
-    JSON.parse = function(text, reviver) {
-        const result = originalParse(text, reviver);
-        if (Array.isArray(result) && result.length > 5000) {
-            if (window.showToastError) window.showToastError("Atenção: Carregamento massivo (Anti-Griefing). Omitindo dados além de 5000 itens.");
-            return result.slice(0, 5000);
-        }
-        return result;
-    };
-
-})();
+window.showToastError = (message) => showToast(message, 'error');
 </script>
 
 
@@ -2429,7 +2369,7 @@ function enforceRBACVisibility() {
                 <header class="topbar">
                     <label class="global-search" for="admin-global-search">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                        <input id="admin-global-search" type="search" placeholder="Buscar uma área do CRM" autocomplete="off">
+                        <input id="admin-global-search" type="search" placeholder="Buscar uma área do CRM" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true">
                         <kbd>⌘ K</kbd>
                     </label>
                     <div class="user-profile">
@@ -2440,7 +2380,7 @@ function enforceRBACVisibility() {
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                         <div class="user-greeting">Olá, <span id="auth-username" class="user-name">User</span></div>
-                        <img src="assets/favicon.png" id="auth-avatar" class="user-avatar" alt="Avatar">
+                        <img src="assets/favicon.svg" id="auth-avatar" class="user-avatar" alt="Avatar">
                         <button class="btn-logout" onclick="logout()">Sair</button>
                     </div>
                 </header>
@@ -2572,7 +2512,7 @@ function enforceRBACVisibility() {
                         </div>
                     </div>
                     <div class="table-container qma-mobile-cards">
-                        <table>
+                        <table id="submissions-table">
                             <thead>
                                 <tr>
                                     <th>Contato</th>
@@ -2599,6 +2539,19 @@ function enforceRBACVisibility() {
 
                     <script>
                         (function() {
+                            function escapeMarkup(value) {
+                                return String(value ?? '').replace(/[&<>'"]/g, character => ({
+                                    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+                                })[character]);
+                            }
+                            function readLocalHistory() {
+                                try {
+                                    const parsed = JSON.parse(localStorage.getItem('aldeia_wa_local_history') || '{}');
+                                    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+                                } catch (_) {
+                                    return {};
+                                }
+                            }
                             // SVGs - Lucide Icons
                             const icons = {
                                 bot: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>',
@@ -2620,7 +2573,7 @@ function enforceRBACVisibility() {
                                 searchQuery: '',
                                 selectedForBroadcast: new Set(),
                                 waStatus: 'STARTING',
-                                localMessages: JSON.parse(localStorage.getItem('aldeia_wa_local_history') || '{}'),
+                                localMessages: readLocalHistory(),
                                 chatHistory: [], // Fetched history for activeContact
                                 inputValue: '',
                                 isSending: false,
@@ -2684,13 +2637,14 @@ function enforceRBACVisibility() {
                                 const root = document.getElementById('wa-root');
                                 if (!root) return;
 
-                                if (state.waStatus === 'AWAITING_QR' && state.qrCode) {
+                                const safeQrCode = /^data:image\/png;base64,[a-z0-9+/=]+$/i.test(String(state.qrCode || '')) ? state.qrCode : '';
+                                if (state.waStatus === 'AWAITING_QR' && safeQrCode) {
                                     root.innerHTML = `
                                         <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#080808; color:#fff;">
                                             <h2 style="margin-bottom:20px;">WhatsApp requer Autenticação</h2>
                                             <p style="margin-bottom:30px; color:#a1a1aa;">Escaneie o QR Code abaixo com seu WhatsApp para conectar a Engine.</p>
                                             <div style="padding:10px; background:#fff; border-radius:10px;">
-                                                <img src="${state.qrCode}" alt="WhatsApp QR Code" style="width:250px; height:250px; display:block;" />
+                                                <img src="${safeQrCode}" alt="WhatsApp QR Code" style="width:250px; height:250px; display:block;" />
                                             </div>
                                         </div>
                                     `;
@@ -2709,7 +2663,7 @@ function enforceRBACVisibility() {
                                 // Layout Split
                                 root.innerHTML = `
                                     <!-- LEFT COLUMN -->
-                                    <div style="width: 380px; border-right: 1px solid rgba(255,255,255,0.08); background: rgba(10,10,10,0.6); backdrop-filter: blur(24px); display: flex; flex-direction: column; z-index: 10; box-shadow: 10px 0 30px -10px rgba(0,0,0,0.5);">
+                                    <div class="wa-sidebar" style="width: 380px; border-right: 1px solid rgba(255,255,255,0.08); background: rgba(10,10,10,0.6); backdrop-filter: blur(24px); display: flex; flex-direction: column; z-index: 10; box-shadow: 10px 0 30px -10px rgba(0,0,0,0.5);">
                                         ${renderLeftHeader()}
                                         <div style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
                                             ${filtered.length === 0 ? '<div style="text-align:center; color:#a1a1aa; font-size: 13px; margin-top:30px;">Carregando conversas do WhatsApp...</div>' : filtered.map(renderLeadCard).join('')}
@@ -2717,7 +2671,7 @@ function enforceRBACVisibility() {
                                     </div>
 
                                     <!-- RIGHT COLUMN -->
-                                    <div style="flex: 1; display: flex; flex-direction: column; position: relative; background: #080808; background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 0); background-size: 24px 24px;">
+                                    <div class="wa-conversation" style="flex: 1; display: flex; flex-direction: column; position: relative; background: #080808; background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 0); background-size: 24px 24px;">
                                         ${state.activeContact ? renderChatRoom() : renderEmptyState()}
                                     </div>
                                 `;
@@ -2756,7 +2710,7 @@ function enforceRBACVisibility() {
                                             ` : ''}
                                         </div>
                                         <div style="display: flex; flex-direction: column; gap: 10px;">
-                                            <input type="text" id="wa-search-input" value="${state.searchQuery}" placeholder="Pesquisar contato ou número..." style="width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 0.8rem; outline: none; box-sizing: border-box;" />
+                                            <input type="text" id="wa-search-input" value="${escapeMarkup(state.searchQuery)}" placeholder="Pesquisar contato ou número..." style="width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 0.8rem; outline: none; box-sizing: border-box;" />
                                             <div style="display: flex; gap: 6px; background: rgba(0,0,0,0.4); padding: 3px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
                                                 <button id="btn-filter-all" style="flex: 1; padding: 6px; border-radius: 8px; font-size: 0.725rem; font-weight: 600; background: ${state.currentFilter === 'all' ? '#e4e4e7' : 'transparent'}; color: ${state.currentFilter === 'all' ? '#000' : '#a1a1aa'}; border: none; cursor: pointer;">Todos</button>
                                                 <button id="btn-filter-vacuo" style="flex: 1; padding: 6px; border-radius: 8px; font-size: 0.725rem; font-weight: 600; background: ${state.currentFilter === 'vacuo' ? '#e4e4e7' : 'transparent'}; color: ${state.currentFilter === 'vacuo' ? '#000' : '#a1a1aa'}; border: none; cursor: pointer;">No Vácuo</button>
@@ -2767,11 +2721,12 @@ function enforceRBACVisibility() {
                             }
 
                             function renderLeadCard(chat) {
-                                const name = chat.name || chat.id.replace('@c.us', '');
+                                const chatId = String(chat?.id ?? '');
+                                const name = String(chat?.name || chatId.replace('@c.us', '') || 'Contato');
                                 const isVacuo = chat.lastMessage && chat.lastMessage.fromMe;
-                                const isChecked = state.selectedForBroadcast.has(chat.id) ? 'checked' : '';
+                                const isChecked = state.selectedForBroadcast.has(chatId) ? 'checked' : '';
                                 const initial = name.charAt(0).toUpperCase();
-                                const isActive = state.activeContact && state.activeContact.id === chat.id;
+                                const isActive = state.activeContact && state.activeContact.id === chatId;
                                 
                                 // Temperature Indicator (Hot if active in last 15 mins)
                                 const isHot = chat.lastMessage && !chat.lastMessage.fromMe && (Math.floor(Date.now()/1000) - chat.lastMessage.timestamp < 900);
@@ -2779,17 +2734,17 @@ function enforceRBACVisibility() {
                                 const avatarShadow = isHot ? '0 0 10px rgba(255,255,255,0.3)' : 'none';
 
                                 return `
-                                    <div class="wa-lead-card" data-id="${chat.id}" data-name="${name.replace(/'/g, "\'")}" data-phone="${chat.id.replace('@c.us','')}" style="position: relative; padding: 14px 16px; border-radius: 12px; cursor: pointer; transition: all 0.2s; border: 1px solid ${isActive ? 'rgba(34, 197, 94, 0.4)' : 'rgba(255,255,255,0.03)'}; background: ${isActive ? 'rgba(34, 197, 94, 0.08)' : 'rgba(255,255,255,0.01)'}; display: flex; align-items: center; gap: 12px;">
-                                        <input type="checkbox" class="broadcast-checkbox" data-id="${chat.id}" ${isChecked} style="width: 16px; height: 16px; accent-color: #22c55e; cursor: pointer;" />
+                                    <div class="wa-lead-card" data-id="${escapeMarkup(chatId)}" data-name="${escapeMarkup(name)}" data-phone="${escapeMarkup(chatId.replace('@c.us',''))}" style="position: relative; padding: 14px 16px; border-radius: 12px; cursor: pointer; transition: all 0.2s; border: 1px solid ${isActive ? 'rgba(255,255,255,0.24)' : 'rgba(255,255,255,0.03)'}; background: ${isActive ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.01)'}; display: flex; align-items: center; gap: 12px;">
+                                        <input type="checkbox" class="broadcast-checkbox" data-id="${escapeMarkup(chatId)}" ${isChecked} style="width: 16px; height: 16px; accent-color: #d4d4d8; cursor: pointer;" />
                                         <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #27272a, #09090b); border: 1px solid ${avatarBorder}; box-shadow: ${avatarShadow}; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #e4e4e7; font-size: 0.9rem; flex-shrink: 0; aspect-ratio: 1/1;">
-                                            ${initial}
+                                            ${escapeMarkup(initial)}
                                         </div>
                                         <div style="flex: 1; min-width: 0;">
                                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                                                <h4 style="color: #f4f4f5; font-weight: 500; font-size: 0.925rem; margin:0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${name}</h4>
+                                                <h4 style="color: #f4f4f5; font-weight: 500; font-size: 0.925rem; margin:0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeMarkup(name)}</h4>
                                                 ${isVacuo ? '<span style="font-size: 0.65rem; color: #ef4444; background: rgba(239,68,68,0.1); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(239,68,68,0.2);">Vácuo</span>' : ''}
                                             </div>
-                                            <p style="color: #a1a1aa; font-size: 0.775rem; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${chat.lastMessage ? chat.lastMessage.body : 'Clique para abrir o chat'}</p>
+                                            <p style="color: #a1a1aa; font-size: 0.775rem; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeMarkup(chat.lastMessage ? chat.lastMessage.body : 'Clique para abrir o chat')}</p>
                                         </div>
                                     </div>
                                 `;
@@ -2808,12 +2763,13 @@ function enforceRBACVisibility() {
                             }
 
                             function renderChatRoom() {
-                                const contact = state.activeContact;
-                                const firstName = contact.name.split(' ')[0];
-                                const initial = contact.name.charAt(0).toUpperCase();
+                                const contact = state.activeContact ?? {};
+                                const contactName = String(contact.name ?? 'Contato');
+                                const firstName = contactName.split(' ')[0] || 'contato';
+                                const initial = contactName.charAt(0).toUpperCase() || 'A';
 
                                 // Merge remote and local history
-                                const combinedHistory = [...state.chatHistory, ...(state.localMessages[contact.id] || [])];
+                                const combinedHistory = [...(Array.isArray(state.chatHistory) ? state.chatHistory : []), ...(state.localMessages?.[contact.id] || [])];
                                 combinedHistory.sort((a, b) => a.timestamp - b.timestamp);
 
                                 return `
@@ -2821,11 +2777,11 @@ function enforceRBACVisibility() {
                                     <div style="padding: 16px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(15,15,15,0.9); backdrop-filter: blur(16px); display: flex; justify-content: space-between; align-items: center; z-index: 10;">
                                         <div style="display: flex; align-items: center; gap: 14px;">
                                             <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #27272a, #09090b); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-weight: 600; color: #e4e4e7; font-size: 1rem; flex-shrink: 0; aspect-ratio: 1/1;">
-                                                ${initial}
+                                                ${escapeMarkup(initial)}
                                             </div>
                                             <div>
-                                                <h3 style="color: #f4f4f5; font-weight: 500; font-size: 1rem; margin: 0 0 2px 0;">${contact.name}</h3>
-                                                <span style="color: #a1a1aa; font-size: 0.75rem;">+${contact.phone}</span>
+                                                <h3 style="color: #f4f4f5; font-weight: 500; font-size: 1rem; margin: 0 0 2px 0;">${escapeMarkup(contactName)}</h3>
+                                                <span style="color: #a1a1aa; font-size: 0.75rem;">+${escapeMarkup(contact.phone)}</span>
                                             </div>
                                         </div>
                                         <div style="display: flex; gap: 8px;">
@@ -2837,8 +2793,8 @@ function enforceRBACVisibility() {
 
                                     <!-- AI Context Tag -->
                                     ${state.aiContextTag ? `
-                                    <div style="position: absolute; top: 80px; left: 50%; transform: translateX(-50%); z-index: 11; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); backdrop-filter: blur(8px); padding: 6px 16px; border-radius: 99px; color: #d8b4fe; font-size: 0.75rem; font-weight: 500; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-                                        ${icons.spark} IA Contexto: ${state.aiContextTag}
+                                    <div style="position: absolute; top: 80px; left: 50%; transform: translateX(-50%); z-index: 11; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); backdrop-filter: blur(8px); padding: 6px 16px; border-radius: 99px; color: rgba(255,255,255,0.82); font-size: 0.75rem; font-weight: 500; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                                        ${icons.spark} IA Contexto: ${escapeMarkup(state.aiContextTag)}
                                     </div>
                                     ` : ''}
 
@@ -2857,8 +2813,8 @@ function enforceRBACVisibility() {
                                     ${state.smartReplies.length > 0 ? `
                                     <div style="padding: 0 24px 12px 24px; display: flex; gap: 8px;">
                                         ${state.smartReplies.map(reply => `
-                                            <button class="btn-smart-reply" data-text="${reply}" style="padding: 8px 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 99px; color: #e4e4e7; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;">
-                                                ${reply}
+                                            <button class="btn-smart-reply" data-text="${escapeMarkup(reply)}" style="padding: 8px 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 99px; color: #e4e4e7; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;">
+                                                ${escapeMarkup(reply)}
                                             </button>
                                         `).join('')}
                                     </div>
@@ -2867,7 +2823,7 @@ function enforceRBACVisibility() {
                                     <!-- Input Area -->
                                     <div style="padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(12,12,12,0.95); backdrop-filter: blur(20px);">
                                         <div style="display: flex; gap: 12px; align-items: flex-end; max-width: 100%;">
-                                            <textarea id="wa-msg-input" placeholder="Digite uma mensagem para ${firstName}..." style="flex: 1; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; color: #e4e4e7; outline: none; resize: none; min-height: 52px; font-family: inherit; font-size: 0.9rem; line-height: 1.4;">${state.inputValue}</textarea>
+                                            <textarea id="wa-msg-input" placeholder="Digite uma mensagem para ${escapeMarkup(firstName)}..." style="flex: 1; background: rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; color: #e4e4e7; outline: none; resize: none; min-height: 52px; font-family: inherit; font-size: 0.9rem; line-height: 1.4;">${escapeMarkup(state.inputValue)}</textarea>
                                             
                                             <button id="btn-ai-followup" title="Gerar mensagem com IA Gemini" style="height: 52px; padding: 0 16px; background: rgba(255,255,255,0.08); color: #e4e4e7; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
                                                 ${icons.bot} IA Follow-up
@@ -2906,7 +2862,7 @@ function enforceRBACVisibility() {
 
                                 return `
                                     <div style="align-self: ${alignSelf}; max-width: 75%; background: ${bg}; border: ${border}; padding: 8px 12px; border-radius: ${borderRadius}; color: ${color}; font-size: 0.9rem; line-height: 1.4; display: flex; flex-direction: column; opacity: ${opacity}; transition: opacity 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                                        <div style="word-wrap: break-word; white-space: pre-wrap;">${msg.body}</div>
+                                        <div style="word-wrap: break-word; white-space: pre-wrap;">${escapeMarkup(msg.body)}</div>
                                         <div style="display: flex; align-items: center; justify-content: flex-end; margin-top: 4px;">
                                             <span style="font-size: 0.65rem; color: #a1a1aa;">${time}</span>
                                             ${statusIcon}
@@ -2976,12 +2932,21 @@ function enforceRBACVisibility() {
                             }
 
                             // LOGIC CONTROLLERS
-                            function handleNewChat() {
-                                const phone = prompt("Digite o número do WhatsApp com DDD (Ex: 21999998888):");
+                            async function handleNewChat() {
+                                const phone = await requestTextInput({
+                                    title: 'Nova conversa',
+                                    label: 'WhatsApp com DDD',
+                                    placeholder: 'Ex.: 21999998888'
+                                });
                                 if (!phone) return;
                                 const cleanPhone = phone.replace(/\D/g, '');
-                                if (cleanPhone.length < 8) return showToast("Número inválido.");
-                                const name = prompt("Digite o Nome do Contato (Opcional):") || cleanPhone;
+                                if (cleanPhone.length < 8) return showToast('Número inválido.', 'error');
+                                const name = await requestTextInput({
+                                    title: 'Identificar contato',
+                                    label: 'Nome do contato',
+                                    placeholder: 'Opcional',
+                                    value: cleanPhone
+                                }) || cleanPhone;
                                 const chatId = cleanPhone + '@c.us';
                                 
                                 const newLead = {
@@ -3134,10 +3099,16 @@ function enforceRBACVisibility() {
                                 }
                             }
 
+                            let whatsappSocket = null;
+                            let whatsappStatusTimer = null;
+                            let whatsappLeadsTimer = null;
+
                             function initSocket() {
-                                if (window.io) {
-                                    const socket = window.io();
-                                    socket.on('wa_message', (msg) => {
+                                const token = sessionStorage.getItem('aldeia_admin_token') || '';
+                                if (window.io && token) {
+                                    whatsappSocket?.disconnect?.();
+                                    whatsappSocket = window.io({ auth: { token } });
+                                    whatsappSocket.on('wa_message', (msg) => {
                                         if (state.activeContact) {
                                             const chatId = typeof msg.from === 'string' && msg.from.includes('@g.us') ? msg.from : (msg.fromMe ? msg.to : msg.from);
                                             if (state.activeContact.id === chatId) {
@@ -3159,21 +3130,39 @@ function enforceRBACVisibility() {
                                 }
                             }
 
+                            function stopWhatsAppRuntime() {
+                                whatsappSocket?.disconnect?.();
+                                whatsappSocket = null;
+                                clearInterval(whatsappStatusTimer);
+                                clearInterval(whatsappLeadsTimer);
+                                whatsappStatusTimer = null;
+                                whatsappLeadsTimer = null;
+                            }
+
+                            function startWhatsAppRuntime() {
+                                stopWhatsAppRuntime();
+                                if (!sessionStorage.getItem('aldeia_admin_token')) return;
+                                initSocket();
+                                void fetchStatus();
+                                void fetchLeads();
+                                whatsappStatusTimer = window.setInterval(fetchStatus, 5000);
+                                whatsappLeadsTimer = window.setInterval(fetchLeads, 15000);
+                            }
+                            window.startWhatsAppRuntime = startWhatsAppRuntime;
+                            window.stopWhatsAppRuntime = stopWhatsAppRuntime;
+
                             // INITIAL RENDER IMMEDIATELY
                             render();
-                            initSocket();
-                            fetchStatus();
-                            fetchLeads();
-                            setInterval(fetchStatus, 3000);
-                            setInterval(fetchLeads, 10000);
+                            if (sessionStorage.getItem('aldeia_admin_token')) startWhatsAppRuntime();
+                            window.addEventListener('beforeunload', stopWhatsAppRuntime, { once: true });
                         })();
                     </script>
                 </div>
 
                 <!-- TAB: CLIENTS -->
                 <div id="clients-tab" class="tab-content">
-                    <div class="table-container">
-                        <table>
+                    <div class="table-container qma-mobile-cards">
+                        <table id="clients-table">
                             <thead>
                                 <tr>
                                     <th>Nome</th>
@@ -3348,7 +3337,7 @@ function enforceRBACVisibility() {
                                     <button type="button" class="ui-circle" onclick="setAccentPreset('#3b82f6')" style="width:28px; height:28px; border-radius:50%; background:#3b82f6; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" title="Azul (MIBR / Cod)"></button>
                                     <button type="button" class="ui-circle" onclick="setAccentPreset('#10b981')" style="width:28px; height:28px; border-radius:50%; background:#10b981; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" title="Verde (Green)"></button>
                                     <button type="button" class="ui-circle" onclick="setAccentPreset('#f59e0b')" style="width:28px; height:28px; border-radius:50%; background:#f59e0b; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" title="Amarelo / Ouro"></button>
-                                    <button type="button" class="ui-circle" onclick="setAccentPreset('#ec4899')" style="width:28px; height:28px; border-radius:50%; background:#ec4899; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" title="Rosa (Pink)"></button>
+                                <button type="button" class="ui-circle" onclick="setAccentPreset('#71717a')" style="width:28px; height:28px; border-radius:50%; background:#71717a; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" title="Grafite"></button>
                                     <button type="button" class="ui-circle" onclick="setAccentPreset('#ffffff')" style="width:28px; height:28px; border-radius:50%; background:#ffffff; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" title="Branco / Prata"></button>
                                     <span id="port-color-hex" style="color: #aaa; font-size: 0.85rem; font-family: monospace;">#e4e4e7</span>
                                 </div>
@@ -3393,8 +3382,8 @@ function enforceRBACVisibility() {
                         </form>
                     </div>
 
-                    <div class="table-container">
-                        <table>
+                    <div class="table-container qma-mobile-cards">
+                        <table id="portfolio-table">
                             <thead>
                                 <tr>
                                     <th>Projeto</th>
@@ -3435,8 +3424,8 @@ function enforceRBACVisibility() {
                     </div>
                     <div class="crm-card">
                         <span class="crm-card-title">Últimos Eventos de Tráfego</span>
-                        <div class="table-container" style="margin-top: 15px; border:none;">
-                            <table>
+                        <div class="table-container qma-mobile-cards" style="margin-top: 15px; border:none;">
+                            <table id="telemetry-table">
                                 <thead><tr><th>Horário</th><th>Sessão</th><th>Tipo do Evento</th><th>Detalhe</th></tr></thead>
                                 <tbody id="telemetry-logs-body">
                                     <tr><td><div class="qma-skeleton-cell" style="width: 60%;"></div></td><td><div class="qma-skeleton-cell" style="width: 50%;"></div></td><td><div class="qma-skeleton-cell" style="width: 45%;"></div></td><td><div class="qma-skeleton-cell" style="width: 70%;"></div></td></tr>
@@ -4164,6 +4153,10 @@ function enforceRBACVisibility() {
                 leadsMap.removeLayer(heatLayerInstance);
                 heatLayerInstance = null;
             }
+            if (previousTab?.id === 'trello-tab' && tabId !== 'trello-tab' && deepWorkTicker) {
+                clearInterval(deepWorkTicker);
+                deepWorkTicker = null;
+            }
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
 
@@ -4218,16 +4211,24 @@ function enforceRBACVisibility() {
         }
 
         async function loadDashboardStats() {
-            const [subRes, visitRes, projectRes] = await Promise.all([
+            const requests = await Promise.allSettled([
                 fetch('/api/submissions?t=' + Date.now(), { headers: getAuthHeaders() }),
                 fetch('/api/visits/stats?t=' + Date.now(), { headers: getAuthHeaders() }),
                 fetch('/api/admin/project-views/metrics?t=' + Date.now(), { headers: getAuthHeaders() })
             ]);
-            if (!subRes.ok || !visitRes.ok || !projectRes.ok) throw new Error('Não foi possível carregar as métricas administrativas.');
-
-            rawLeads = await subRes.json();
-            const visitData = await visitRes.json();
-            const projectData = await projectRes.json();
+            const readResult = async (result, fallback) => {
+                if (result.status !== 'fulfilled' || !result.value?.ok) return fallback;
+                try { return await result.value.json(); } catch (_) { return fallback; }
+            };
+            const [leadsData, visitData, projectData] = await Promise.all([
+                readResult(requests[0], []),
+                readResult(requests[1], {}),
+                readResult(requests[2], {})
+            ]);
+            if (requests.every(result => result.status === 'rejected' || !result.value?.ok)) {
+                throw new Error('Não foi possível carregar as métricas administrativas.');
+            }
+            rawLeads = Array.isArray(leadsData) ? leadsData : [];
 
             animateCount(document.getElementById('dash-total-leads'), rawLeads?.length ?? 0);
             animateCount(document.getElementById('dash-visits-today'), visitData?.today ?? 0);
@@ -4236,8 +4237,8 @@ function enforceRBACVisibility() {
             animateCount(document.getElementById('dash-project-unique'), projectData?.unique24h ?? 0);
             animateCount(document.getElementById('dash-project-total'), projectData?.totalViews ?? 0);
             renderSparkline(document.getElementById('dash-project-sparkline'), projectData?.series7d ?? []);
-            renderRecentSubmissionsWidget(rawLeads ?? []);
-            renderPortfolioRankingWidget(projectData?.topProjects ?? []);
+            renderRecentSubmissionsWidget(rawLeads);
+            renderPortfolioRankingWidget(Array.isArray(projectData?.topProjects) ? projectData.topProjects : []);
         }
 
         function animateCount(element, targetValue) {
@@ -4460,7 +4461,8 @@ function enforceRBACVisibility() {
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
                 if (response.ok) {
-                    rawLeads = await response.json();
+                    const leadsPayload = await response.json();
+                    rawLeads = Array.isArray(leadsPayload) ? leadsPayload : [];
                     
                     if (statTotal) statTotal.textContent = rawLeads.length;
                     if (statLast) {
@@ -4514,7 +4516,7 @@ function enforceRBACVisibility() {
                                 <div class="user-name">${escapeHTML(sub.nome)}</div>
                                 <div class="user-info">${escapeHTML(sub.email)}</div>
                                 <div class="user-info">${escapeHTML(sub.telefone)}</div>
-                                ${sub.instagram ? `<div class="user-info" style="color: #a1a1aa; font-weight: 500; margin-top: 2px;"><a href="https://instagram.com/${sub.instagram.replace('@','')}" target="_blank" style="color: inherit; text-decoration: underline;">Instagram: ${escapeHTML(sub.instagram)}</a></div>` : ''}
+                                ${sub.instagram ? `<div class="user-info" style="color: #a1a1aa; font-weight: 500; margin-top: 2px;"><a href="https://instagram.com/${encodeURIComponent(String(sub.instagram).replace('@',''))}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">Instagram: ${escapeHTML(sub.instagram)}</a></div>` : ''}
                                 
                                 <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;">
                                     ${displayLoc ? `<div class="badge-geo" style="margin: 0;" title="Localização">IP: ${escapeHTML(displayLoc)}</div>` : ''}
@@ -4522,7 +4524,7 @@ function enforceRBACVisibility() {
                                     ${sub.locationConsent && sub.locationCoords ? `<div class="badge-geo" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); margin: 0;" title="Localização aproximada autorizada">Localização compartilhada</div>` : ''}
                                     ${sub.utmSource ? `<div class="badge-geo" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); margin: 0;" title="Origem do Tráfego">Origem: ${escapeHTML(sub.utmSource)} ${sub.utmCampaign ? '('+escapeHTML(sub.utmCampaign)+')' : ''}</div>` : ''}
                                     ${sub.visits ? `<div class="badge-geo" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); margin: 0;" title="Acessos antes da conversão">Visitas: ${escapeHTML(sub.visits)}</div>` : ''}
-                                    ${sub.firstVisit ? `<div class="badge-geo" style="background: rgba(236, 72, 153, 0.1); color: #ec4899; border: 1px solid rgba(236, 72, 153, 0.2); margin: 0; width: 100%; max-width: fit-content;" title="Data do 1º Acesso no site">1º Acesso: ${escapeHTML(new Date(sub.firstVisit).toLocaleString('pt-BR'))}</div>` : ''}
+                                    ${sub.firstVisit ? `<div class="badge-geo" style="background: rgba(228,228,231,.06); color: rgba(255,255,255,.68); border: 1px solid rgba(255,255,255,.1); margin: 0; width: 100%; max-width: fit-content;" title="Data do 1º Acesso no site">1º Acesso: ${escapeHTML(new Date(sub.firstVisit).toLocaleString('pt-BR'))}</div>` : ''}
                                 </div>
                             </td>
                             <td data-label="Projeto">
@@ -4564,7 +4566,8 @@ function enforceRBACVisibility() {
                 try {
                     const fallbackRes = await fetch('/data/submissions.json?t=' + Date.now());
                     if (fallbackRes.ok) {
-                        rawLeads = await fallbackRes.json();
+                        const fallbackPayload = await fallbackRes.json();
+                        rawLeads = Array.isArray(fallbackPayload) ? fallbackPayload : [];
                         console.log('[QMA Circuit Breaker] Fallback local loaded:', rawLeads.length, 'leads');
                         if (statTotal) statTotal.textContent = rawLeads.length;
                         if (table) table.style.display = 'table';
@@ -4946,20 +4949,20 @@ function enforceRBACVisibility() {
                 const currStatus = c.status || 'Fechado';
 
                 tr.innerHTML = `
-                    <td>
+                    <td data-label="Cliente">
                         <div class="user-name">${escapeHTML(c.nome)}</div>
                         <div class="user-info">${escapeHTML(c.email)}</div>
                         <div class="user-info">${escapeHTML(c.telefone)}</div>
                     </td>
-                    <td>
+                    <td data-label="Projeto">
                         <div class="project-text">${escapeHTML(c.projeto)}</div>
                     </td>
-                    <td>
+                    <td data-label="Status">
                         <select onchange="updateClientStatus('${c.id}', this.value)" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; outline: none;">
                             ${statusOptions.map(opt => `<option value="${opt.val}" ${currStatus === opt.val ? 'selected' : ''} style="background: #111;">${opt.label}</option>`).join('')}
                         </select>
                     </td>
-                    <td>
+                    <td data-label="Ações">
                         <div class="actions-cell">
                             <a href="${waLink}" target="_blank" class="btn-action btn-wa">Contato WhatsApp</a>
                             <button class="btn-action btn-email" style="border-color: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="removeClient('${c.id}')">Remover</button>
@@ -5014,32 +5017,38 @@ function enforceRBACVisibility() {
         }
 
         async function updateClientStatus(clientId, newStatus) {
+            const client = rawClients.find(c => c.id === clientId);
+            const previousStatus = client?.status || 'Ativo';
+            if (client) client.status = newStatus;
             try {
-                const response = await fetch(`/api/clients/${clientId}`, {
+                const response = await fetch(`/api/clients/${encodeURIComponent(clientId)}`, {
                     method: 'PUT',
                     headers: getAuthHeaders(),
                     body: JSON.stringify({ status: newStatus })
                 });
-                if (response.ok) {
-                    const client = rawClients.find(c => c.id === clientId);
-                    if (client) client.status = newStatus;
-                }
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result?.message || 'Não foi possível atualizar o status.');
+                showToast('Status do cliente atualizado.', 'success');
             } catch (err) {
+                if (client) client.status = previousStatus;
+                await loadClients();
                 console.error('Erro ao atualizar status do cliente:', err);
+                showToast(err?.message || 'Não foi possível atualizar o status.', 'error');
             }
         }
 
-        async function removeClient(clientId) {
-            if (!confirm('Deseja realmente remover este cliente?')) return;
-            try {
-                await fetch(`/api/clients/${clientId}`, {
+        function removeClient(clientId) {
+            openAdminConfirmation('Remover cliente', 'O cliente será removido do CRM e não poderá ser recuperado.', async () => {
+                const response = await fetch(`/api/clients/${encodeURIComponent(clientId)}`, {
                     method: 'DELETE',
                     headers: getAuthHeaders()
                 });
-            } catch (err) {
-                console.error(err);
-            }
-            await loadClients();
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result?.message || 'Não foi possível remover o cliente.');
+                rawClients = rawClients.filter(client => client.id !== clientId);
+                await loadClients();
+                showToast('Cliente removido.', 'success');
+            });
         }
 
         // Charts & Analytics rendering using Chart.js
@@ -5409,22 +5418,22 @@ function enforceRBACVisibility() {
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div class="input-group">
                             <label class="input-label">Título</label>
-                            <input class="input-control" type="text" value="${item.title || ''}" onchange="updateServiceTitle(${index}, this.value)" style="width: 100%;">
+                            <input class="input-control" type="text" value="${escapeHTML(item.title ?? '')}" onchange="updateServiceTitle(${index}, this.value)" style="width: 100%;">
                         </div>
                         <div class="input-group">
                             <label class="input-label">Tags (separadas por vírgula)</label>
-                            <input class="input-control" type="text" value="${(item.tags || []).join(', ')}" onchange="updateServiceTags(${index}, this.value)" style="width: 100%;">
+                            <input class="input-control" type="text" value="${escapeHTML((Array.isArray(item.tags) ? item.tags : []).join(', '))}" onchange="updateServiceTags(${index}, this.value)" style="width: 100%;">
                         </div>
                     </div>
                     <div class="input-group">
                         <label class="input-label">Descrição</label>
-                        <textarea class="input-control" style="min-height: 60px; width: 100%;" onchange="updateServiceText(${index}, this.value)">${item.text || ''}</textarea>
+                        <textarea class="input-control" style="min-height: 60px; width: 100%;" onchange="updateServiceText(${index}, this.value)">${escapeHTML(item.text ?? '')}</textarea>
                     </div>
                     <div class="input-group">
                         <label class="input-label">Imagem do Serviço</label>
                         <div style="display: flex; align-items: center; gap: 15px;">
-                            <img src="${item.image || ''}" id="ed-s-img-preview-${index}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; background: #222;">
-                            <input type="text" value="${item.image || ''}" readonly style="flex: 1; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); padding: 8px; border-radius: 4px; color: #aaa; font-size: 0.75rem;">
+                            <img src="${escapeHTML(item.image ?? '')}" id="ed-s-img-preview-${index}" alt="" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; background: #222;">
+                            <input type="text" value="${escapeHTML(item.image ?? '')}" readonly style="flex: 1; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.04); padding: 8px; border-radius: 4px; color: #aaa; font-size: 0.75rem;">
                             <button type="button" class="btn-action btn-email" onclick="document.getElementById('ed-s-file-${index}').click()" style="padding: 6px 12px; font-size: 0.75rem;">Upload</button>
                             <input type="file" id="ed-s-file-${index}" accept="image/*" style="display: none;" onchange="handleServiceUpload(${index}, this)">
                         </div>
@@ -5469,11 +5478,11 @@ function enforceRBACVisibility() {
                     </div>
                     <div class="input-group">
                         <label class="input-label">Pergunta</label>
-                        <input class="input-control" type="text" value="${item.q || ''}" onchange="updateFaqQuestion(${index}, this.value)" style="width: 100%;">
+                        <input class="input-control" type="text" value="${escapeHTML(item.q ?? '')}" onchange="updateFaqQuestion(${index}, this.value)" style="width: 100%;">
                     </div>
                     <div class="input-group">
                         <label class="input-label">Resposta (Aceita HTML)</label>
-                        <textarea class="input-control" style="min-height: 80px; width: 100%;" onchange="updateFaqAnswer(${index}, this.value)">${item.a || ''}</textarea>
+                        <textarea class="input-control" style="min-height: 80px; width: 100%;" onchange="updateFaqAnswer(${index}, this.value)">${escapeHTML(item.a ?? '')}</textarea>
                     </div>
                 `;
                 listEl.appendChild(row);
@@ -5501,10 +5510,10 @@ function enforceRBACVisibility() {
                 row.style.cssText = 'display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);';
                 
                 row.innerHTML = `
-                    <img src="${item.src}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; background: #222;">
+                    <img src="${escapeHTML(item.src ?? '')}" alt="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; background: #222;">
                     <div style="flex: 1; display: flex; gap: 15px; align-items: center;">
-                        <input class="input-control" type="text" value="${item.src}" readonly style="flex: 0.4; font-size: 0.75rem; color: #888;">
-                        <input class="input-control" type="text" placeholder="Nome/Descrição do Projeto" value="${item.alt || ''}" style="flex: 0.6; font-size: 0.85rem;" onchange="updatePortfolioItemAlt(${index}, this.value)">
+                        <input class="input-control" type="text" value="${escapeHTML(item.src ?? '')}" readonly style="flex: 0.4; font-size: 0.75rem; color: #888;">
+                        <input class="input-control" type="text" placeholder="Nome/Descrição do Projeto" value="${escapeHTML(item.alt ?? '')}" style="flex: 0.6; font-size: 0.85rem;" onchange="updatePortfolioItemAlt(${index}, this.value)">
                     </div>
                     <button type="button" class="btn-action btn-email" onclick="document.getElementById('ed-p-file-${index}').click()" style="padding: 8px 12px; font-size: 0.75rem;">Upload</button>
                     <input type="file" id="ed-p-file-${index}" accept="image/*" style="display: none;" onchange="handlePortfolioUpload(${index}, this)">
@@ -5682,6 +5691,7 @@ function enforceRBACVisibility() {
             }
             return headers;
         }
+        window.getWAuth = getAuthHeaders;
 
         function startAdminDashboard(token) {
             enforceRBACVisibility();
@@ -5689,6 +5699,7 @@ function enforceRBACVisibility() {
             sessionStorage.setItem('aldeia_admin_token', token);
             document.getElementById('admin-login').style.display = 'none';
             document.getElementById('admin-dashboard').style.display = 'block';
+            window.startWhatsAppRuntime?.();
             loadSidebarBrand().catch(error => console.warn('[SIDEBAR BRAND]', error.message));
             
             loadDashboardStats();
@@ -6023,7 +6034,7 @@ function enforceRBACVisibility() {
                     const sessionLabel = String(event?.sessionId || 'Sem sessão').slice(0, 16);
                     const type = event?.eventType === 'pageview' ? 'Página vista' : event?.eventType === 'click' ? 'Clique' : String(event?.eventType || 'Evento');
                     const detail = event?.elementId || event?.path || '/';
-                    return `<tr><td>${escapeHTML(dateLabel)}</td><td><span style="font-family:var(--font-m); font-size:.8rem;">${escapeHTML(sessionLabel)}</span></td><td>${escapeHTML(type)}</td><td>${escapeHTML(String(detail))}</td></tr>`;
+                    return `<tr><td data-label="Horário">${escapeHTML(dateLabel)}</td><td data-label="Sessão"><span style="font-family:var(--font-m); font-size:.8rem;">${escapeHTML(sessionLabel)}</span></td><td data-label="Evento">${escapeHTML(type)}</td><td data-label="Detalhe">${escapeHTML(String(detail))}</td></tr>`;
                 }).join('');
             } catch (error) {
                 console.warn('[Analytics] Falha ao carregar:', error.message);
@@ -6107,7 +6118,7 @@ function enforceRBACVisibility() {
             
             try {
                 const res = await fetch('/api/portfolio?t=' + Date.now(), { headers: getAuthHeaders() });
-                /* bypass */
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 {
                     const payload = await res.json();
                     rawPortfolioProjects = Array.isArray(payload) ? payload : [];
@@ -6118,19 +6129,20 @@ function enforceRBACVisibility() {
                     }
                     rawPortfolioProjects.forEach(p => {
                         const tr = document.createElement('tr');
-                        const colorHex = p.accentColor || p.color || '#e4e4e7';
+                        const colorCandidate = String(p?.accentColor || p?.color || '#e4e4e7');
+                        const colorHex = /^#[0-9a-f]{6}$/i.test(colorCandidate) ? colorCandidate : '#e4e4e7';
                         const projectActions = currentAdminUser?.role === 'admin' ? `
                             <button onclick="editProject('${p.id}')" style="background: rgba(228, 228, 231, 0.15); color: #a1a1aa; border: 1px solid rgba(228, 228, 231, 0.3); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Editar</button>
                             <button onclick="deleteProject('${p.id}')" style="background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Excluir</button>` : '<span class="metric-caption">Somente adição</span>';
                         tr.innerHTML = `
-                            <td>
+                            <td data-label="Projeto">
                                 <div style="display:flex; align-items:center; gap:10px;">
                                     <div style="width:12px; height:12px; border-radius:50%; background:${colorHex}; border:1px solid rgba(255,255,255,0.3); flex-shrink:0;"></div>
                                     <strong style="color:#fff;">${escapeHTML(p.title)}</strong>
                                 </div>
                             </td>
-                            <td><span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${escapeHTML(p.categoryLabel || p.category)}</span></td>
-                            <td>
+                            <td data-label="Categoria"><span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${escapeHTML(p.categoryLabel || p.category)}</span></td>
+                            <td data-label="Ações">
                                 <div style="display:flex; gap:8px;">
                                     ${projectActions}
                                 </div>
@@ -6287,22 +6299,17 @@ function enforceRBACVisibility() {
             document.getElementById('port-cancel-btn').style.display = 'none';
         }
 
-        async function deleteProject(id) {
-            if (!confirm('Tem certeza que deseja excluir este projeto?')) return;
-            try {
-                const res = await fetch(`/api/portfolio/${id}`, {
+        function deleteProject(id) {
+            openAdminConfirmation('Excluir projeto', 'O projeto será removido do portfólio público e não poderá ser recuperado.', async () => {
+                const res = await fetch(`/api/portfolio/${encodeURIComponent(id)}`, {
                     method: 'DELETE',
                     headers: getAuthHeaders()
                 });
-                if (res.ok) {
-                    loadPortfolio();
-                } else {
-                    showToast('Erro ao excluir projeto.');
-                }
-            } catch (err) {
-                console.error(err);
-                showToast('Erro de conexão ao excluir.');
-            }
+                const result = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(result?.message || 'Não foi possível excluir o projeto.');
+                await loadPortfolio();
+                showToast('Projeto excluído.', 'success');
+            });
         }
 
         // --- Múltipla exclusão de Portfólio ---
@@ -6324,28 +6331,24 @@ function enforceRBACVisibility() {
             }
         }
 
-        async function deleteSelectedPortfolios() {
+        function deleteSelectedPortfolios() {
             const checkboxes = document.querySelectorAll('.port-checkbox:checked');
             if (checkboxes.length === 0) return;
-            if (!confirm(`Tem certeza que deseja excluir os ${checkboxes.length} projetos selecionados?`)) return;
-
             const idsToDelete = Array.from(checkboxes).map(cb => cb.value);
-            
-            try {
+            openAdminConfirmation('Excluir projetos', `Os ${idsToDelete.length} projetos selecionados serão removidos do site.`, async () => {
                 for (const id of idsToDelete) {
-                    await fetch(`/api/portfolio/${id}`, {
+                    const response = await fetch(`/api/portfolio/${encodeURIComponent(id)}`, {
                         method: 'DELETE',
                         headers: getAuthHeaders()
                     });
+                    const result = await response.json().catch(() => ({}));
+                    if (!response.ok) throw new Error(result?.message || 'A exclusão em lote foi interrompida.');
                 }
                 document.getElementById('port-select-all').checked = false;
                 updatePortDeleteBtn();
-                loadPortfolio();
-                showToast('Projetos selecionados excluídos com sucesso.');
-            } catch (err) {
-                console.error(err);
-                showToast('Erro de conexão durante exclusão em massa.');
-            }
+                await loadPortfolio();
+                showToast('Projetos selecionados excluídos.', 'success');
+            });
         }
         // ------------------------------------
 
@@ -6607,7 +6610,18 @@ function enforceRBACVisibility() {
             document.documentElement.dataset.adminRole = currentAdminUser?.role || 'operator';
         }
 
-        function logout() {
+        async function logout() {
+            window.stopWhatsAppRuntime?.();
+            const tokenToRevoke = sessionToken;
+            if (tokenToRevoke) {
+                try {
+                    await fetch('/api/auth/logout', {
+                        method: 'POST',
+                        headers: { Authorization: `Bearer ${tokenToRevoke}` },
+                        cache: 'no-store'
+                    });
+                } catch (_) {}
+            }
             sessionToken = null;
             currentAdminUser = null;
             sessionStorage.removeItem('aldeia_admin_token');
@@ -6899,18 +6913,22 @@ function enforceRBACVisibility() {
 
         async function updateTrelloTask(id, payload) {
             const index = allTrelloTasks.findIndex(task => task.id === id);
+            const previousTask = index !== -1 ? { ...allTrelloTasks[index] } : null;
             if (index !== -1) {
                 allTrelloTasks[index] = { ...allTrelloTasks[index], ...payload };
                 renderTrelloBoard();
             }
             try {
                 const res = await fetch(`/api/trello/${encodeURIComponent(id)}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload) });
-                /* bypass */
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data?.message || `Falha HTTP ${res.status}`);
                 if (data.task && index !== -1) allTrelloTasks[index] = data.task;
+                renderTrelloBoard();
             } catch (error) {
                 console.error('[TRELLO UPDATE]', error);
-                await loadTrelloTasks();
+                if (index !== -1 && previousTask) allTrelloTasks[index] = previousTask;
+                renderTrelloBoard();
+                showToast(error?.message || 'Não foi possível atualizar a tarefa.', 'error');
             }
         }
 
@@ -6939,11 +6957,17 @@ function enforceRBACVisibility() {
             const formStatus = document.getElementById('trello-form-status');
             if (formStatus) formStatus.textContent = '';
             renderKanbanTeamControls();
-            document.getElementById('trello-task-modal').classList.add('active');
+            const modal = document.getElementById('trello-task-modal');
+            modal.hidden = false;
+            modal.setAttribute('aria-hidden', 'false');
+            modal.classList.add('active');
         }
 
         function closeTrelloTaskModal() {
-            document.getElementById('trello-task-modal').classList.remove('active');
+            const modal = document.getElementById('trello-task-modal');
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+            modal.hidden = true;
         }
 
         async function saveTrelloTask(e) {
@@ -7003,17 +7027,18 @@ function enforceRBACVisibility() {
             await updateTrelloTask(id, { status: newStatus });
         }
 
-        async function deleteTrelloTask(id) {
-            if (!confirm('Deseja excluir esta tarefa do Trello?')) return;
-            try {
-                await fetch(`/api/trello/${id}`, {
+        function deleteTrelloTask(id) {
+            openAdminConfirmation('Excluir tarefa', 'A tarefa será removida do quadro e não poderá ser recuperada.', async () => {
+                const response = await fetch(`/api/trello/${encodeURIComponent(id)}`, {
                     method: 'DELETE',
                     headers: getAuthHeaders()
                 });
-                loadTrelloTasks();
-            } catch (err) {
-                console.error(err);
-            }
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result?.message || 'Não foi possível excluir a tarefa.');
+                allTrelloTasks = allTrelloTasks.filter(task => task.id !== id);
+                renderTrelloBoard();
+                showToast('Tarefa excluída.', 'success');
+            });
         }
 
         // ===== AGENDAMENTOS =====
@@ -7024,14 +7049,18 @@ function enforceRBACVisibility() {
             const scheduler = document.getElementById('scheduler-week');
             if (!scheduler) return;
             try {
-                const [meetingsRes, clientsRes, leadsRes] = await Promise.all([
+                const [meetingsResult, clientsResult, leadsResult] = await Promise.allSettled([
                     fetch('/api/meetings', { headers: getAuthHeaders() }),
                     fetch('/api/clients', { headers: getAuthHeaders() }),
                     fetch('/api/submissions', { headers: getAuthHeaders() })
                 ]);
-                const meetingsData = meetingsRes.ok ? await meetingsRes.json() : [];
-                const clientsData = clientsRes.ok ? await clientsRes.json() : [];
-                const leadsData = leadsRes.ok ? await leadsRes.json() : [];
+                const meetingsRes = meetingsResult.status === 'fulfilled' ? meetingsResult.value : null;
+                if (!meetingsRes?.ok) throw new Error(`Agenda indisponível (HTTP ${meetingsRes?.status || 0}).`);
+                const clientsRes = clientsResult.status === 'fulfilled' ? clientsResult.value : null;
+                const leadsRes = leadsResult.status === 'fulfilled' ? leadsResult.value : null;
+                const meetingsData = await meetingsRes.json();
+                const clientsData = clientsRes?.ok ? await clientsRes.json().catch(() => []) : [];
+                const leadsData = leadsRes?.ok ? await leadsRes.json().catch(() => []) : [];
                 allMeetings = Array.isArray(meetingsData) ? meetingsData : [];
                 const clients = Array.isArray(clientsData) ? clientsData : [];
                 const leads = Array.isArray(leadsData) ? leadsData : [];
@@ -7110,12 +7139,20 @@ function enforceRBACVisibility() {
             const invite = document.getElementById('meeting-send-invite');
             if (invite) { invite.checked = true; invite.disabled = false; }
             const inviteHelper = document.querySelector('#meeting-form .glass-switch span');
-            if (inviteHelper) inviteHelper.textContent = 'O Google Calendar notificará o cliente.';
+            if (inviteHelper) inviteHelper.textContent = 'O convite poderá ser compartilhado quando a reunião iniciar.';
             const meetingStatus = document.getElementById('meeting-form-status');
             if (meetingStatus) meetingStatus.textContent = '';
-            document.getElementById('meeting-modal').classList.add('active');
+            const modal = document.getElementById('meeting-modal');
+            modal.hidden = false;
+            modal.setAttribute('aria-hidden', 'false');
+            modal.classList.add('active');
         }
-        function closeMeetingModal() { document.getElementById('meeting-modal').classList.remove('active'); }
+        function closeMeetingModal() {
+            const modal = document.getElementById('meeting-modal');
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+            modal.hidden = true;
+        }
 
         async function saveMeeting(event) {
             event.preventDefault();
@@ -7147,7 +7184,9 @@ function enforceRBACVisibility() {
                     window.setTimeout(() => window.location.assign('/admin'), 900);
                     return;
                 }
-                /* bypass */
+                if (!res.ok || result?.status !== 'success') {
+                    throw new Error(result?.message || `Falha HTTP ${res.status}`);
+                }
                 await loadMeetings();
                 if (typeof window.showMeetingSuccess === 'function') {
                     window.showMeetingSuccess(result.meeting || {}, result.warning || '');
@@ -7358,23 +7397,28 @@ function enforceRBACVisibility() {
             // A busca do CRM deve começar limpa; nunca reutiliza o nome do usuário logado.
             if (search) {
                 const clearRestoredSearch = () => {
-                    if (document.activeElement !== search) {
+                    if (search.dataset.manual !== 'true') {
                         search.value = '';
                         search.defaultValue = '';
                     }
                 };
                 clearRestoredSearch();
-                search.setAttribute('autocomplete', 'off');
-                search.setAttribute('name', 'crm-navigation-search');
+                search.setAttribute('autocomplete', 'one-time-code');
+                search.setAttribute('name', `crm-navigation-search-${Date.now()}`);
+                search.setAttribute('data-lpignore', 'true');
+                search.setAttribute('data-1p-ignore', 'true');
                 // Chrome pode restaurar pesquisas depois dos scripts. O campo só é liberado
                 // quando a pessoa realmente interage com ele.
                 search.readOnly = true;
-                const enableManualSearch = () => { search.readOnly = false; };
+                const enableManualSearch = () => {
+                    search.dataset.manual = 'true';
+                    search.readOnly = false;
+                };
                 search.addEventListener('pointerdown', enableManualSearch, { once: true });
-                search.addEventListener('focus', enableManualSearch, { once: true });
+                search.addEventListener('keydown', enableManualSearch, { once: true });
                 window.addEventListener('pageshow', clearRestoredSearch);
-                window.setTimeout(clearRestoredSearch, 120);
-                window.setTimeout(clearRestoredSearch, 900);
+                const autofillGuard = window.setInterval(clearRestoredSearch, 100);
+                window.setTimeout(() => window.clearInterval(autofillGuard), 5000);
             }
             const filterNavigation = () => {
                 const query = search?.value.trim().toLocaleLowerCase('pt-BR') || '';
@@ -7402,6 +7446,10 @@ function enforceRBACVisibility() {
             document.addEventListener('keydown', event => {
                 if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
                     event.preventDefault();
+                    if (search) {
+                        search.dataset.manual = 'true';
+                        search.readOnly = false;
+                    }
                     search?.focus();
                 }
             });
@@ -7710,7 +7758,12 @@ function enforceRBACVisibility() {
                 const action = pendingAdminConfirmation;
                 closeAdminConfirmation();
                 if (!action) return;
-                try { await action(); } catch (error) { setSettingsStatus(error.message); }
+                try {
+                    await action();
+                } catch (error) {
+                    setSettingsStatus(error?.message || 'Não foi possível concluir a ação.');
+                    showToast(error?.message || 'Não foi possível concluir a ação.', 'error');
+                }
             });
             document.getElementById('admin-confirm-modal')?.addEventListener('click', event => {
                 if (event.target.id === 'admin-confirm-modal') closeAdminConfirmation();
@@ -7919,7 +7972,7 @@ function enforceRBACVisibility() {
 
 </script>
     <!-- MODAL NOVA TAREFA -->
-    <div id="trello-task-modal" class="modal-overlay">
+    <div id="trello-task-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="trello-modal-title" hidden>
         <div class="modal-content" style="max-width:680px; border-radius:24px; background:rgba(10,10,10,.88); backdrop-filter:blur(28px);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="color: #fff; font-size: 1.2rem;" id="trello-modal-title">Nova tarefa</h3>
@@ -7980,7 +8033,7 @@ function enforceRBACVisibility() {
     </div>
 
     <!-- MODAL NOVO AGENDAMENTO -->
-    <div id="meeting-modal" class="modal-overlay">
+    <div id="meeting-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="meeting-modal-title" hidden>
         <div class="modal-content" style="max-width:620px; border-radius:24px; background:rgba(10,10,10,.9); backdrop-filter:blur(28px);">
             <div class="meeting-modal-heading" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:22px;">
                 <div><h3 id="meeting-modal-title" style="color:#fff; font-size:1.25rem; margin-bottom:4px;">Novo agendamento</h3><p id="meeting-modal-subtitle" style="color:rgba(255,255,255,.42); font-size:.76rem;">Calendar e Google Meet em uma única ação.</p></div>
@@ -7994,7 +8047,7 @@ function enforceRBACVisibility() {
                     <div><label class="input-label">Início</label><input class="input-control" id="meeting-start" type="datetime-local" required></div>
                     <div><label class="input-label">Término</label><input class="input-control" id="meeting-end" type="datetime-local" required></div>
                 </div>
-                <div class="glass-switch" style="margin-bottom:22px;"><div><strong style="display:block; color:#fff; font-size:.82rem; margin-bottom:3px;">Enviar convite por e-mail</strong><span style="color:rgba(255,255,255,.42); font-size:.72rem;">O Google Calendar notificará o cliente.</span></div><label class="switch-control"><input id="meeting-send-invite" type="checkbox" checked><span class="switch-slider"></span></label></div>
+                <div class="glass-switch" style="margin-bottom:22px;"><div><strong style="display:block; color:#fff; font-size:.82rem; margin-bottom:3px;">Preparar convite do cliente</strong><span style="color:rgba(255,255,255,.42); font-size:.72rem;">O convite poderá ser compartilhado quando a reunião iniciar.</span></div><label class="switch-control"><input id="meeting-send-invite" type="checkbox" checked><span class="switch-slider"></span></label></div>
                 <p id="meeting-form-status" role="status" aria-live="polite" style="min-height:20px;margin:0 0 10px;color:rgba(255,255,255,.58);font-size:.76rem;text-align:right;"></p>
                 <div style="display:flex; justify-content:flex-end; gap:10px;"><button type="button" class="icon-button" onclick="closeMeetingModal()">Cancelar</button><button type="submit" id="meeting-submit" class="primary-command-button">Criar agendamento</button></div>
             </form>
@@ -8129,6 +8182,12 @@ function enforceRBACVisibility() {
     tab.innerHTML = `
       <header class="portfolio-header"><div><p class="portfolio-eyebrow">Coleção de cases</p><h2 class="box-title">Gerenciador de Portfólio</h2><p class="portfolio-intro">Edite os dados e acompanhe a apresentação do case em tempo real.</p></div><div class="portfolio-header-actions"><button type="button" class="portfolio-button portfolio-button-secondary"  id="portfolio-uploads-button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>Gerenciar uploads</button><button type="button" class="portfolio-button portfolio-button-primary" id="portfolio-new-button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>Novo projeto</button></div></header>
       <div class="portfolio-workspace"><form id="portfolio-form" class="portfolio-editor-form"><input type="hidden" id="port-edit-id" value=""><section class="portfolio-panel"><div class="portfolio-panel-heading"><span class="portfolio-panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z"/><path d="M8 10h8M8 14h5"/></svg></span><div><h3>Dados básicos</h3><p>Defina como o case aparece na vitrine.</p></div></div><label class="portfolio-field"><span>Título do projeto</span><input type="text" id="port-title" placeholder="Ex.: Identidade FURY" required></label><div class="portfolio-fields-grid"><label class="portfolio-field"><span>Categoria</span><select id="port-category" required><option value="artes">Artes avulsas</option><option value="identidade">Identidade visual</option><option value="social">Social media</option><option value="videos">Vídeos</option></select></label><label class="portfolio-field"><span>Formato</span><select id="port-format" required><option value="auto">Formato original</option><option value="post">Post quadrado (1:1)</option><option value="portrait">Retrato (4:5)</option><option value="story">Vertical (9:16)</option><option value="video">Paisagem (16:9)</option></select></label></div></section><section class="portfolio-panel"><div class="portfolio-panel-heading"><span class="portfolio-panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16Z"/></svg></span><div><h3>Identidade visual</h3><p>Escolha o tom que ilumina este case.</p></div></div><div class="portfolio-color-row"><input type="color" id="port-accent-color" value="#e4e4e7" aria-label="Cor de destaque"><div class="portfolio-color-presets" role="group" aria-label="Cores de destaque"><button class="portfolio-color-swatch" type="button" data-color="#e4e4e7" style="--swatch:#e4e4e7" aria-label="Prata"></button><button class="portfolio-color-swatch" type="button" data-color="#ef4444" style="--swatch:#ef4444" aria-label="Vermelho"></button><button class="portfolio-color-swatch" type="button" data-color="#3b82f6" style="--swatch:#3b82f6" aria-label="Azul"></button><button class="portfolio-color-swatch" type="button" data-color="#10b981" style="--swatch:#10b981" aria-label="Verde"></button><button class="portfolio-color-swatch" type="button" data-color="#f59e0b" style="--swatch:#f59e0b" aria-label="Ouro"></button><button class="portfolio-color-swatch" type="button" data-color="#ec4899" style="--swatch:#ec4899" aria-label="Rosa"></button></div><output id="port-color-hex">#e4e4e7</output></div></section><section class="portfolio-panel"><div class="portfolio-panel-heading"><span class="portfolio-panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8" cy="9" r="1"/><path d="m21 15-4-4L7 20"/></svg></span><div><h3>Mídia de capa</h3><p>Arraste uma imagem ou selecione do dispositivo.</p></div></div><div id="port-cover-dropzone" class="portfolio-dropzone" tabindex="0" role="button" aria-label="Enviar capa do projeto"><img src="" id="port-cover-preview" alt="Prévia da capa"><div class="portfolio-dropzone-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4m0 0L8 8m4-4 4 4"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg><strong>Solte sua imagem aqui</strong><span>ou clique para procurar</span></div><button type="button" id="port-cover-remove" class="portfolio-media-remove" aria-label="Remover capa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M8 6V4h8v2m-7 4v7m4-7v7M6 6l1 14h10l1-14"/></svg></button></div><input type="text" id="port-cover" placeholder="Nenhum arquivo enviado" readonly required class="portfolio-upload-value"><input type="file" id="port-cover-file" accept="image/*" hidden></section><section class="portfolio-panel"><div class="portfolio-panel-heading"><span class="portfolio-panel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><div><h3>Créditos</h3><p>Associe o responsável pelo projeto.</p></div></div><div class="portfolio-credit-badge"><button type="button" class="portfolio-credit-avatar" id="port-member-photo-button" aria-label="Enviar foto do autor"><img src="" id="port-member-photo-preview" alt="Foto do autor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4m0 0L8 8m4-4 4 4"/><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg></button><div class="portfolio-credit-fields"><label class="portfolio-field"><span>Nome</span><input type="text" id="port-member-name" placeholder="Ex.: Japex"></label><label class="portfolio-field"><span>Cargo</span><input type="text" id="port-member-role" placeholder="Ex.: Diretor de arte"></label></div></div><input type="text" id="port-member-photo" class="portfolio-upload-value" placeholder="Foto do autor (URL ou upload)"><input type="file" id="port-member-photo-file" accept="image/*" hidden></section><section class="portfolio-panel"><div class="portfolio-panel-heading portfolio-panel-heading-inline"><div><h3>Galeria interna</h3><p>Adicione detalhes para a página do case.</p></div><button type="button" class="portfolio-text-button" id="portfolio-add-media">Adicionar mídia</button></div><div id="port-gallery-builder" class="portfolio-gallery-builder"></div></section><div class="portfolio-form-actions"><button type="submit" id="port-submit-btn" class="portfolio-button portfolio-button-primary">Salvar e publicar</button><button type="button" id="port-cancel-btn" class="portfolio-button portfolio-button-secondary" style="display:none">Cancelar</button></div></form><aside class="portfolio-live-preview" aria-label="Prévia em tempo real"><div class="portfolio-preview-top"><span>Prévia ao vivo</span><span class="portfolio-preview-status">Não publicado</span></div><div class="portfolio-preview-art" id="portfolio-live-preview-art"><img id="portfolio-live-preview-image" alt="Prévia do projeto"><div class="portfolio-preview-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m5 17 5-5 4 4 2-2 3 3"/></svg></div><div class="portfolio-preview-glow"></div></div><div class="portfolio-preview-meta"><p id="portfolio-live-preview-category">ARTES AVULSAS</p><h3 id="portfolio-live-preview-title">Seu próximo projeto</h3><div class="portfolio-preview-credit"><span id="portfolio-live-preview-avatar">A</span><div><strong id="portfolio-live-preview-author">Créditos da Aldeia</strong><small id="portfolio-live-preview-role">Direção criativa</small></div></div></div></aside></div><button type="button" id="portfolio-preview-fab" class="portfolio-preview-fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2"/></svg>Ver prévia</button><div id="portfolio-preview-modal" class="portfolio-preview-modal" hidden><div class="portfolio-preview-modal-backdrop"></div><div class="portfolio-preview-modal-card"><button type="button" id="portfolio-preview-modal-close" aria-label="Fechar prévia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div id="portfolio-preview-modal-slot"></div></div></div><div class="table-container" style="margin-top:24px"><table><thead><tr><th>Projeto</th><th>Categoria</th><th>Ações</th></tr></thead><tbody id="portfolio-list"><tr><td colspan="3">Carregando portfólio...</td></tr></tbody></table></div>`;
+    const legacyPinkSwatch = tab.querySelector('.portfolio-color-swatch[data-color="#ec4899"]');
+    if (legacyPinkSwatch) {
+      legacyPinkSwatch.dataset.color = '#71717a';
+      legacyPinkSwatch.style.setProperty('--swatch', '#71717a');
+      legacyPinkSwatch.setAttribute('aria-label', 'Grafite');
+    }
     const get = (id) => document.getElementById(id);
     const inputIds = ['port-title','port-category','port-format','port-accent-color','port-cover','port-member-name','port-member-role','port-member-photo'];
     const sync = () => {
@@ -8311,6 +8370,13 @@ function enforceRBACVisibility() {
     const editor = document.createElement('div'); editor.className = 'cms-editor-column';
     title?.classList.add('cms-editor-title'); intro?.classList.add('cms-editor-copy'); form?.classList.add('cms-editor-form');
     if (title) editor.appendChild(title); if (intro) editor.appendChild(intro); if (form) editor.appendChild(form); layout.appendChild(editor);
+    shell.appendChild(layout);
+    tab.classList.add('cms-preview-disabled');
+    const sectionIcons = ['<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 8h10M7 12h6M7 16h8"/>','<path d="M4 21V7a2 2 0 0 1 2-2h8"/><path d="M14 3v6h6"/><path d="M14 3l6 6"/><path d="M8 14h8M8 18h6"/>','<path d="M4 20V10a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10"/><path d="M8 8V4h8v4"/><path d="M7 15h10"/>'];
+    tab.querySelectorAll('.cms-accordion-header').forEach((header,index) => {
+      const icon=document.createElement('span'); icon.className='cms-section-icon'; icon.innerHTML=cmsIcon(sectionIcons[index % sectionIcons.length]); header.prepend(icon);
+    });
+    return;
     const preview = document.createElement('aside'); preview.className = 'cms-live-preview'; preview.setAttribute('aria-label','Prévia ao vivo do site');
     preview.innerHTML = `<div class="cms-preview-topbar"><div class="cms-browser-dots" aria-hidden="true"><span></span><span></span><span></span></div><div class="cms-preview-address">${cmsIcon('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M8 10h8M8 14h5"/>')}<span>aldeia.agency</span></div><button type="button" class="cms-preview-refresh" aria-label="Atualizar prévia">${cmsIcon('<path d="M21 12a9 9 0 0 1-15.2 6.5L3 16"/><path d="M3 21v-5h5"/><path d="M3 12A9 9 0 0 1 18.2 5.5L21 8"/><path d="M21 3v5h-5"/>')}</button></div><div class="cms-preview-stage"><iframe id="cms-preview-frame" title="Prévia do site ALDEIA" src="about:blank" loading="lazy"></iframe></div>`;
     layout.appendChild(preview); shell.appendChild(layout);
@@ -8367,7 +8433,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderMonth=()=>{ if(!month) return; month.replaceChildren(); const label=monthCursor.toLocaleDateString('pt-BR',{month:'long',year:'numeric'}); const nav=document.createElement('div'); nav.className='month-navigation'; nav.innerHTML=`<h3>${label}</h3><div class="month-nav-actions"><button type="button" class="month-nav-button" data-month-nav="prev" aria-label="Mês anterior">${schedulerIcon('<path d="m15 18-6-6 6-6"/>')}</button><button type="button" class="month-nav-button" data-month-nav="next" aria-label="Próximo mês">${schedulerIcon('<path d="m9 18 6-6-6-6"/>')}</button></div>`; month.append(nav); const weekDays=document.createElement('div'); weekDays.className='month-weekdays'; ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(day=>{const el=document.createElement('span');el.textContent=day;weekDays.append(el)});month.append(weekDays); const grid=document.createElement('div');grid.className='month-grid'; const first=new Date(monthCursor.getFullYear(),monthCursor.getMonth(),1);const start=new Date(first);start.setDate(1-first.getDay());const today=new Date();today.setHours(0,0,0,0);for(let index=0;index<42;index++){const day=new Date(start);day.setDate(start.getDate()+index);const cell=document.createElement('div');cell.className=`month-cell${day.getMonth()!==monthCursor.getMonth()?' is-outside':''}${day.getTime()===today.getTime()?' is-today':''}`;const date=document.createElement('span');date.className='month-date';date.textContent=String(day.getDate());cell.append(date);const events=(window.allMeetings||[]).filter(item=>{const d=new Date(item.startAt);return d.getFullYear()===day.getFullYear()&&d.getMonth()===day.getMonth()&&d.getDate()===day.getDate()});if(events.length){const list=document.createElement('div');list.className='month-events';events.slice(0,3).forEach(item=>{const type=item.eventType==='work'?'work':'meeting';const event=document.createElement('div');event.className=`month-event ${type}`;event.innerHTML=`${schedulerIcon(type==='work'?'<path d="M18 2l4 4-8.5 8.5-4-4L18 2Z"/><path d="M9.5 10.5 6 14a4 4 0 0 1-5 1 4 4 0 0 0 5 5c1.6 0 3-.8 4-2l3.5-3.5"/>':'<rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3z"/>')}<span>${String(item.title||'Evento')}</span>`;list.append(event)});if(events.length>3){const more=document.createElement('span');more.className='month-more';more.textContent=`+${events.length-3}`;list.append(more)}cell.append(list)}grid.append(cell)}month.append(grid);nav.querySelectorAll('[data-month-nav]').forEach(button=>button.addEventListener('click',()=>{monthCursor.setMonth(monthCursor.getMonth()+(button.dataset.monthNav==='next'?1:-1));renderMonth()}));};
     window.renderMeetingMonth=renderMonth; const originalTimeline=window.renderMeetingTimeline; if(typeof originalTimeline==='function')window.renderMeetingTimeline=function(){originalTimeline();renderMonth();};
     const setView=(next)=>{view=next;week.hidden=next!=='timeline';month.hidden=next!=='month';toggle.querySelectorAll('[data-calendar-view]').forEach(button=>button.classList.toggle('is-active',button.dataset.calendarView===next));if(next==='month')renderMonth();};toggle.addEventListener('click',event=>{const button=event.target.closest('[data-calendar-view]');if(button)setView(button.dataset.calendarView)});
-    const modal=document.getElementById('meeting-modal');modal?.classList.add('meeting-premium-modal');const content=modal?.querySelector('.modal-content');if(content&&!content.querySelector('.meeting-modal-glow')){const modalGlow=document.createElement('div');modalGlow.className='meeting-modal-glow';content.prepend(modalGlow)}const form=document.getElementById('meeting-form');if(form&&!document.getElementById('meeting-event-type')){const field=document.createElement('div');field.className='meeting-event-type-field';field.innerHTML=`<label class="meeting-event-type-label" for="meeting-event-type">Tipo de evento</label><select id="meeting-event-type" class="meeting-event-type-select"><option value="meeting">Reunião (Google Meet)</option><option value="work">Bloco de trabalho / foco</option></select>`;form.prepend(field);const typeSelect=field.querySelector('select');typeSelect.addEventListener('change',()=>{const work=typeSelect.value==='work';const invite=document.getElementById('meeting-send-invite');if(invite){invite.checked=!work;invite.disabled=work}const client=document.getElementById('meeting-client');if(client)client.disabled=false;const helper=form.querySelector('.glass-switch span');if(helper)helper.textContent=work?'Um bloco de foco interno não envia convite.':'O Google Calendar notificará o cliente.';});}
+    const modal=document.getElementById('meeting-modal');modal?.classList.add('meeting-premium-modal');const content=modal?.querySelector('.modal-content');if(content&&!content.querySelector('.meeting-modal-glow')){const modalGlow=document.createElement('div');modalGlow.className='meeting-modal-glow';content.prepend(modalGlow)}const form=document.getElementById('meeting-form');if(form&&!document.getElementById('meeting-event-type')){const field=document.createElement('div');field.className='meeting-event-type-field';field.innerHTML=`<label class="meeting-event-type-label" for="meeting-event-type">Tipo de evento</label><select id="meeting-event-type" class="meeting-event-type-select"><option value="meeting">Reunião (Google Meet)</option><option value="work">Bloco de trabalho / foco</option></select>`;form.prepend(field);const typeSelect=field.querySelector('select');typeSelect.addEventListener('change',()=>{const work=typeSelect.value==='work';const invite=document.getElementById('meeting-send-invite');if(invite){invite.checked=!work;invite.disabled=work}const client=document.getElementById('meeting-client');if(client)client.disabled=false;const helper=form.querySelector('.glass-switch span');if(helper)helper.textContent=work?'Um bloco de foco interno não envia convite.':'O convite poderá ser compartilhado quando a reunião iniciar.';});}
     renderMonth();
   };
   // Controller substituído pela versão Google Calendar logo abaixo.
@@ -8876,7 +8942,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const isWork = meetingTypeSelect?.value === 'work'; const invite = document.getElementById('meeting-send-invite');
       if (invite) { invite.checked = !isWork; invite.disabled = isWork; }
       const helper = form?.querySelector('.glass-switch span');
-      if (helper) helper.textContent = isWork ? 'Um bloco de foco interno não envia convite.' : 'O Google Calendar notificará o cliente.';
+      if (helper) helper.textContent = isWork ? 'Um bloco de foco interno não envia convite.' : 'O convite poderá ser compartilhado quando a reunião iniciar.';
       const titleLabel = document.getElementById('meeting-title-label'); const descriptionLabel = document.getElementById('meeting-description-label');
       const titleInput = document.getElementById('meeting-title'); const descriptionInput = document.getElementById('meeting-description');
       if (titleLabel) titleLabel.textContent = isWork ? 'Título do trabalho' : 'Título da reunião';
@@ -9145,6 +9211,75 @@ document.addEventListener('DOMContentLoaded', () => {
   .google-calendar-tab .command-copy p { display:none; }
   .google-calendar-tab .command-toolbar { padding-bottom:10px!important; }
   .gcal-toolbar { margin-bottom:10px; padding:9px; }
+}
+</style>
+<style>
+/* QMA final: tokens, responsividade e geometria observável */
+html,body,#admin-dashboard,.crm-wrapper,.main-content{max-width:100%;overflow-x:hidden}
+body{background:var(--qma-canvas);color:var(--qma-text)}
+.crm-card,.glass-panel,.submissions-box,.kanban-col,.portfolio-panel,.qma-command-card,.team-access-card{
+  border-color:var(--qma-border)!important;
+  border-radius:var(--qma-radius-card)!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.034),rgba(255,255,255,.012))!important;
+  -webkit-backdrop-filter:blur(var(--qma-blur));
+  backdrop-filter:blur(var(--qma-blur));
+  box-shadow:var(--qma-shadow);
+}
+.qma-btn,.btn-action,.primary-command-button,.portfolio-button,.input-control,.qma-input,input,select,textarea{
+  border-radius:var(--qma-radius-control)!important;
+}
+.nav-item,.qma-btn,.primary-command-button,.portfolio-button,.btn-login{min-height:44px}
+.main-content{width:100%;min-width:0}
+#dashboard-tab .grid-cards{grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;margin-right:0;padding-right:0}
+.qma-profile-layout{grid-template-columns:minmax(0,1.08fr) minmax(320px,.92fr)!important;align-items:start}
+#whatsapp-tab{height:calc(100dvh - 124px)!important;min-height:520px;border:1px solid var(--qma-border);border-radius:var(--qma-radius-card);overflow:hidden!important}
+#wa-root{min-width:0}.wa-sidebar{flex:0 0 min(380px,38%)!important;min-width:280px}.wa-conversation{min-width:0}
+
+/* Círculos funcionais nunca podem herdar stretch de flex/grid. */
+.user-avatar,.legend-dot,.card-assignee img,.task-timer button,.asset-thumb,.task-delete,.card-assignee-avatar,
+.meeting-avatar,.topbar-icon-button,.mini-round-button,.portfolio-color-swatch,.portfolio-credit-avatar,
+.portfolio-preview-credit>span,.portfolio-preview-modal-card>button,.gcal-date-number,.gcal-week-heading strong,
+.cms-browser-dots span,.cms-preview-modal-close,.ui-circle{
+  box-sizing:border-box;flex:0 0 auto!important;flex-shrink:0!important;aspect-ratio:1/1;align-items:center;justify-content:center
+}
+.user-avatar,.card-assignee img,.asset-thumb,.portfolio-credit-avatar img,.portfolio-preview-credit>span img,
+#prof-avatar-preview,#port-member-photo-preview,#ed-t-img-preview,#ed-j-img-preview{
+  object-fit:cover;flex:0 0 auto!important;flex-shrink:0!important;aspect-ratio:1/1
+}
+.topbar-icon-button,.mini-round-button,.task-delete,.cms-preview-modal-close{padding:0!important}
+
+/* Camadas e alvos de toque finais: modais acima da navegação e círculos 1:1. */
+.modal-overlay,.cms-preview-modal,.portfolio-preview-modal{z-index:20000!important}
+.modal-overlay{inset:0;height:auto;min-height:100dvh;padding:16px;overflow-y:auto;overscroll-behavior:contain;align-items:flex-start}
+.modal-overlay:not(.gcal-modal) .modal-content{margin:auto;max-height:calc(100dvh - 32px);overflow-y:auto}
+.portfolio-preview-fab{bottom:88px!important;z-index:12010!important}
+.gcal-week-event:focus-visible,.gcal-day-event:focus-visible{outline:2px solid rgba(255,255,255,.72);outline-offset:2px}
+.task-delete,.cms-preview-modal-close,.portfolio-preview-modal-card>button,#meeting-detail-close{
+  width:44px!important;min-width:44px!important;max-width:44px!important;
+  height:44px!important;min-height:44px!important;max-height:44px!important;
+  flex:0 0 44px!important;aspect-ratio:1/1!important;border-radius:50%!important
+}
+
+@media(max-width:1100px){
+  #dashboard-tab .grid-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .qma-profile-layout{grid-template-columns:1fr!important}
+}
+@media(max-width:760px){
+  .main-content{padding-inline:14px!important}
+  #dashboard-tab .grid-cards{grid-template-columns:1fr}
+  #telemetry-tab .table-container,#logins-tab .table-container{max-height:min(65dvh,640px);overflow:auto;overscroll-behavior:contain}
+  .portfolio-color-swatch{flex:0 0 44px!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;aspect-ratio:1/1!important}
+  #whatsapp-tab{height:calc(100dvh - 96px)!important;min-height:620px}
+  #wa-root{flex-direction:column!important}
+  .wa-sidebar{width:100%!important;min-width:0;flex:0 0 42%!important;border-right:0!important;border-bottom:1px solid var(--qma-border)}
+  .wa-conversation{flex:1 1 58%!important;min-height:0}
+  .table-container{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+  .gcal-event{width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;flex:0 0 28px!important;border-radius:50%!important}
+}
+@media(max-width:520px){
+  #whatsapp-tab{min-height:680px}
+  .wa-sidebar{flex-basis:46%!important}
+  .wa-conversation{flex-basis:54%!important}
 }
 </style>
 </body>

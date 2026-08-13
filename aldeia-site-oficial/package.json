@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "check": "node --check server.js && node --check app.js && node --check portfolio.js && node --check projeto.js && node scripts/check-inline-scripts.js",
     "figma:watch": "python figma_sync_daemon.py"
   },
   "keywords": [],
@@ -17,7 +18,6 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@open-wa/wa-automate": "^4.76.0",
     "@use-gesture/react": "^10.3.1",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.10.0",
@@ -37,7 +37,9 @@
     "react-dom": "^19.2.8",
     "socket.io": "^4.8.3",
     "sqlite3": "^6.0.1",
-    "whatsapp-web.js": "^1.34.7",
     "zod": "^4.3.6"
+  },
+  "optionalDependencies": {
+    "whatsapp-web.js": "^1.34.7"
   }
 }
