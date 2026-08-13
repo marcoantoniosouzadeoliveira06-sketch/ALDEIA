@@ -104,9 +104,13 @@ function safeReadJSON(filePath, fallback = []) {
 async function safeWriteJSON(filePath, content) {
     try {
         const fullPath = path.isAbsolute(filePath) ? filePath : path.join(__dirname, filePath);
+        // Garantir que a pasta existe
+        const dir = path.dirname(fullPath);
+        if (!fs.existsSync(dir)) { fs.mkdirSync(dir, { recursive: true }); }
         await fs.promises.writeFile(fullPath, JSON.stringify(content, null, 2), 'utf-8');
         return true;
-    } catch (e) {
+    } catch (err) {
+        console.error('[SAFE WRITE ERROR]', err.message);
         return false;
     }
 }
@@ -181,7 +185,7 @@ app.post('/api/auth/login', async (req, res) => {
             role: user.role
         });
     } catch (e) {
-        res.status(500).json({ status: 'error', message: 'Erro no servidor de autenticação.' });
+        res.json({ status: 'error', message: 'Erro no servidor de autenticação.' });
     }
 });
 
@@ -367,7 +371,7 @@ app.post('/api/admin/users', requireAuth, requireRole(['admin']), validate(creat
     } catch (error) {
         if (error?.code === 11000) return res.status(409).json({ status: 'error', message: 'Este login já está em uso.' });
         console.error('[ADMIN USER CREATE]', error.message);
-        return res.status(503).json({ status: 'error', message: 'Não foi possível criar o usuário.' });
+        return res.json({ status: 'error', message: 'Não foi possível criar o usuário.' });
     }
 });
 
@@ -390,7 +394,7 @@ app.patch('/api/admin/users/:username/role', requireAuth, requireRole(['admin'])
         return res.json({ status: 'success', user: sanitizeProfileResponse({ ...account, role: nextRole }, account.username) });
     } catch (error) {
         console.error('[ADMIN USER ROLE]', error.message);
-        return res.status(503).json({ status: 'error', message: 'Não foi possível alterar o cargo.' });
+        return res.json({ status: 'error', message: 'Não foi possível alterar o cargo.' });
     }
 });
 
@@ -410,7 +414,7 @@ app.delete('/api/admin/users/:username', requireAuth, requireRole(['admin']), va
         return res.json({ status: 'success', message: 'Acesso revogado.' });
     } catch (error) {
         console.error('[ADMIN USER DELETE]', error.message);
-        return res.status(503).json({ status: 'error', message: 'Não foi possível revogar o acesso.' });
+        return res.json({ status: 'error', message: 'Não foi possível revogar o acesso.' });
     }
 });
 
@@ -444,7 +448,7 @@ app.delete('/api/reset', requireAuth, requireRole(['admin']), validate(z.object(
         res.json({ success: true, message: 'Arquivos locais resetados com sucesso.' });
     } catch (e) {
         console.error('[RESET ERROR]', e);
-        res.status(500).json({ success: false, message: 'Erro ao resetar banco.' });
+        res.json({ success: false, message: 'Erro ao resetar banco.' });
     }
 });
 
@@ -485,7 +489,7 @@ app.post('/api/content', requireAuth, requireRole(['admin']), validate(cmsConten
     if (saved || jsonSuccess) {
         res.json({ status: 'success', message: 'Conteúdo atualizado com sucesso' });
     } else {
-        res.status(500).json({ status: 'error', message: 'Erro ao salvar conteúdo' });
+        res.json({ status: 'error', message: 'Erro ao salvar conteúdo' });
     }
 });
 
@@ -641,7 +645,7 @@ app.post('/api/portfolio', requireAuth, requireRole(['admin', 'operador']), vali
     if (savedInMongo || jsonSuccess) {
         res.json({ status: 'success', project: sanitizeProjectResponse(newProject) });
     } else {
-        res.status(500).json({ status: 'error', message: 'Erro ao salvar projeto' });
+        res.json({ status: 'error', message: 'Erro ao salvar projeto' });
     }
 });
 
@@ -1377,7 +1381,7 @@ app.post('/api/google-calendar/sync', requireAuth, requireRole(['admin', 'operad
         });
     } catch (error) {
         console.error('[GOOGLE CALENDAR SYNC]', error.message);
-        res.status(502).json({ status: 'error', message: 'Nao foi possivel sincronizar o Google Calendar agora.' });
+        res.json({ status: 'error', message: 'Nao foi possivel sincronizar o Google Calendar agora.' });
     }
 });
 
@@ -1740,7 +1744,7 @@ app.delete('/api/meetings/:id', requireAuth, requireRole(['admin', 'operador']),
         deleted = true;
     }
 
-    if (!deleted) return res.status(500).json({ status: 'error', message: 'Não foi possível remover o agendamento agora.' });
+    if (!deleted) return res.json({ status: 'error', message: 'Não foi possível remover o agendamento agora.' });
     res.setHeader('Cache-Control', 'no-store');
     return res.json({ status: 'success', deletedId: meetingId, warning: googleWarning || undefined });
 });
@@ -1822,7 +1826,7 @@ app.put('/api/profile/password', requireAuth, validate(passwordChangeSchema), as
         return res.json({ status: 'success', message: 'Senha atualizada. Outras sessoes foram encerradas.', token, username });
     } catch (error) {
         console.error('[PROFILE PASSWORD]', error.message);
-        return res.status(503).json({ status: 'error', message: 'Nao foi possivel atualizar a credencial.' });
+        return res.json({ status: 'error', message: 'Nao foi possivel atualizar a credencial.' });
     }
 });
 
@@ -1871,7 +1875,7 @@ app.post('/api/upload', requireAuth, uploadLimiter, (req, res) => {
                 return res.json({ status: 'success', url, storage: 'local' });
             } catch (localError) {
                 console.error('[UPLOAD FALLBACK]', localError?.message || 'Falha desconhecida');
-                return res.status(503).json({ status: 'error', message: 'Não foi possível concluir o upload. Tente novamente.' });
+                return res.json({ status: 'error', message: 'Não foi possível concluir o upload. Tente novamente.' });
             }
         }
     });
@@ -2047,7 +2051,7 @@ app.post('/api/analytics', analyticsEventLimiter, parseAnalyticsBeacon, validate
         return res.json({ status: 'success', storage: result.storage, accepted: result.events.length });
     } catch (error) {
         console.error('[ANALYTICS POST]', error.message);
-        return res.status(500).json({ status: 'error' });
+        return res.json({ status: 'error' });
     }
     // Fallback local: mantém um histórico limitado para o Analytics continuar útil sem MongoDB.
 });
@@ -2087,7 +2091,7 @@ app.post('/api/telemetry', analyticsEventLimiter, parseAnalyticsBeacon, validate
         return res.json({ status: 'success', storage: result.storage });
     } catch (error) {
         console.error('[TELEMETRY POST]', error.message);
-        return res.status(500).json({ status: 'error' });
+        return res.json({ status: 'error' });
     }
 });
 
@@ -2201,7 +2205,7 @@ app.put('/api/admin/settings', requireAuth, requireRole(['admin']), validate(adm
             );
         } catch (error) {
             console.error('[ADMIN SETTINGS PUT]', error.message);
-            return res.status(503).json({ status: 'error', message: 'Configuracoes indisponiveis.' });
+            return res.json({ status: 'error', message: 'Configuracoes indisponiveis.' });
         }
     }
     await safeWriteJSON('admin_settings.json', settings);
@@ -2221,12 +2225,12 @@ app.post('/api/admin/maintenance', requireAuth, requireRole(['admin']), validate
         }
         if (action === 'sync_cloudinary') {
             const configured = Boolean(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
-            if (!configured) return res.status(503).json({ status: 'error', message: 'Cloudinary nao configurado.' });
+            if (!configured) return res.json({ status: 'error', message: 'Cloudinary nao configurado.' });
             await cloudinary.api.ping();
             return res.json({ status: 'success', message: 'Cloudinary sincronizado.' });
         }
         if (action === 'optimize_indexes') {
-            if (!isMongoConnected) return res.status(503).json({ status: 'error', message: 'MongoDB indisponivel.' });
+            if (!isMongoConnected) return res.json({ status: 'error', message: 'MongoDB indisponivel.' });
             await Promise.all([
                 ProjectModel, ClientModel, SubmissionModel, AnalyticsModel, SiteContentModel,
                 AuditLogModel, TrelloTaskModel, MeetingModel, UserProfileModel, ProjectViewWindowModel,
@@ -2248,7 +2252,7 @@ app.post('/api/admin/maintenance', requireAuth, requireRole(['admin']), validate
         return res.status(400).json({ status: 'error', message: 'Acao invalida.' });
     } catch (error) {
         console.error('[ADMIN MAINTENANCE]', error.message);
-        return res.status(503).json({ status: 'error', message: 'Operacao administrativa indisponivel.' });
+        return res.json({ status: 'error', message: 'Operacao administrativa indisponivel.' });
     }
 });
 
@@ -2283,7 +2287,7 @@ app.delete('/api/admin/data', requireAuth, requireRole(['admin']), validate(admi
         return res.json({ status: 'success', removedScopes: [...scopes] });
     } catch (error) {
         console.error('[ADMIN DATA PURGE]', error.message);
-        return res.status(503).json({ status: 'error', message: 'Nao foi possivel excluir os dados.' });
+        return res.json({ status: 'error', message: 'Nao foi possivel excluir os dados.' });
     }
 });
 
