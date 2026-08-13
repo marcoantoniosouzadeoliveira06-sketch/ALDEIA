@@ -5360,7 +5360,7 @@ function enforceRBACVisibility() {
                     if (data.status === 'success' && data.url) {
                         callback(data.url);
                     } else {
-                        showToast(data?.message ?? "Erro desconhecido" || 'Erro no envio da imagem.');
+                        showToast((data?.message ?? "Erro desconhecido") || 'Erro no envio da imagem.');
                     }
                 } else if (res.status === 401) {
                     showToast('Sessão não autorizada ou expirada. Por favor, faça login novamente.');
