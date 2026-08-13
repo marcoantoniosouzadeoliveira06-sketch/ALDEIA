@@ -1,16 +1,1 @@
-[
-  {
-    "id": "t_1786560269557_hypc",
-    "title": "CAMISA TDK",
-    "description": "",
-    "status": "backlog",
-    "assignedTo": "Japex",
-    "priority": "alta",
-    "clientName": "TDK",
-    "dueDate": "2026-08-12",
-    "subtasks": [],
-    "assets": [],
-    "timeSpentSeconds": 0,
-    "timerStartedAt": ""
-  }
-]
+[]

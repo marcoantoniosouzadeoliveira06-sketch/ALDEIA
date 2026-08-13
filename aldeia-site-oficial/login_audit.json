@@ -198,5 +198,21 @@
     "ip": "::1",
     "status": "Sucesso",
     "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "5dec3b5d-8480-4459-9b72-9fc526d7d231",
+    "timestamp": "2026-08-13 18:31:53",
+    "username": "Japex",
+    "ip": "anon-f9931b5421890ae4",
+    "status": "Sucesso",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "3df6300f-fe3a-4167-b11b-ed499700446f",
+    "timestamp": "2026-08-13 18:36:31",
+    "username": "teste",
+    "ip": "anon-f9931b5421890ae4",
+    "status": "Sucesso",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
   }
 ]

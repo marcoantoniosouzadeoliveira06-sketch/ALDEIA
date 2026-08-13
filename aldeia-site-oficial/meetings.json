@@ -16,5 +16,24 @@
     "integrationStatus": "not_configured",
     "createdBy": "Marco",
     "createdAt": "2026-08-11T21:10:04.325Z"
+  },
+  {
+    "id": "meet_1786646429411_077d1227",
+    "title": "ddsds",
+    "description": "",
+    "eventType": "meeting",
+    "clientId": "",
+    "clientName": "",
+    "clientEmail": "",
+    "startAt": "2026-08-13T12:00:00.000Z",
+    "endAt": "2026-08-13T13:00:00.000Z",
+    "attendees": [],
+    "sendInvite": true,
+    "meetLink": "",
+    "googleEventId": "",
+    "source": "aldeia",
+    "integrationStatus": "not_configured",
+    "createdBy": "Marco",
+    "createdAt": "2026-08-13T18:40:29.411Z"
   }
 ]
