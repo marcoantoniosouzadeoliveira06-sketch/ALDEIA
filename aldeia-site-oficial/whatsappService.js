@@ -1,4 +1,3 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
 const EventEmitter = require('events');
 
@@ -12,6 +11,14 @@ class WhatsAppService extends EventEmitter {
 
     async initialize() {
         try {
+            let Client;
+            let LocalAuth;
+            try {
+                ({ Client, LocalAuth } = require('whatsapp-web.js'));
+            } catch (_) {
+                this.status = 'DISABLED';
+                throw new Error('Runtime opcional do WhatsApp não está instalado neste ambiente.');
+            }
             this.client = new Client({
                 authStrategy: new LocalAuth({ clientId: 'ALDEIA_CRM' }),
                 puppeteer: {

@@ -612,7 +612,7 @@
     <!-- MODAL ORÇAMENTO -->
     <div id="budget-modal">
         <div class="modal-content">
-            <button class="modal-close" type="button" data-budget-close aria-label="Fechar orçamento">✕</button>
+            <button class="modal-close" type="button" data-budget-close aria-label="Fechar orçamento"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
             <div id="modal-success-screen" style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
                 <svg style="width: 64px; height: 64px; stroke: #ffffff; margin-bottom: 24px; fill: none;" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="20 6 9 17 4 12"></polyline>
@@ -698,12 +698,19 @@
             position: absolute;
             top: 15px;
             right: 20px;
-            font-size: 1.3rem;
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            flex: 0 0 44px;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
             color: var(--text-muted);
             cursor: pointer;
             transition: color 0.3s;
-            background: none;
-            border: none;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.1);
         }
         .modal-close:hover {
             color: #fff;
@@ -1069,6 +1076,21 @@
         }
 
         let lastContentHash = '';
+        const isSafeCmsMedia = (value) => /^(?:\/|assets\/|https:\/\/)/i.test(String(value || ''));
+        const setSafeCmsRichText = (element, value) => {
+            if (!element) return;
+            const template = document.createElement('template');
+            template.innerHTML = String(value ?? '');
+            const allowedTags = new Set(['STRONG', 'EM', 'BR', 'UL', 'OL', 'LI', 'P', 'SPAN']);
+            [...template.content.querySelectorAll('*')].forEach((node) => {
+                if (!allowedTags.has(node.tagName)) {
+                    node.replaceWith(document.createTextNode(node.textContent || ''));
+                    return;
+                }
+                [...node.attributes].forEach((attribute) => node.removeAttribute(attribute.name));
+            });
+            element.replaceChildren(template.content.cloneNode(true));
+        };
         async function loadContent() {
             try {
                 const res = await fetch('/api/content?t=' + Date.now());
@@ -1090,14 +1112,14 @@
                         if (l3) l3.textContent = content.heroTitleLine3;
                     }
                     if (content.heroSubtitle) {
-                        document.getElementById('hero-subtitle').textContent = content.heroSubtitle;
+                        setSafeCmsRichText(document.getElementById('hero-subtitle'), content.heroSubtitle);
                     }
 
                     // About
                     if (content.about) {
                         const ab = content.about;
                         const abText = document.getElementById('about-big-text');
-                        if (abText) abText.innerHTML = ab.bigText;
+                        setSafeCmsRichText(abText, ab.bigText || '');
                         const c1Text = document.getElementById('about-card1-text');
                         if (c1Text) c1Text.textContent = ab.card1;
                         const c2Text = document.getElementById('about-card2-text');
@@ -1107,57 +1129,48 @@
                     // Services
                     if (content.services) {
                         const sDesc = document.getElementById('services-desc');
-                        if (sDesc) sDesc.innerHTML = content.services.desc;
+                        setSafeCmsRichText(sDesc, content.services.desc || '');
                         
                         const sAccordion = document.getElementById('services-accordion-list');
-                        if (sAccordion && content.services.items) {
-                            sAccordion.innerHTML = '';
+                        if (sAccordion && Array.isArray(content.services.items)) {
+                            sAccordion.replaceChildren();
                             content.services.items.forEach((item, index) => {
                                 const num = String(index + 1).padStart(2, '0');
-                                const tagsHtml = item.tags.map(t => `<span>${t}</span>`).join('');
-                                const itemHtml = `
-                                    <div class="svc-item" data-svc="${index + 1}">
-                                        <div class="svc-header">
-                                            <span class="svc-num">${num}</span>
-                                            <h3 class="svc-title">${item.title}</h3>
-                                            <div class="svc-toggle"><span></span><span></span></div>
-                                        </div>
-                                        <div class="svc-body">
-                                            <div class="svc-text">
-                                                <p>${item.text}</p>
-                                                <div class="svc-tags">${tagsHtml}</div>
-                                            </div>
-                                            <div class="svc-image">
-                                                <img src="${item.image}" alt="${item.title}" loading="lazy">
-                                                <button class="svc-close">✕</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `;
-                                sAccordion.insertAdjacentHTML('beforeend', itemHtml);
+                                const row = document.createElement('div'); row.className = 'svc-item'; row.dataset.svc = String(index + 1);
+                                const header = document.createElement('div'); header.className = 'svc-header';
+                                const number = document.createElement('span'); number.className = 'svc-num'; number.textContent = num;
+                                const title = document.createElement('h3'); title.className = 'svc-title'; title.textContent = String(item?.title || 'Serviço');
+                                const toggle = document.createElement('div'); toggle.className = 'svc-toggle'; toggle.append(document.createElement('span'), document.createElement('span'));
+                                header.append(number, title, toggle);
+                                const body = document.createElement('div'); body.className = 'svc-body';
+                                const copy = document.createElement('div'); copy.className = 'svc-text';
+                                const paragraph = document.createElement('p'); paragraph.textContent = String(item?.text || '');
+                                const tags = document.createElement('div'); tags.className = 'svc-tags';
+                                (Array.isArray(item?.tags) ? item.tags : []).forEach(value => { const tag = document.createElement('span'); tag.textContent = String(value || ''); tags.appendChild(tag); });
+                                copy.append(paragraph, tags);
+                                const media = document.createElement('div'); media.className = 'svc-image';
+                                const image = document.createElement('img'); image.alt = String(item?.title || 'Serviço da Agência Aldeia'); image.loading = 'lazy'; if (isSafeCmsMedia(item?.image)) image.src = item.image;
+                                const close = document.createElement('button'); close.type = 'button'; close.className = 'svc-close'; close.setAttribute('aria-label', 'Fechar serviço'); close.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+                                media.append(image, close); body.append(copy, media); row.append(header, body); sAccordion.appendChild(row);
                             });
                             bindAccordionTriggers();
                         }
                     }
 
                     // FAQs
-                    if (content.faqs) {
+                    if (Array.isArray(content.faqs)) {
                         const faqContainer = document.getElementById('faq-list-container');
                         if (faqContainer) {
-                            faqContainer.innerHTML = '';
+                            faqContainer.replaceChildren();
                             content.faqs.forEach((faq, index) => {
                                 const num = String(index + 1).padStart(2, '0');
-                                const faqHtml = `
-                                    <div class="faq-item">
-                                        <button class="faq-btn">
-                                            <span class="faq-num">/${num}</span>
-                                            <span class="faq-q">${faq.q}</span>
-                                            <span class="faq-icon"><span></span><span></span></span>
-                                        </button>
-                                        <div class="faq-answer">${faq.a}</div>
-                                    </div>
-                                `;
-                                faqContainer.insertAdjacentHTML('beforeend', faqHtml);
+                                const row = document.createElement('div'); row.className = 'faq-item';
+                                const button = document.createElement('button'); button.type = 'button'; button.className = 'faq-btn';
+                                const number = document.createElement('span'); number.className = 'faq-num'; number.textContent = `/${num}`;
+                                const question = document.createElement('span'); question.className = 'faq-q'; question.textContent = String(faq?.q || 'Pergunta');
+                                const icon = document.createElement('span'); icon.className = 'faq-icon'; icon.append(document.createElement('span'), document.createElement('span'));
+                                const answer = document.createElement('div'); answer.className = 'faq-answer'; setSafeCmsRichText(answer, faq?.a || '');
+                                button.append(number, question, icon); row.append(button, answer); faqContainer.appendChild(row);
                             });
                             bindFaqTriggers();
                         }
@@ -1167,7 +1180,7 @@
                     if (content.future) {
                         const fut = content.future;
                         const sub = document.getElementById('future-subtitle');
-                        if (sub) sub.innerHTML = fut.subtitle;
+                        if (sub) sub.textContent = fut.subtitle || '';
                         
                         const paint = document.getElementById('future-metallic');
                         if (paint) {
@@ -1247,7 +1260,7 @@
                     if (content.footer) {
                         const foot = content.footer;
                         const fDesc = document.getElementById('footer-desc');
-                        if (fDesc) fDesc.innerHTML = foot.desc;
+                        if (fDesc) fDesc.textContent = foot.desc || '';
                         
                         const fPhone = document.getElementById('footer-phone');
                         if (fPhone) {
@@ -1427,45 +1440,7 @@
                 }
             } catch (e) { console.error('CMS Content Error', e); }
 
-            // 2. Fetch Portfolio CMS
-            try {
-                const pRes = await fetch('/api/portfolio');
-                if (pRes.ok) {
-                    const portfolioData = await pRes.json();
-                    const portGrid = document.querySelector('.portfolio-grid');
-                    // We only replace if we have data to avoid wiping out placeholders if DB is empty
-                    if (portfolioData.data && portfolioData.data.length > 0 && portGrid) {
-                        portGrid.innerHTML = '';
-                        portfolioData.data.forEach((item, index) => {
-                            const delay = index * 0.1;
-                            const isVideo = item.coverImage && item.coverImage.match(/\.(mp4|webm|ogg)$/i);
-                            
-                            const mediaHTML = isVideo 
-                                ? `<video src="${item.coverImage}" autoplay loop muted playsinline class="case-img" style="object-fit: cover; width: 100%; height: 100%;"></video>`
-                                : `<img src="${item.coverImage}" alt="Projeto de design da Agência Aldeia: ${item.title}" class="case-img" loading="lazy">`;
-
-                            portGrid.innerHTML += `
-                            <article class="case-card scroll-fade" style="animation-delay: ${delay}s">
-                                <div class="case-media">
-                                    <div class="case-overlay">
-                                        <div class="case-category">${item.category}</div>
-                                        <div class="case-actions">
-                                            <a href="#" class="case-btn view-btn" aria-label="Visualizar projeto ${item.title}"><span class="material-symbols-outlined" aria-hidden="true">visibility</span></a>
-                                        </div>
-                                    </div>
-                                    ${mediaHTML}
-                                </div>
-                                <div class="case-info">
-                                    <h3 class="case-title" style="color: ${item.highlightColor || '#fff'}">${item.title}</h3>
-                                    ${item.author && item.author.name ? `<p class="case-meta">By ${item.author.name}</p>` : ''}
-                                </div>
-                            </article>`;
-                        });
-                    }
-                }
-            } catch (e) { console.error('CMS Portfolio Error', e); }
-
-            // 3. Form Submission Integration
+            // 2. Form Submission Integration
             const cForm = document.getElementById('modal-cadastro-form');
             if (cForm && cForm.dataset.submitBound !== 'true') {
                 cForm.addEventListener('submit', async (e) => {
@@ -1481,6 +1456,8 @@
                         instagram: document.getElementById('m-instagram')?.value,
                         projeto: [document.getElementById('m-servico')?.value, document.getElementById('m-detalhes')?.value].filter(Boolean).join(' - ') || 'Contato via Site',
                     };
+                    const whatsappName = String(payload.nome || '').trim();
+                    const whatsappProject = String(payload.projeto || 'Projeto').trim();
 
                     try {
                         const res = await fetch('/api/cadastro', {
@@ -1489,14 +1466,14 @@
                             body: JSON.stringify(payload)
                         });
                         
-                        if (res.ok) {
+                        const result = await res.json().catch(() => ({}));
+                        if (res.ok && result?.status !== 'error') {
                             cForm.reset();
                             if (submitBtn) submitBtn.innerText = 'ENVIADO! REDIRECIONANDO...';
                             
                             // Automatically open WhatsApp!
-                            const nome = document.getElementById('m-nome')?.value || '';
-                            const projeto = [document.getElementById('m-servico')?.value, document.getElementById('m-detalhes')?.value].filter(Boolean).join(' - ') || 'Projeto';
-                            const waUrl = `https://wa.me/5521980638271?text=Olá,%20meu%20nome%20é%20${encodeURIComponent(nome)}.%20Eu%20quero%20fazer%20um%20${encodeURIComponent(projeto)}%20com%20a%20Agência%20ALDEIA.%20Como%20posso%20fazer?`;
+                            const message = `Olá, meu nome é ${whatsappName}. Eu quero conversar sobre ${whatsappProject} com a Agência ALDEIA. Como posso fazer?`;
+                            const waUrl = `https://wa.me/5521980638271?text=${encodeURIComponent(message)}`;
                             
                             setTimeout(() => {
                                 window.location.href = waUrl;
@@ -1504,6 +1481,8 @@
                             }, 1500);
                         } else {
                             if (submitBtn) submitBtn.innerText = 'ERRO NO ENVIO';
+                            const feedback = document.getElementById('modal-form-feedback');
+                            if (feedback) feedback.textContent = String(result?.message || 'Não foi possível enviar. Tente novamente.');
                             setTimeout(() => { if (submitBtn) submitBtn.innerText = originalText; }, 3000);
                         }
                     } catch (err) {

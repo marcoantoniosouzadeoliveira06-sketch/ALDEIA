@@ -90,7 +90,7 @@
     </script>
 </head>
 
-<body data-cms-owner="page">
+<body>
 
 
 
@@ -362,7 +362,7 @@
     <!-- MODAL ORÇAMENTO -->
     <div id="budget-modal">
         <div class="modal-content">
-            <button class="modal-close" type="button" data-budget-close aria-label="Fechar orçamento">✕</button>
+            <button class="modal-close" type="button" data-budget-close aria-label="Fechar orçamento"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
             <div id="modal-success-screen"
                 style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
                 <svg style="width: 64px; height: 64px; stroke: #ffffff; margin-bottom: 24px; fill: none;"
@@ -466,12 +466,19 @@
             position: absolute;
             top: 15px;
             right: 20px;
-            font-size: 1.3rem;
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            flex: 0 0 44px;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
             color: var(--text-muted);
             cursor: pointer;
             transition: color 0.3s;
-            background: none;
-            border: none;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.1);
         }
 
         .modal-close:hover {
@@ -546,6 +553,7 @@
 
             // Send telemetry (non-blocking)
             function sendTelemetry(eventType, converted) {
+                if (localStorage.getItem('aldeia_cookie_consent') !== 'accepted') return;
                 const t = window.__aldeiaTelemetry;
                 if (!t.modalOpenTime) return;
 
@@ -577,6 +585,7 @@
 
             // Abandonment on page unload
             window.addEventListener('beforeunload', function() {
+                if (localStorage.getItem('aldeia_cookie_consent') !== 'accepted') return;
                 const t = window.__aldeiaTelemetry;
                 if (t.modalOpenTime && !t.converted) {
                     const dwellTime = parseFloat(((performance.now() - t.modalOpenTime) / 1000).toFixed(2));
@@ -639,6 +648,17 @@
         const modalForm = document.getElementById('modal-cadastro-form');
         const modalSubmitBtn = document.getElementById('m-btn-envio');
         const modalBtnText = document.getElementById('m-btn-text');
+        const showFormStatus = (message) => {
+            let status = document.getElementById('modal-form-status');
+            if (!status) {
+                status = document.createElement('p');
+                status.id = 'modal-form-status';
+                status.setAttribute('role', 'alert');
+                status.style.cssText = 'margin:10px 0 0;color:#fca5a5;font-size:.78rem;line-height:1.45;text-align:center;';
+                modalSubmitBtn.insertAdjacentElement('afterend', status);
+            }
+            status.textContent = message;
+        };
 
         modalForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -715,11 +735,11 @@
                     document.getElementById('modal-form-screen').style.display = 'none';
                     document.getElementById('modal-success-screen').style.display = 'flex';
                 } else {
-                    alert('Erro ao enviar. Tente novamente.');
+                    showFormStatus('Não foi possível enviar agora. Tente novamente.');
                 }
             } catch (err) {
                 console.error(err);
-                alert(err?.name === 'AbortError'
+                showFormStatus(err?.name === 'AbortError'
                     ? 'O envio demorou mais que o esperado. Tente novamente.'
                     : 'Erro na conexão com o servidor.');
             } finally {
@@ -791,6 +811,7 @@
         }
 
         async function loadContent() {
+            return;
             try {
                 const res = await fetch('/api/content?t=' + Date.now());
                 if (res.ok) {
@@ -834,7 +855,7 @@
                                             </div>
                                             <div class="svc-image">
                                                 <img src="${item.image}" alt="${item.title}" loading="lazy">
-                                                <button class="svc-close">✕</button>
+                                                <button class="svc-close" type="button" aria-label="Fechar serviço"><svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
                                             </div>
                                         </div>
                                     </div>
@@ -965,74 +986,6 @@
             }
         }
         loadContent();
-
-        let allPortfolioData = [];
-        async function loadPortfolio() {
-            try {
-                const res = await fetch('/api/portfolio');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.data && data.data.length > 0) {
-                        allPortfolioData = data.data;
-                        renderPortfolioGrid('all');
-                    } else {
-                        document.getElementById('portfolio-grid').innerHTML = '<p style="color:#a1a1aa; text-align:center; width:100%;">Nenhum projeto encontrado.</p>';
-                    }
-                }
-            } catch(e) {
-                console.error('Error fetching portfolio:', e);
-            }
-        }
-
-        function renderPortfolioGrid(filter) {
-            const grid = document.getElementById('portfolio-grid');
-            if (!grid) return;
-            grid.innerHTML = '';
-            
-            const filtered = filter === 'all' 
-                ? allPortfolioData 
-                : allPortfolioData.filter(item => {
-                    const cat = (item.category || '').toLowerCase();
-                    if (filter === 'identidade') return cat.includes('identidade') || cat.includes('visual');
-                    if (filter === 'social') return cat.includes('social') || cat.includes('media') || cat.includes('mídia');
-                    if (filter === 'videos') return cat.includes('vídeo') || cat.includes('video') || cat.includes('motion');
-                    if (filter === 'artes') return cat.includes('arte') || cat.includes('avulsa');
-                    return false;
-                });
-
-            filtered.forEach((item, index) => {
-                const delay = (index % 10) * 0.1;
-                const isVideo = item.coverImage && item.coverImage.match(/\.(mp4|webm|ogg)$/i);
-                
-                const mediaHTML = isVideo 
-                    ? `<video src="${item.coverImage}" autoplay loop muted playsinline class="case-img" style="object-fit: cover; width: 100%; height: 100%;"></video>`
-                    : `<img src="${item.coverImage}" alt="${item.title}" class="case-img" loading="lazy">`;
-
-                grid.innerHTML += `
-                <article class="case-card scroll-fade" style="animation-delay: ${delay}s">
-                    <div class="case-media">
-                        <div class="case-overlay">
-                            <div class="case-category">${item.category}</div>
-                            <h3 class="case-title">${item.title}</h3>
-                            <a href="${item.link || '#'}" class="case-link" target="_blank">Ver Projeto</a>
-                        </div>
-                        ${mediaHTML}
-                    </div>
-                </article>
-                `;
-            });
-        }
-
-        const portTabs = document.querySelectorAll('.portfolio-tab');
-        portTabs.forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                portTabs.forEach(t => t.classList.remove('active'));
-                e.target.classList.add('active');
-                renderPortfolioGrid(e.target.getAttribute('data-filter'));
-            });
-        });
-
-        loadPortfolio();
 
         // --- DECRYPT TEXT EFFECT ---
         function decryptText(element, duration = 800) {

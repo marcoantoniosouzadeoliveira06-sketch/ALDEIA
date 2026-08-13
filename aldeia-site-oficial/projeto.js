@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const projectId = urlParams.get('id');
+    const safeColor = (value) => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? String(value) : '#ffffff';
+    const safeMedia = (value, fallback = '') => /^(?:https?:\/\/|\/?assets\/)/i.test(String(value || '')) ? String(value) : fallback;
 
     function getFallbackProject(id) {
         const numMatch = id ? id.match(/\d+/) : null;
@@ -44,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Aplicando a cor de destaque dinâmica da equipe no projeto
-        const accentColor = project.accentColor || project.color || '#ffffff';
+        const accentColor = safeColor(project?.accentColor || project?.color);
         document.documentElement.style.setProperty('--accent', accentColor);
         document.documentElement.style.setProperty('--accent-glow', accentColor + '44');
 
@@ -52,19 +54,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const titleEl = document.getElementById('project-page-title');
         const catEl = document.getElementById('project-page-category');
         if (titleEl) {
-            titleEl.textContent = project.title;
+            titleEl.textContent = String(project?.title ?? 'Projeto ALDEIA');
             titleEl.classList.add('shiny-text', 'scroll-float');
             titleEl.style.setProperty('--color', '#c8c8c8');
             titleEl.style.setProperty('--shine-color', '#ffffff');
             window.initScrollFloat?.();
         }
         if (catEl) {
-            catEl.textContent = project.categoryLabel;
+            catEl.textContent = String(project?.categoryLabel ?? 'Design & Performance');
             catEl.style.color = accentColor;
         }
 
         // Render member credits
-        if (project.member && (project.member.name || project.member.photo)) {
+        if (project?.member && (project.member.name || project.member.photo)) {
             const heroContainer = document.querySelector('.project-hero .section-container');
             if (heroContainer) {
                 // Remove existing if any (useful for fast reloads)
@@ -75,17 +77,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 memberDiv.className = 'project-member-credit reveal-up';
                 memberDiv.style.cssText = 'display: flex; align-items: center; gap: 14px; margin-top: 30px; animation-delay: 0.3s;';
                 
-                const photoSrc = project.member.photo || 'https://i.pravatar.cc/150?img=11';
-                const name = project.member.name || 'Membro da Equipe';
-                const role = project.member.role ? `<span style="color: ${accentColor}; font-weight: 400; font-size: 0.9rem; margin-left: 6px;">(${project.member.role})</span>` : '';
-                
-                memberDiv.innerHTML = `
-                    <img src="${photoSrc}" alt="${name}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid ${accentColor}; box-shadow: 0 0 15px ${accentColor}44;">
-                    <div>
-                        <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;">Feito por</p>
-                        <p style="color: #fff; font-size: 1.15rem; font-weight: 600; margin: 0; font-family: var(--font-h); letter-spacing: 0.02em;">${name}${role}</p>
-                    </div>
-                `;
+                const photoSrc = safeMedia(project.member.photo, 'https://i.pravatar.cc/150?img=11');
+                const name = String(project.member.name || 'Membro da Equipe');
+
+                const avatar = document.createElement('img');
+                avatar.src = photoSrc;
+                avatar.alt = name;
+                avatar.className = 'project-member-avatar';
+                avatar.style.cssText = `width:52px;height:52px;aspect-ratio:1/1;flex:0 0 52px;border-radius:50%;object-fit:cover;border:2px solid ${accentColor};box-shadow:0 0 15px ${accentColor}44;`;
+
+                const copy = document.createElement('div');
+                const eyebrow = document.createElement('p');
+                eyebrow.textContent = 'Feito por';
+                eyebrow.style.cssText = 'color:var(--text-muted);font-size:.8rem;margin:0 0 4px;text-transform:uppercase;letter-spacing:.1em;font-weight:600;';
+                const memberName = document.createElement('p');
+                memberName.textContent = name;
+                memberName.style.cssText = 'color:#fff;font-size:1.15rem;font-weight:600;margin:0;font-family:var(--font-h);letter-spacing:.02em;';
+                if (project.member.role) {
+                    const role = document.createElement('span');
+                    role.textContent = ` (${String(project.member.role)})`;
+                    role.style.cssText = `color:${accentColor};font-weight:400;font-size:.9rem;margin-left:6px;`;
+                    memberName.appendChild(role);
+                }
+                copy.append(eyebrow, memberName);
+                memberDiv.append(avatar, copy);
                 heroContainer.appendChild(memberDiv);
             }
         }
@@ -94,32 +109,42 @@ document.addEventListener('DOMContentLoaded', () => {
         if (bodyContainer) {
             bodyContainer.innerHTML = '';
 
-            (project.assets || []).forEach((asset, index) => {
+            (Array.isArray(project?.assets) ? project.assets : []).forEach((asset, index) => {
                 const delay = index * 0.1;
                 const assetWrap = document.createElement('div');
                 assetWrap.className = 'project-asset-wrap reveal-up';
                 assetWrap.style.animationDelay = `${delay}s`;
 
-                const format = project.format || 'post';
+                const format = /^(?:post|portrait|story|video|auto)$/i.test(String(project?.format || '')) ? String(project.format) : 'post';
+                const source = safeMedia(asset?.src);
+                if (!source) return;
 
                 if (asset.type === 'video') {
                     bodyContainer.appendChild(assetWrap);
                     if (window.createAldeiaVideoPlayer) {
                         window.createAldeiaVideoPlayer(assetWrap, {
-                            src: asset.src,
+                            src: source,
                             format: format,
-                            poster: project.cover,
+                            poster: safeMedia(project?.cover),
                             autoplay: false // Reprodução manual a pedido do usuário (sem lag)
                         });
                     } else {
-                        assetWrap.innerHTML = `<video src="${asset.src}" controls playsinline style="width:100%; border-radius:12px;"></video>`;
+                        const video = document.createElement('video');
+                        video.src = source;
+                        video.controls = true;
+                        video.playsInline = true;
+                        video.style.cssText = 'width:100%;border-radius:12px;';
+                        assetWrap.appendChild(video);
                     }
                 } else {
-                    assetWrap.innerHTML = `
-                        <div class="aldeia-image-container format-${format}">
-                            <img src="${asset.src}" alt="Detalhe de ${project.title}" loading="lazy">
-                        </div>
-                    `;
+                    const imageContainer = document.createElement('div');
+                    imageContainer.className = `aldeia-image-container format-${format}`;
+                    const image = document.createElement('img');
+                    image.src = source;
+                    image.alt = `Detalhe de ${String(project?.title ?? 'Projeto ALDEIA')}`;
+                    image.loading = 'lazy';
+                    imageContainer.appendChild(image);
+                    assetWrap.appendChild(imageContainer);
                     bodyContainer.appendChild(assetWrap);
                 }
             });

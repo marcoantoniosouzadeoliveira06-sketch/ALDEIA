@@ -1,3 +1,19 @@
 :root {
-  /* Variáveis injetadas automaticamente pelo Figma Sync Daemon */
+  color-scheme: dark;
+  --qma-canvas: #000000;
+  --qma-surface: rgba(255, 255, 255, 0.02);
+  --qma-surface-hover: rgba(255, 255, 255, 0.07);
+  --qma-border: rgba(255, 255, 255, 0.08);
+  --qma-border-strong: rgba(255, 255, 255, 0.14);
+  --qma-text: rgba(255, 255, 255, 0.92);
+  --qma-text-secondary: rgba(255, 255, 255, 0.62);
+  --qma-text-muted: rgba(255, 255, 255, 0.42);
+  --qma-danger: #f87171;
+  --qma-success: #86efac;
+  --qma-radius-card: 24px;
+  --qma-radius-control: 14px;
+  --qma-radius-pill: 999px;
+  --qma-blur: 20px;
+  --qma-shadow: 0 24px 64px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  --qma-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }

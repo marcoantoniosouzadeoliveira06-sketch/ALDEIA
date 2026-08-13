@@ -1,5 +1,12 @@
 // aldeia-tracker.js
 (function() {
+    if (localStorage.getItem('aldeia_cookie_consent') !== 'accepted') {
+        window.__aldeiaTracker = {
+            getTrackingData: () => ({}),
+            trackPortfolioClick: () => {}
+        };
+        return;
+    }
     function setCookie(name, value, days) {
         let expires = "";
         if (days) {

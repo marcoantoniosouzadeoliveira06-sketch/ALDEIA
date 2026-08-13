@@ -15,6 +15,11 @@
 (function () {
     'use strict';
 
+    if (localStorage.getItem('aldeia_cookie_consent') !== 'accepted') {
+        window.__ALDEIA_TELEMETRY = { getSessionId: () => '', version: 'disabled' };
+        return;
+    }
+
     /* ── 1. CONSTANTES ───────────────────────────────────── */
     const TELEMETRY_ENDPOINT = '/api/telemetry';
     const MAX_PAYLOAD_BYTES  = 2048;          // 2 KB hard limit

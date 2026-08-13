@@ -13,6 +13,19 @@ telemetry.db
 telemetry_log.json
 login_audit.json
 submissions.json
+user_profiles.json
+google_calendar_tokens.json
+clients.json
+trello_tasks.json
+meetings.json
+analytics.json
+analytics_state.json
+project_view_events.json
+project_view_windows.json
+visits.json
+admin_settings.json
+.wwebjs_auth/
+.wwebjs_cache/
 assets/uploads/
 *.tmp_*
 # System & OS Files
@@ -20,6 +33,7 @@ assets/uploads/
 Thumbs.db
 # Temporary Python / Backup Scripts & Reconstructed Files
 *.backup.html
+new_admin.html
 *.py
 reconstructed_*
 original_*

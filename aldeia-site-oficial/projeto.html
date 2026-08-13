@@ -297,7 +297,7 @@
     <!-- MODAL ORÇAMENTO -->
     <div id="budget-modal">
         <div class="modal-content">
-            <button class="modal-close" type="button" data-budget-close aria-label="Fechar orçamento">✕</button>
+            <button class="modal-close" type="button" data-budget-close aria-label="Fechar orçamento"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
             <div id="modal-success-screen"
                 style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
                 <svg style="width: 64px; height: 64px; stroke: hsl(0, 0%, 23%); margin-bottom: 24px; fill: none;"
@@ -401,12 +401,19 @@
             position: absolute;
             top: 15px;
             right: 20px;
-            font-size: 1.3rem;
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            flex: 0 0 44px;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
             color: var(--text-muted);
             cursor: pointer;
             transition: color 0.3s;
-            background: none;
-            border: none;
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.1);
         }
 
         .modal-close:hover {
@@ -482,6 +489,7 @@
 
             // Send telemetry (non-blocking)
             function sendTelemetry(eventType, converted) {
+                if (localStorage.getItem('aldeia_cookie_consent') !== 'accepted') return;
                 const t = window.__aldeiaTelemetry;
                 if (!t.modalOpenTime) return;
 
@@ -513,6 +521,7 @@
 
             // Abandonment on page unload
             window.addEventListener('beforeunload', function() {
+                if (localStorage.getItem('aldeia_cookie_consent') !== 'accepted') return;
                 const t = window.__aldeiaTelemetry;
                 if (t.modalOpenTime && !t.converted) {
                     const dwellTime = parseFloat(((performance.now() - t.modalOpenTime) / 1000).toFixed(2));
@@ -575,6 +584,17 @@
         const modalForm = document.getElementById('modal-cadastro-form');
         const modalSubmitBtn = document.getElementById('m-btn-envio');
         const modalBtnText = document.getElementById('m-btn-text');
+        const showFormStatus = (message) => {
+            let status = document.getElementById('modal-form-status');
+            if (!status) {
+                status = document.createElement('p');
+                status.id = 'modal-form-status';
+                status.setAttribute('role', 'alert');
+                status.style.cssText = 'margin:10px 0 0;color:#fca5a5;font-size:.78rem;line-height:1.45;text-align:center;';
+                modalSubmitBtn.insertAdjacentElement('afterend', status);
+            }
+            status.textContent = message;
+        };
 
         modalForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -651,11 +671,11 @@
                     document.getElementById('modal-form-screen').style.display = 'none';
                     document.getElementById('modal-success-screen').style.display = 'flex';
                 } else {
-                    alert('Erro ao enviar. Tente novamente.');
+                    showFormStatus('Não foi possível enviar agora. Tente novamente.');
                 }
             } catch (err) {
                 console.error(err);
-                alert(err?.name === 'AbortError'
+                showFormStatus(err?.name === 'AbortError'
                     ? 'O envio demorou mais que o esperado. Tente novamente.'
                     : 'Erro na conexão com o servidor.');
             } finally {
