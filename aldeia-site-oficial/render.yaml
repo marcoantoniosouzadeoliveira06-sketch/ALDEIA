@@ -19,7 +19,7 @@ services:
       - key: MONGODB_URI
         sync: false
       - key: ALLOWED_ORIGINS
-        value: https://aldeia-agencia-oficial.onrender.com
+        value: https://xn--aldeiaagncia-veb.com.br,https://www.xn--aldeiaagncia-veb.com.br,https://aldeia-agencia-oficial.onrender.com
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY

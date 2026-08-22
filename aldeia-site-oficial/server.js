@@ -981,6 +981,8 @@ const renderExternalHostname = String(process.env.RENDER_EXTERNAL_HOSTNAME || ''
 const defaultOrigins = [
     'https://aldeiadesign.com.br',
     'https://www.aldeiadesign.com.br',
+    'https://xn--aldeiaagncia-veb.com.br',
+    'https://www.xn--aldeiaagncia-veb.com.br',
     'https://aldeia-agencia-oficial.onrender.com'
 ];
 if (renderExternalHostname) defaultOrigins.push(`https://${renderExternalHostname}`);

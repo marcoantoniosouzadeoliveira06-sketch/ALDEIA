@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 
-Sitemap: https://aldeia-agencia-oficial.onrender.com/sitemap.xml
+Sitemap: https://xn--aldeiaagncia-veb.com.br/sitemap.xml
