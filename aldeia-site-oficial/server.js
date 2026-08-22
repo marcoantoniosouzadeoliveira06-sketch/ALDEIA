@@ -309,6 +309,7 @@ const trelloTaskSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, default: '' },
     status: { type: String, default: 'backlog', index: true },
+    boardId: { type: String, default: '', index: true },
     assignedTo: { type: String, default: '', index: true },
     priority: { type: String, default: 'média' }, // 'alta', 'média', 'baixa'
     clientName: { type: String, default: '' },
@@ -317,6 +318,23 @@ const trelloTaskSchema = new mongoose.Schema({
     assets: { type: [{ url: String, label: String }], default: [] },
     timeSpentSeconds: { type: Number, default: 0 },
     timerStartedAt: { type: String, default: '' }
+}, { timestamps: true });
+
+const productionSpaceSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
+    description: { type: String, default: '' },
+    memberIds: { type: [String], default: [] },
+    archived: { type: Boolean, default: false }
+}, { timestamps: true });
+
+const productionBoardSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true },
+    spaceId: { type: String, default: '', index: true },
+    name: { type: String, required: true },
+    description: { type: String, default: '' },
+    favorite: { type: Boolean, default: false },
+    archived: { type: Boolean, default: false }
 }, { timestamps: true });
 
 const meetingSchema = new mongoose.Schema({
@@ -392,6 +410,8 @@ const AnalyticsModel = mongoose.model('Analytics', analyticsSchema);
 const SiteContentModel = mongoose.model('SiteContent', siteContentSchema);
 const AuditLogModel = mongoose.model('AuditLog', auditLogSchema);
 const TrelloTaskModel = mongoose.model('TrelloTask', trelloTaskSchema);
+const ProductionSpaceModel = mongoose.model('ProductionSpace', productionSpaceSchema);
+const ProductionBoardModel = mongoose.model('ProductionBoard', productionBoardSchema);
 const MeetingModel = mongoose.model('Meeting', meetingSchema);
 const UserProfileModel = mongoose.model('UserProfile', userProfileSchema);
 const ProjectViewWindowModel = mongoose.model('ProjectViewWindow', projectViewWindowSchema);
@@ -493,6 +513,7 @@ const trelloPayloadSchema = z.object({
     title: requiredText(180),
     description: plainText(2000).optional().default(''),
     status: z.enum(['backlog', 'in_progress', 'awaiting_client', 'review', 'done']).optional().default('backlog'),
+    boardId: z.string().trim().regex(SAFE_ID).optional().or(z.literal('')),
     assignedTo: plainText(100).optional().default(''),
     priority: z.enum(['alta', 'média', 'baixa']).optional().default('média'),
     clientName: plainText(160).optional().default(''),
@@ -510,6 +531,19 @@ const trelloPayloadSchema = z.object({
     timerStartedAt: z.string().datetime().optional().or(z.literal(''))
 }).strip();
 const trelloUpdateSchema = trelloPayloadSchema.partial().refine(value => Object.keys(value).length > 0, 'Nenhum campo válido para atualizar');
+const productionSpacePayloadSchema = z.object({
+    name: requiredText(100),
+    description: plainText(500).optional().default(''),
+    memberIds: z.array(z.string().trim().regex(SAFE_ID)).max(50).optional().default([])
+}).strict();
+const productionSpaceUpdateSchema = productionSpacePayloadSchema.partial().extend({ archived: z.boolean().optional() }).refine(value => Object.keys(value).length > 0, 'Nenhum campo válido para atualizar');
+const productionBoardPayloadSchema = z.object({
+    spaceId: z.string().trim().regex(SAFE_ID).optional().or(z.literal('')),
+    name: requiredText(100),
+    description: plainText(500).optional().default(''),
+    favorite: z.boolean().optional().default(false)
+}).strict();
+const productionBoardUpdateSchema = productionBoardPayloadSchema.partial().extend({ archived: z.boolean().optional() }).refine(value => Object.keys(value).length > 0, 'Nenhum campo válido para atualizar');
 const meetingPayloadSchema = z.object({
     title: requiredText(180),
     description: plainText(4000).optional().default(''),
@@ -703,6 +737,7 @@ function sanitizeTrelloResponse(task) {
         title: sanitizePlainText(value.title || ''),
         description: sanitizePlainText(value.description || ''),
         status: ['backlog', 'in_progress', 'awaiting_client', 'review', 'done'].includes(value.status) ? value.status : 'backlog',
+        boardId: SAFE_ID.test(String(value.boardId || '')) ? String(value.boardId) : '',
         assignedTo: sanitizePlainText(value.assignedTo || ''),
         priority: ['alta', 'média', 'baixa'].includes(value.priority) ? value.priority : 'média',
         clientName: sanitizePlainText(value.clientName || ''),
@@ -2197,6 +2232,156 @@ app.delete('/api/clients/:id', requireAuth, requireRole(['admin', 'operator']), 
     }
 });
 
+// ===== CENTRAL DE PRODUÇÃO (EQUIPES E QUADROS) =====
+async function findProductionSpace(spaceId) {
+    if (!spaceId) return null;
+    if (isMongoConnected) {
+        try {
+            const space = await ProductionSpaceModel.findOne({ id: spaceId }).lean();
+            if (space) return sanitizeProductionSpaceResponse(space);
+        } catch (error) { console.error('[PRODUCTION SPACE LOOKUP]', error.message); }
+    }
+    return safeReadJSON('production_spaces.json', []).map(sanitizeProductionSpaceResponse).find(space => space.id === spaceId) || null;
+}
+
+app.get('/api/production/spaces', requireAuth, requireRole(['admin', 'operator']), async (req, res) => {
+    try {
+        if (isMongoConnected) {
+            const spaces = await ProductionSpaceModel.find().sort({ createdAt: -1 }).lean();
+            return res.json(spaces.map(sanitizeProductionSpaceResponse));
+        }
+        return res.json(safeReadJSON('production_spaces.json', []).map(sanitizeProductionSpaceResponse));
+    } catch (error) {
+        console.error('[PRODUCTION SPACES GET]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Não foi possível carregar as equipes.' });
+    }
+});
+
+app.post('/api/production/spaces', requireAuth, requireRole(['admin']), validate(productionSpacePayloadSchema), async (req, res) => {
+    const space = {
+        id: `space_${crypto.randomUUID().replace(/-/g, '').slice(0, 18)}`,
+        name: req.validatedBody.name,
+        description: req.validatedBody.description || '',
+        memberIds: [...new Set(req.validatedBody.memberIds || [])],
+        archived: false
+    };
+    try {
+        if (isMongoConnected) await ProductionSpaceModel.create(space);
+        await mutateJSON('production_spaces.json', [], items => [space, ...(Array.isArray(items) ? items : [])]);
+        return res.status(201).json({ status: 'success', space: sanitizeProductionSpaceResponse(space) });
+    } catch (error) {
+        console.error('[PRODUCTION SPACE POST]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Não foi possível criar a equipe.' });
+    }
+});
+
+app.put('/api/production/spaces/:id', requireAuth, requireRole(['admin']), validate(idParamsSchema, 'params'), validate(productionSpaceUpdateSchema), async (req, res) => {
+    const id = req.validatedParams.id;
+    const patch = req.validatedBody;
+    try {
+        let updated = null;
+        if (isMongoConnected) updated = await ProductionSpaceModel.findOneAndUpdate({ id }, patch, { new: true }).lean();
+        await mutateJSON('production_spaces.json', [], items => (Array.isArray(items) ? items : []).map(item => item.id === id ? { ...item, ...patch, id } : item));
+        if (!updated) updated = safeReadJSON('production_spaces.json', []).map(sanitizeProductionSpaceResponse).find(item => item.id === id) || null;
+        return updated ? res.json({ status: 'success', space: sanitizeProductionSpaceResponse(updated) }) : res.status(404).json({ status: 'error', message: 'Equipe não encontrada.' });
+    } catch (error) {
+        console.error('[PRODUCTION SPACE PUT]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Não foi possível atualizar a equipe.' });
+    }
+});
+
+app.delete('/api/production/spaces/:id', requireAuth, requireRole(['admin']), validate(idParamsSchema, 'params'), async (req, res) => {
+    const id = req.validatedParams.id;
+    try {
+        const linkedBoards = isMongoConnected
+            ? await ProductionBoardModel.countDocuments({ spaceId: id, archived: { $ne: true } })
+            : safeReadJSON('production_boards.json', []).filter(board => board?.spaceId === id && !board.archived).length;
+        if (linkedBoards) return res.status(409).json({ status: 'error', message: 'Arquive ou mova os quadros desta equipe antes de removê-la.' });
+        const mongoArchived = isMongoConnected ? await ProductionSpaceModel.findOneAndUpdate({ id }, { archived: true }, { new: true }).lean() : null;
+        let found = false;
+        await mutateJSON('production_spaces.json', [], items => (Array.isArray(items) ? items : []).map(item => {
+            if (item.id !== id) return item;
+            found = true; return { ...item, archived: true };
+        }));
+        return found || mongoArchived ? res.json({ status: 'success' }) : res.status(404).json({ status: 'error', message: 'Equipe não encontrada.' });
+    } catch (error) {
+        console.error('[PRODUCTION SPACE DELETE]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Não foi possível remover a equipe.' });
+    }
+});
+
+app.get('/api/production/boards', requireAuth, requireRole(['admin', 'operator']), async (req, res) => {
+    try {
+        if (isMongoConnected) {
+            const boards = await ProductionBoardModel.find().sort({ favorite: -1, createdAt: -1 }).lean();
+            return res.json(boards.map(sanitizeProductionBoardResponse));
+        }
+        return res.json(safeReadJSON('production_boards.json', []).map(sanitizeProductionBoardResponse));
+    } catch (error) {
+        console.error('[PRODUCTION BOARDS GET]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Não foi possível carregar os quadros.' });
+    }
+});
+
+app.post('/api/production/boards', requireAuth, requireRole(['admin']), validate(productionBoardPayloadSchema), async (req, res) => {
+    const body = req.validatedBody;
+    if (body.spaceId && !await findProductionSpace(body.spaceId)) {
+        return res.status(400).json({ status: 'error', message: 'A equipe selecionada não existe.' });
+    }
+    const board = {
+        id: `board_${crypto.randomUUID().replace(/-/g, '').slice(0, 18)}`,
+        spaceId: body.spaceId || '',
+        name: body.name,
+        description: body.description || '',
+        favorite: body.favorite === true,
+        archived: false
+    };
+    try {
+        if (isMongoConnected) await ProductionBoardModel.create(board);
+        await mutateJSON('production_boards.json', [], items => [board, ...(Array.isArray(items) ? items : [])]);
+        return res.status(201).json({ status: 'success', board: sanitizeProductionBoardResponse(board) });
+    } catch (error) {
+        console.error('[PRODUCTION BOARD POST]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Não foi possível criar o quadro.' });
+    }
+});
+
+app.put('/api/production/boards/:id', requireAuth, requireRole(['admin']), validate(idParamsSchema, 'params'), validate(productionBoardUpdateSchema), async (req, res) => {
+    const id = req.validatedParams.id;
+    const patch = req.validatedBody;
+    if (patch.spaceId && !await findProductionSpace(patch.spaceId)) return res.status(400).json({ status: 'error', message: 'A equipe selecionada não existe.' });
+    let updated = null;
+    try {
+        if (isMongoConnected) updated = await ProductionBoardModel.findOneAndUpdate({ id }, patch, { new: true }).lean();
+        await mutateJSON('production_boards.json', [], items => (Array.isArray(items) ? items : []).map(item => item.id === id ? { ...item, ...patch, id } : item));
+        if (!updated) updated = safeReadJSON('production_boards.json', []).map(sanitizeProductionBoardResponse).find(item => item.id === id) || null;
+        return updated ? res.json({ status: 'success', board: sanitizeProductionBoardResponse(updated) }) : res.status(404).json({ status: 'error', message: 'Quadro não encontrado.' });
+    } catch (error) {
+        console.error('[PRODUCTION BOARD PUT]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Não foi possível atualizar o quadro.' });
+    }
+});
+
+app.delete('/api/production/boards/:id', requireAuth, requireRole(['admin']), validate(idParamsSchema, 'params'), async (req, res) => {
+    const id = req.validatedParams.id;
+    try {
+        const taskCount = isMongoConnected
+            ? await TrelloTaskModel.countDocuments({ boardId: id })
+            : safeReadJSON('trello_tasks.json', []).filter(task => task?.boardId === id).length;
+        if (taskCount) return res.status(409).json({ status: 'error', message: 'Mova ou exclua as tarefas antes de arquivar este quadro.' });
+        const mongoArchived = isMongoConnected ? await ProductionBoardModel.findOneAndUpdate({ id }, { archived: true }, { new: true }).lean() : null;
+        let found = false;
+        await mutateJSON('production_boards.json', [], items => (Array.isArray(items) ? items : []).map(item => {
+            if (item.id !== id) return item;
+            found = true; return { ...item, archived: true };
+        }));
+        return found || mongoArchived ? res.json({ status: 'success' }) : res.status(404).json({ status: 'error', message: 'Quadro não encontrado.' });
+    } catch (error) {
+        console.error('[PRODUCTION BOARD DELETE]', error.message);
+        return res.status(503).json({ status: 'error', message: 'Não foi possível arquivar o quadro.' });
+    }
+});
+
 // ===== ROTAS DE TRELLO (KANBAN DA EQUIPE) =====
 app.get('/api/trello', requireAuth, requireRole(['admin', 'operator']), async (req, res) => {
     if (isMongoConnected) {
@@ -2211,6 +2396,12 @@ app.get('/api/trello', requireAuth, requireRole(['admin', 'operator']), async (r
 
 app.post('/api/trello', requireAuth, requireRole(['admin', 'operator']), validate(trelloPayloadSchema), async (req, res) => {
     req.body = req.validatedBody;
+    if (req.body.boardId) {
+        const boards = isMongoConnected
+            ? await ProductionBoardModel.findOne({ id: req.body.boardId }).lean().catch(() => null)
+            : safeReadJSON('production_boards.json', []).find(board => board?.id === req.body.boardId);
+        if (!boards) return res.status(400).json({ status: 'error', message: 'O quadro selecionado não existe.' });
+    }
     const assignee = await resolveActiveKanbanAssignee(req.body.assignedTo);
     if (req.body.assignedTo && !assignee) {
         return res.status(400).json({ status: 'error', message: 'Selecione uma conta ativa da equipe.' });
@@ -2220,6 +2411,7 @@ app.post('/api/trello', requireAuth, requireRole(['admin', 'operator']), validat
         title: req.body.title || 'Nova Tarefa',
         description: req.body.description || '',
         status: req.body.status || 'backlog',
+        boardId: req.body.boardId || '',
         assignedTo: assignee?.username || '',
         priority: req.body.priority || 'média',
         clientName: req.body.clientName || '',
@@ -2245,6 +2437,12 @@ app.post('/api/trello', requireAuth, requireRole(['admin', 'operator']), validat
 app.put('/api/trello/:id', requireAuth, requireRole(['admin', 'operator']), validate(idParamsSchema, 'params'), validate(trelloUpdateSchema), async (req, res) => {
     const taskId = req.validatedParams.id;
     const payload = { ...req.validatedBody };
+    if (payload.boardId) {
+        const board = isMongoConnected
+            ? await ProductionBoardModel.findOne({ id: payload.boardId }).lean().catch(() => null)
+            : safeReadJSON('production_boards.json', []).find(item => item?.id === payload.boardId);
+        if (!board) return res.status(400).json({ status: 'error', message: 'O quadro selecionado não existe.' });
+    }
     if (Object.hasOwn(payload, 'assignedTo')) {
         const assignee = await resolveActiveKanbanAssignee(payload.assignedTo);
         if (payload.assignedTo && !assignee) {
@@ -2439,6 +2637,31 @@ function getGoogleCalendarStatus() {
         oauthReady: isGoogleOAuthReady(),
         calendarLabel: GOOGLE_CALENDAR_ID === 'primary' ? 'Calendário principal' : 'Calendário conectado',
         lastSyncedAt: lastGoogleCalendarSyncAt || ''
+    };
+}
+
+function sanitizeProductionSpaceResponse(space) {
+    const value = scrubNoSql(space || {});
+    return {
+        id: SAFE_ID.test(String(value.id || '')) ? String(value.id) : '',
+        name: sanitizePlainText(value.name || ''),
+        description: sanitizePlainText(value.description || ''),
+        memberIds: Array.isArray(value.memberIds) ? value.memberIds.filter(id => SAFE_ID.test(String(id))).slice(0, 50).map(String) : [],
+        archived: value.archived === true,
+        createdAt: sanitizePlainText(value.createdAt || '')
+    };
+}
+
+function sanitizeProductionBoardResponse(board) {
+    const value = scrubNoSql(board || {});
+    return {
+        id: SAFE_ID.test(String(value.id || '')) ? String(value.id) : '',
+        spaceId: SAFE_ID.test(String(value.spaceId || '')) ? String(value.spaceId) : '',
+        name: sanitizePlainText(value.name || ''),
+        description: sanitizePlainText(value.description || ''),
+        favorite: value.favorite === true,
+        archived: value.archived === true,
+        createdAt: sanitizePlainText(value.createdAt || '')
     };
 }
 

@@ -17,6 +17,8 @@ user_profiles.json
 google_calendar_tokens.json
 clients.json
 trello_tasks.json
+production_spaces.json
+production_boards.json
 meetings.json
 analytics.json
 analytics_state.json

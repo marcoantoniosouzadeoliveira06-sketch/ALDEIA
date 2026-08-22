@@ -3181,10 +3181,19 @@ window.showToastError = (message) => showToast(message, 'error');
                 <!-- TAB: SUPER KANBAN -->
                 <div id="trello-tab" class="tab-content">
                     <div class="kanban-shell">
+                        <section id="production-hub" class="production-hub" aria-labelledby="production-hub-title">
+                            <div class="command-toolbar">
+                                <div class="command-copy"><span class="command-eyebrow">CENTRAL DE PRODUÇÃO</span><h2 id="production-hub-title" class="box-title">Equipes e quadros</h2><p>Organize o trabalho por equipes reais, sem contas ou projetos de exemplo.</p></div>
+                                <div class="command-actions"><button class="icon-button" type="button" onclick="openProductionSpaceModal()">Criar equipe</button><button class="primary-command-button" type="button" onclick="openProductionBoardModal()">Novo quadro</button></div>
+                            </div>
+                            <div id="production-hub-content" class="production-hub-content" aria-live="polite"></div>
+                        </section>
+                        <section id="production-board-view" hidden aria-labelledby="production-board-title">
                         <div class="command-toolbar">
                             <div class="command-copy">
-                                <h2 class="box-title">Central de Produção</h2>
-                                <p>Tarefas, aprovações, referências e tempo de foco da equipe em uma única superfície operacional.</p>
+                                <button class="kanban-back-button" type="button" onclick="closeProductionBoard()">← Todos os quadros</button>
+                                <h2 id="production-board-title" class="box-title">Central de Produção</h2>
+                                <p id="production-board-description">Tarefas, aprovações, referências e tempo de foco da equipe em uma única superfície operacional.</p>
                             </div>
                             <div class="command-actions">
                                 <div id="kanban-assignee-filters" class="assignee-filters" aria-label="Filtrar por responsável"></div>
@@ -3214,6 +3223,7 @@ window.showToastError = (message) => showToast(message, 'error');
                                 <div id="trello-col-done" class="kanban-cards-container"></div>
                             </div>
                         </div>
+                        </section>
                     </div>
                 </div>
 
@@ -6699,6 +6709,141 @@ window.showToastError = (message) => showToast(message, 'error');
         let trelloAssigneeFilter = 'todos';
         let deepWorkTicker = null;
         let kanbanTeamMembers = [];
+        let productionSpaces = [];
+        let productionBoards = [];
+        let activeProductionBoardId = null;
+
+        async function loadProductionData() {
+            const [spacesResult, boardsResult] = await Promise.allSettled([
+                fetch('/api/production/spaces', { headers: getAuthHeaders() }),
+                fetch('/api/production/boards', { headers: getAuthHeaders() })
+            ]);
+            productionSpaces = spacesResult.status === 'fulfilled' && spacesResult.value.ok
+                ? await spacesResult.value.json().catch(() => []) : [];
+            productionBoards = boardsResult.status === 'fulfilled' && boardsResult.value.ok
+                ? await boardsResult.value.json().catch(() => []) : [];
+            productionSpaces = Array.isArray(productionSpaces) ? productionSpaces.filter(space => !space?.archived) : [];
+            productionBoards = Array.isArray(productionBoards) ? productionBoards.filter(board => !board?.archived) : [];
+        }
+
+        function boardTaskCount(boardId) {
+            return allTrelloTasks.filter(task => String(task?.boardId || '') === String(boardId || '')).length;
+        }
+
+        function createProductionBoardCard(board, space) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'production-board-card';
+            button.addEventListener('click', () => openProductionBoard(board.id));
+            const mark = document.createElement('span'); mark.className = 'production-board-mark'; mark.textContent = String(boardTaskCount(board.id));
+            const title = document.createElement('h4'); title.textContent = board.name || 'Quadro sem título';
+            const description = document.createElement('p'); description.textContent = board.description || 'Sem descrição.';
+            const meta = document.createElement('span'); meta.className = 'production-board-meta'; meta.textContent = `${space?.name || 'Sem equipe'} · ${boardTaskCount(board.id)} tarefa${boardTaskCount(board.id) === 1 ? '' : 's'}`;
+            button.append(mark, title, description, meta);
+            return button;
+        }
+
+        function renderProductionHub() {
+            const hub = document.getElementById('production-hub-content');
+            if (!hub) return;
+            hub.replaceChildren();
+            const bySpace = new Map(productionSpaces.map(space => [space.id, []]));
+            const independent = [];
+            productionBoards.forEach(board => (bySpace.get(board.spaceId) || independent).push(board));
+            const sections = [...productionSpaces.map(space => ({ space, boards: bySpace.get(space.id) || [] })), { space: null, boards: independent }];
+            const legacyCount = boardTaskCount('');
+            if (legacyCount) sections.unshift({ space: { id: '__legacy__', name: 'Quadro geral', description: 'Tarefas existentes ainda sem equipe.' }, boards: [{ id: '__legacy__', name: 'Quadro geral', description: 'Tarefas migradas do Kanban anterior.' }] });
+            if (!sections.length || (!productionBoards.length && !legacyCount)) {
+                const empty = document.createElement('div'); empty.className = 'production-empty'; empty.textContent = 'Nenhuma equipe ou quadro foi criado. Crie uma equipe real e depois o primeiro quadro.'; hub.appendChild(empty); return;
+            }
+            sections.forEach(({ space, boards }) => {
+                if (!space && !boards.length) return;
+                const section = document.createElement('section'); section.className = 'production-space-section';
+                const heading = document.createElement('div'); heading.className = 'production-space-heading';
+                const title = document.createElement('h3'); title.textContent = space?.name || 'Quadros independentes';
+                const count = document.createElement('span'); count.textContent = `${boards.length} quadro${boards.length === 1 ? '' : 's'}`;
+                heading.append(title, count); section.appendChild(heading);
+                if (space?.description) { const note = document.createElement('p'); note.className = 'production-board-meta'; note.textContent = space.description; section.appendChild(note); }
+                const grid = document.createElement('div'); grid.className = 'production-board-grid';
+                boards.forEach(board => grid.appendChild(createProductionBoardCard(board, space)));
+                if (!boards.length) { const empty = document.createElement('div'); empty.className = 'production-empty'; empty.textContent = 'Esta equipe ainda não possui quadros.'; grid.appendChild(empty); }
+                section.appendChild(grid); hub.appendChild(section);
+            });
+        }
+
+        function openProductionBoard(boardId) {
+            activeProductionBoardId = boardId;
+            const board = boardId === '__legacy__' ? { name: 'Quadro geral', description: 'Tarefas do Kanban anterior.' } : productionBoards.find(item => item.id === boardId);
+            document.getElementById('production-hub').hidden = true;
+            document.getElementById('production-board-view').hidden = false;
+            document.getElementById('production-board-title').textContent = board?.name || 'Central de Produção';
+            document.getElementById('production-board-description').textContent = board?.description || 'Tarefas, aprovações, referências e tempo de foco da equipe.';
+            renderTrelloBoard();
+        }
+
+        function closeProductionBoard() {
+            activeProductionBoardId = null;
+            document.getElementById('production-board-view').hidden = true;
+            document.getElementById('production-hub').hidden = false;
+            renderProductionHub();
+        }
+
+        function closeProductionModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            modal.classList.remove('active'); modal.hidden = true; modal.setAttribute('aria-hidden', 'true');
+        }
+
+        function openProductionSpaceModal() {
+            const modal = document.getElementById('production-space-modal');
+            document.getElementById('production-space-form').reset();
+            const members = document.getElementById('production-space-members'); members.replaceChildren();
+            if (!kanbanTeamMembers.length) members.textContent = 'Nenhuma conta ativa disponível.';
+            kanbanTeamMembers.forEach(member => {
+                const label = document.createElement('label'); label.className = 'production-member-option';
+                const input = document.createElement('input'); input.type = 'checkbox'; input.value = member.username;
+                const text = document.createElement('span'); text.textContent = member.displayName;
+                label.append(input, text); members.appendChild(label);
+            });
+            document.getElementById('production-space-status').textContent = '';
+            modal.hidden = false; modal.setAttribute('aria-hidden', 'false'); modal.classList.add('active');
+            document.getElementById('production-space-name').focus();
+        }
+
+        function openProductionBoardModal() {
+            const modal = document.getElementById('production-board-modal');
+            document.getElementById('production-board-form').reset();
+            const select = document.getElementById('production-board-space'); select.replaceChildren();
+            const none = document.createElement('option'); none.value = ''; none.textContent = 'Sem equipe'; select.appendChild(none);
+            productionSpaces.forEach(space => { const option = document.createElement('option'); option.value = space.id; option.textContent = space.name; select.appendChild(option); });
+            document.getElementById('production-board-status').textContent = '';
+            modal.hidden = false; modal.setAttribute('aria-hidden', 'false'); modal.classList.add('active');
+            document.getElementById('production-board-name').focus();
+        }
+
+        async function saveProductionSpace(event) {
+            event.preventDefault();
+            const status = document.getElementById('production-space-status');
+            const payload = { name: document.getElementById('production-space-name').value.trim(), description: document.getElementById('production-space-description').value.trim(), memberIds: [...document.querySelectorAll('#production-space-members input:checked')].map(input => input.value) };
+            status.textContent = 'Criando equipe…';
+            try {
+                const response = await fetch('/api/production/spaces', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload) });
+                const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.message || 'Não foi possível criar a equipe.');
+                await loadProductionData(); renderProductionHub(); closeProductionModal('production-space-modal'); showToast('Equipe criada.', 'success');
+            } catch (error) { status.textContent = error.message || 'Não foi possível criar a equipe.'; }
+        }
+
+        async function saveProductionBoard(event) {
+            event.preventDefault();
+            const status = document.getElementById('production-board-status');
+            const payload = { name: document.getElementById('production-board-name').value.trim(), spaceId: document.getElementById('production-board-space').value, description: document.getElementById('production-board-description-input').value.trim() };
+            status.textContent = 'Criando quadro…';
+            try {
+                const response = await fetch('/api/production/boards', { method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload) });
+                const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.message || 'Não foi possível criar o quadro.');
+                await loadProductionData(); renderProductionHub(); closeProductionModal('production-board-modal'); showToast('Quadro criado.', 'success');
+            } catch (error) { status.textContent = error.message || 'Não foi possível criar o quadro.'; }
+        }
 
         const lucidePaths = {
             play: '<polygon points="6 3 20 12 6 21 6 3"/>',
@@ -6742,6 +6887,8 @@ window.showToastError = (message) => showToast(message, 'error');
                 allTrelloTasks = [];
                 setKanbanTeamMembers(currentAdminUser ? [currentAdminUser] : []);
             }
+            await loadProductionData().catch(() => { productionSpaces = []; productionBoards = []; });
+            renderProductionHub();
             renderTrelloBoard();
             if (!deepWorkTicker) deepWorkTicker = setInterval(updateVisibleTaskTimers, 1000);
         }
@@ -6817,7 +6964,13 @@ window.showToastError = (message) => showToast(message, 'error');
             statuses.forEach(status => { columns[status].replaceChildren(); });
             const counts = Object.fromEntries(statuses.map(status => [status, 0]));
             const selectedMember = kanbanTeamMembers.find(member => member.username.toLowerCase() === trelloAssigneeFilter.toLowerCase());
-            const filtered = allTrelloTasks.filter(task => trelloAssigneeFilter === 'todos' || [selectedMember?.username, selectedMember?.displayName].filter(Boolean).some(value => String(task.assignedTo || '').toLowerCase() === value.toLowerCase()));
+            const filtered = allTrelloTasks.filter(task => {
+                const belongsToBoard = activeProductionBoardId === '__legacy__'
+                    ? !task.boardId
+                    : activeProductionBoardId ? String(task.boardId || '') === String(activeProductionBoardId) : false;
+                const belongsToMember = trelloAssigneeFilter === 'todos' || [selectedMember?.username, selectedMember?.displayName].filter(Boolean).some(value => String(task.assignedTo || '').toLowerCase() === value.toLowerCase());
+                return belongsToBoard && belongsToMember;
+            });
             filtered.forEach(task => {
                 const status = statuses.includes(task.status) ? task.status : 'backlog';
                 counts[status] += 1;
@@ -6947,7 +7100,9 @@ window.showToastError = (message) => showToast(message, 'error');
         });
 
         function openNewTaskModal() {
+            if (!activeProductionBoardId) { showToast('Abra um quadro antes de criar uma tarefa.', 'error'); return; }
             document.getElementById('trello-task-id').value = '';
+            document.getElementById('trello-task-board').value = activeProductionBoardId === '__legacy__' ? '' : activeProductionBoardId;
             document.getElementById('trello-task-title').value = '';
             document.getElementById('trello-task-desc').value = '';
             document.getElementById('trello-task-client').value = '';
@@ -6975,6 +7130,7 @@ window.showToastError = (message) => showToast(message, 'error');
             const submitButton = document.getElementById('trello-task-submit');
             const formStatus = document.getElementById('trello-form-status');
             const id = document.getElementById('trello-task-id').value;
+            const boardId = document.getElementById('trello-task-board').value;
             const title = document.getElementById('trello-task-title').value.trim();
             const description = document.getElementById('trello-task-desc').value.trim();
             const assignedTo = document.getElementById('trello-task-assigned').value;
@@ -6990,7 +7146,7 @@ window.showToastError = (message) => showToast(message, 'error');
                 return;
             }
 
-            const payload = { title, description, assignedTo, priority, status, clientName, dueDate, subtasks, assets };
+            const payload = { title, description, boardId, assignedTo, priority, status, clientName, dueDate, subtasks, assets };
             const isEdit = !!id;
             const url = isEdit ? `/api/trello/${id}` : '/api/trello';
             const method = isEdit ? 'PUT' : 'POST';
@@ -7980,6 +8136,7 @@ window.showToastError = (message) => showToast(message, 'error');
             </div>
             <form id="trello-task-form" onsubmit="saveTrelloTask(event)">
                 <input type="hidden" id="trello-task-id" value="">
+                <input type="hidden" id="trello-task-board" value="">
                 <div class="cms-group" style="margin-bottom: 15px;">
                     <label style="color: #aaa; font-size: 0.85rem;">Título da Tarefa</label>
                     <input class="input-control" type="text" id="trello-task-title" placeholder="Ex: Criar campanha de lançamento" required>
@@ -8029,6 +8186,20 @@ window.showToastError = (message) => showToast(message, 'error');
                     <button type="submit" id="trello-task-submit" class="primary-command-button">Salvar tarefa</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div id="production-space-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="production-space-modal-title" hidden>
+        <div class="modal-content" style="max-width:560px; border-radius:24px; background:rgba(10,10,10,.92); backdrop-filter:blur(28px);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h3 id="production-space-modal-title" style="color:#fff;font-size:1.2rem">Criar equipe</h3><button class="task-delete" type="button" onclick="closeProductionModal('production-space-modal')" aria-label="Fechar">×</button></div>
+            <form id="production-space-form" onsubmit="saveProductionSpace(event)"><div class="input-group"><label class="input-label" for="production-space-name">Nome da equipe</label><input class="input-control" id="production-space-name" maxlength="100" required></div><div class="input-group"><label class="input-label" for="production-space-description">Descrição</label><textarea class="input-control" id="production-space-description" maxlength="500" rows="3" placeholder="Objetivo ou área de atuação."></textarea></div><div class="input-group"><span class="input-label">Membros existentes</span><div id="production-space-members" class="production-modal-members"></div></div><p id="production-space-status" role="status" aria-live="polite" style="min-height:20px;color:rgba(255,255,255,.58);font-size:.78rem"></p><div style="display:flex;justify-content:flex-end;gap:10px"><button type="button" class="icon-button" onclick="closeProductionModal('production-space-modal')">Cancelar</button><button type="submit" class="primary-command-button">Criar equipe</button></div></form>
+        </div>
+    </div>
+
+    <div id="production-board-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="production-board-modal-title" hidden>
+        <div class="modal-content" style="max-width:560px; border-radius:24px; background:rgba(10,10,10,.92); backdrop-filter:blur(28px);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h3 id="production-board-modal-title" style="color:#fff;font-size:1.2rem">Novo quadro</h3><button class="task-delete" type="button" onclick="closeProductionModal('production-board-modal')" aria-label="Fechar">×</button></div>
+            <form id="production-board-form" onsubmit="saveProductionBoard(event)"><div class="input-group"><label class="input-label" for="production-board-name">Nome do quadro</label><input class="input-control" id="production-board-name" maxlength="100" required></div><div class="input-group"><label class="input-label" for="production-board-space">Equipe</label><select class="input-control" id="production-board-space"><option value="">Sem equipe</option></select></div><div class="input-group"><label class="input-label" for="production-board-description">Descrição</label><textarea class="input-control" id="production-board-description-input" maxlength="500" rows="3" placeholder="Qual trabalho será organizado aqui?"></textarea></div><p id="production-board-status" role="status" aria-live="polite" style="min-height:20px;color:rgba(255,255,255,.58);font-size:.78rem"></p><div style="display:flex;justify-content:flex-end;gap:10px"><button type="button" class="icon-button" onclick="closeProductionModal('production-board-modal')">Cancelar</button><button type="submit" class="primary-command-button">Criar quadro</button></div></form>
         </div>
     </div>
 
@@ -9212,6 +9383,8 @@ document.addEventListener('DOMContentLoaded', () => {
   .google-calendar-tab .command-toolbar { padding-bottom:10px!important; }
   .gcal-toolbar { margin-bottom:10px; padding:9px; }
 }
+/* Central de produção: superfícies discretas, sem bordas brancas agressivas. */
+.production-hub-content{display:grid;gap:16px;margin-top:18px}.production-space-section{display:grid;gap:10px}.production-space-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.production-space-heading h3{margin:0;color:#fff;font-size:1rem}.production-space-heading span,.production-board-meta{color:rgba(255,255,255,.48);font-size:.78rem}.production-board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}.production-board-card{position:relative;display:flex;min-height:154px;flex-direction:column;align-items:flex-start;gap:10px;padding:18px;border:1px solid rgba(255,255,255,.055);border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012));color:#fff;text-align:left;cursor:pointer;transition:transform .2s ease,background .2s ease}.production-board-card:hover{transform:translateY(-2px);background:rgba(255,255,255,.055)}.production-board-card:focus-visible{outline:2px solid rgba(255,255,255,.5);outline-offset:3px}.production-board-card h4{margin:0;font-size:1rem}.production-board-card p{margin:0;color:rgba(255,255,255,.54);font-size:.8rem;line-height:1.45}.production-board-meta{margin-top:auto;display:flex;align-items:center;gap:8px}.production-board-mark{width:28px;height:28px;flex:0 0 28px;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);font-size:.7rem;font-weight:700}.production-empty{padding:28px;border:1px dashed rgba(255,255,255,.11);border-radius:16px;color:rgba(255,255,255,.52);font-size:.85rem}.kanban-back-button{display:inline-flex;align-items:center;gap:6px;padding:0;border:0;background:transparent;color:rgba(255,255,255,.58);font-size:.78rem;cursor:pointer}.kanban-back-button:hover{color:#fff}.production-modal-members{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;max-height:180px;overflow:auto;padding:4px}.production-member-option{display:flex;align-items:center;gap:8px;padding:9px;border:1px solid rgba(255,255,255,.07);border-radius:10px;color:rgba(255,255,255,.75);font-size:.78rem}.production-member-option input{accent-color:#fff}@media(max-width:700px){.production-board-grid{grid-template-columns:1fr}.production-hub .command-toolbar{align-items:flex-start}.production-hub .command-actions{width:100%;justify-content:stretch}.production-hub .command-actions button{flex:1}}
 </style>
 <style>
 /* QMA final: tokens, responsividade e geometria observável */
