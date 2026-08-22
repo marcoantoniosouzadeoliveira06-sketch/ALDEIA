@@ -42,6 +42,8 @@ services:
         generateValue: true
       - key: GEMINI_API_KEY
         sync: false
+      - key: GOOGLE_ANALYTICS_MEASUREMENT_ID
+        sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: EMAIL_FROM

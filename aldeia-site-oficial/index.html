@@ -43,6 +43,7 @@
     <link rel="stylesheet" href="components/ShinyText.css">
     <link rel="stylesheet" href="components/ScrollFloat.css?v=65">
     <link rel="stylesheet" href="components/MetallicPaint.css">
+    <script defer src="/assets/ga4.js?v=1"></script>
     <!-- JSON-LD Structured Data for SEO -->
     <script type="application/ld+json">
     {
@@ -966,6 +967,10 @@
                     window.__aldeiaTelemetry.converted = true;
                     sendTelemetry('conversion', true);
                     window.__aldeiaTelemetry.modalOpenTime = null;
+                    window.gtag?.('event', 'generate_lead', {
+                        event_category: 'orcamento',
+                        event_label: 'formulario_orcamento'
+                    });
 
                     // Register WhatsApp click event for analytics if possible (fire and forget)
                     if (submissionId) {

@@ -15,3 +15,6 @@ the code.
 - Google Calendar OAuth depends on configured production variables and the
   registered callback URL; local JSON token storage is only a fallback and is
   not durable on Render.
+- Google Analytics 4 is enabled only when Render has a valid
+  `GOOGLE_ANALYTICS_MEASUREMENT_ID` (`G-...`). The public tag is loaded only
+  after the visitor accepts optional cookies.

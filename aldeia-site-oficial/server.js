@@ -997,12 +997,12 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com', 'https://cdnjs.cloudflare.com', 'https://translate.google.com', 'https://www.gstatic.com', 'https://cdn.jsdelivr.net'],
+            scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com', 'https://cdnjs.cloudflare.com', 'https://translate.google.com', 'https://www.gstatic.com', 'https://cdn.jsdelivr.net', 'https://www.googletagmanager.com'],
             styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://api.fontshare.com', 'https://unpkg.com'],
             fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://api.fontshare.com', 'data:'],
             imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
             mediaSrc: ["'self'", 'blob:', 'https:'],
-            connectSrc: ["'self'", 'https://ipapi.co', 'https://translate.google.com', 'https://www.gstatic.com'],
+            connectSrc: ["'self'", 'https://ipapi.co', 'https://translate.google.com', 'https://www.gstatic.com', 'https://www.google-analytics.com', 'https://*.google-analytics.com'],
             frameSrc: ["'self'", 'https://translate.google.com'],
             objectSrc: ["'none'"],
             baseUri: ["'self'"],
@@ -1099,6 +1099,15 @@ app.get('/health', (req, res) => res.status(200).json({
     status: 'ok',
     database: isMongoConnected ? 'mongodb' : 'json-fallback'
 }));
+
+// O ID de medição do GA4 é público por definição. A rota nunca expõe chaves,
+// relatórios ou credenciais e só devolve um valor que passa pela validação GA4.
+app.get('/api/public/analytics-config', (req, res) => {
+    const measurementId = String(process.env.GOOGLE_ANALYTICS_MEASUREMENT_ID || '').trim().toUpperCase();
+    const enabled = /^G-[A-Z0-9]{6,}$/.test(measurementId);
+    res.setHeader('Cache-Control', 'no-store');
+    return res.json({ enabled, measurementId: enabled ? measurementId : '' });
+});
 app.get(['/admin', '/admin/*'], (req, res) => res.sendFile(path.join(ROOT_DIR, 'admin.html')));
 
 // Evita conteúdo duplicado: a URL canônica da página inicial é sempre a raiz.
