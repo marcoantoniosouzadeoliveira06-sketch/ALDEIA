@@ -9215,8 +9215,9 @@ document.addEventListener('DOMContentLoaded', () => {
 </style>
 <style>
 /* QMA final: tokens, responsividade e geometria observável */
-html,body,#admin-dashboard,.crm-wrapper,.main-content{max-width:100%;overflow-x:hidden}
-body{background:var(--qma-canvas);color:var(--qma-text)}
+/* Canvas explícito: impede que o fundo padrão do navegador apareça fora da sidebar. */
+html,body,#admin-dashboard,.crm-wrapper,.main-content{max-width:100%;overflow-x:hidden;background-color:#030303}
+body{background-color:#030303;color:var(--text-main)}
 .crm-card,.glass-panel,.submissions-box,.kanban-col,.portfolio-panel,.qma-command-card,.team-access-card{
   border-color:var(--qma-border)!important;
   border-radius:var(--qma-radius-card)!important;
@@ -9280,6 +9281,17 @@ body{background:var(--qma-canvas);color:var(--qma-text)}
   #whatsapp-tab{min-height:680px}
   .wa-sidebar{flex-basis:46%!important}
   .wa-conversation{flex-basis:54%!important}
+}
+
+/* Em desktop a navegação precisa pintar toda a altura visível, mesmo em páginas longas. */
+@media(min-width:769px){
+  .crm-wrapper{background-color:#030303}
+  .sidebar{
+    height:100dvh!important;
+    min-height:100dvh!important;
+    max-height:100dvh!important;
+    background-color:#050505!important;
+  }
 }
 </style>
 </body>
