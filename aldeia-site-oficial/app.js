@@ -532,9 +532,11 @@
             (entries) => {
                 entries.forEach((entry) => {
                     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                    const mobileDataSaver = window.matchMedia('(max-width: 768px)').matches
-                        || navigator.connection?.saveData;
-                    if (entry.isIntersecting && !reducedMotion && !mobileDataSaver) {
+                    // O vídeo do Hero também é a mídia principal em mobile. Só
+                    // preservamos a imagem de fallback quando o visitante pediu
+                    // explicitamente economia de dados ou redução de movimento.
+                    const saveDataRequested = navigator.connection?.saveData;
+                    if (entry.isIntersecting && !reducedMotion && !saveDataRequested) {
                         loadHeroVideo();
                         heroVideo.play().catch(() => {});
                     } else {
