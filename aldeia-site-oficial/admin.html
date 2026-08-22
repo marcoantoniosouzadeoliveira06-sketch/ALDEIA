@@ -9219,12 +9219,18 @@ document.addEventListener('DOMContentLoaded', () => {
 html,body,#admin-dashboard,.crm-wrapper,.main-content{max-width:100%;overflow-x:hidden;background-color:#030303}
 body{background-color:#030303;color:var(--text-main)}
 .crm-card,.glass-panel,.submissions-box,.kanban-col,.portfolio-panel,.qma-command-card,.team-access-card{
-  border-color:var(--qma-border)!important;
+  border-color:rgba(255,255,255,.055)!important;
   border-radius:var(--qma-radius-card)!important;
   background:linear-gradient(145deg,rgba(255,255,255,.034),rgba(255,255,255,.012))!important;
   -webkit-backdrop-filter:blur(var(--qma-blur));
   backdrop-filter:blur(var(--qma-blur));
   box-shadow:var(--qma-shadow);
+}
+
+/* Superfícies do CRM: separação por profundidade, não por contornos brancos. */
+.table-container,.dashboard-coach-card,.dashboard-bento,.dashboard-side-rail,
+.scheduler-shell,.qma-settings-card,.qma-profile-panel,.qma-modal-panel{
+  border-color:rgba(255,255,255,.055)!important;
 }
 .qma-btn,.btn-action,.primary-command-button,.portfolio-button,.input-control,.qma-input,input,select,textarea{
   border-radius:var(--qma-radius-control)!important;
