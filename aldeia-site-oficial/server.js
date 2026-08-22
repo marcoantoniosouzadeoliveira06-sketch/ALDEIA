@@ -2481,7 +2481,11 @@ async function exchangeGoogleOAuthCode(code) {
             }),
             signal: controller.signal
         });
-        if (!response.ok) throw new Error(`OAuth Google respondeu HTTP ${response.status}`);
+        if (!response.ok) {
+            const payload = await response.json().catch(() => ({}));
+            const providerError = sanitizePlainText(payload?.error_description || payload?.error || 'sem detalhe do provedor');
+            throw new Error(`OAuth Google respondeu HTTP ${response.status}: ${providerError}`);
+        }
         return response.json();
     } finally {
         clearTimeout(timeout);
