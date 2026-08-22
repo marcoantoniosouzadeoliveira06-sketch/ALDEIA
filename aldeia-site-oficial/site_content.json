@@ -73,11 +73,11 @@
     "subtitle": "Se você quer algo <strong>acima do padrão,</strong> estou pronto para construir.",
     "scale": 4,
     "refraction": 0.015,
-    "blur": 0.008,
-    "liquid": 0.25,
+    "blur": 0.024,
+    "liquid": 0.31,
     "speed": 0.25,
     "wave": 0.4,
-    "brightness": 1.5,
+    "brightness": 1.9,
     "contrast": 1,
     "chroma": 0,
     "lightColor": "#e9d5ff",
@@ -87,25 +87,25 @@
   "founders": {
     "temari": {
       "name": "Temari",
-      "handle": "@temarua",
+      "handle": "@temaridesigner",
       "role": "Designer & CEO",
       "status": "CEO & Design",
       "bio": "Diretora Criativa focada em branding e identidade visual de alto impacto.",
-      "image": "assets/temari.webp"
+      "image": "https://res.cloudinary.com/iszvbnc9/image/upload/v1786659107/aldeia_uploads/iin5xyofu45nqyrqmzmc.webp"
     },
     "japex": {
       "name": "Japex",
-      "handle": "@japex",
+      "handle": "@designer.japex",
       "role": "Designer & CEO",
       "status": "CEO & Tech",
       "bio": "Especialista em interfaces digitais, UI/UX design gráfico e desenvolvimento web.",
-      "image": "assets/japex.webp"
+      "image": "https://res.cloudinary.com/iszvbnc9/image/upload/v1786658905/aldeia_uploads/ftficoammtaazz8pmfcj.webp"
     }
   },
   "homePortfolio": {
     "title": "GALERIA DE ARTES DA ALDEIA",
     "subtitle": "Confira nossos principais trabalhos desenvolvidos com alto padrão estético.",
-    "buttonText": "VEJA O PORTFÓLIO COMPLETO →",
+    "buttonText": "VEJA O PORTFÓLIO COMPLETO",
     "cover": "https://res.cloudinary.com/iszvbnc9/image/upload/v1786076512/aldeia_uploads/lshbkvsvgdf2xbyiuv2k.webp"
   },
   "portfolio": [

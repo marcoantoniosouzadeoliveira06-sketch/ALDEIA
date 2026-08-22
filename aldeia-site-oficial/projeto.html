@@ -291,7 +291,6 @@
         menu.querySelectorAll('.mobile-nav-link').forEach((link) => link.addEventListener('click', () => setState(false)));
       })();
     </script>
-<<<<<<< HEAD
     <script src="projeto.js"></script>
     <!-- Preloader Removido -->
 
@@ -379,95 +378,6 @@
         }
 
         #budget-modal .modal-content {
-=======
-    <script src="projeto.js"></script>
-    <!-- Preloader Removido -->
-
-    <!-- MODAL ORÇAMENTO -->
-    <div id="budget-modal">
-        <div class="modal-content">
-            <button class="modal-close" type="button" data-budget-close aria-label="Fechar orçamento"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-            <div id="modal-success-screen"
-                style="display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-                <svg style="width: 64px; height: 64px; stroke: hsl(0, 0%, 23%); margin-bottom: 24px; fill: none;"
-                    viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                <h3
-                    style="font-family: var(--font-h); font-size: 1.8rem; margin-bottom: 12px; text-transform: uppercase;">
-                    Cadastro Enviado!</h3>
-                <p
-                    style="color: var(--text-muted); font-size: 1rem; margin-bottom: 30px; max-width: 320px; line-height: 1.6;">
-                    Recebemos suas informações com sucesso.</p>
-                <a href="" id="modal-wa-btn" target="_blank" class="btn-cta"
-                    style="padding: 14px 28px; width: auto; font-size: 0.95rem;">Falar Conosco via WhatsApp <span
-                        style="margin-left: 6px;">↗</span></a>
-            </div>
-            <div id="modal-form-screen">
-                <h2
-                    style="font-family: var(--font-h); font-size: 2rem; font-weight: 600; text-transform: uppercase; margin-bottom: 10px;">
-                    Faça seu Orçamento</h2>
-                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 30px; line-height: 1.5;">
-                    Conte-nos sua ideia e vamos dar vida ao seu projeto.</p>
-                <form id="modal-cadastro-form">
-                    <div class="input-group">
-                        <label class="input-label" for="m-nome">Nome Completo</label>
-                        <input class="input-control" type="text" id="m-nome" required placeholder="Ex: João Silva">
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label" for="m-email">E-mail de Contato</label>
-                        <input class="input-control" type="email" id="m-email" required
-                            placeholder="Ex: joao@empresa.com">
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label" for="m-telefone">WhatsApp</label>
-                        <input class="input-control" type="tel" id="m-telefone" required
-                            placeholder="Ex: (21) 98063-8271">
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label" for="m-instagram">Instagram (Opcional)</label>
-                        <input class="input-control" type="text" id="m-instagram"
-                            placeholder="Ex: @sua.marca ou @seu.perfil">
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label" for="m-projeto">Ideia do Projeto</label>
-                        <textarea class="input-control" id="m-projeto" required
-                            placeholder="Descreva brevemente o projeto, soluções necessárias, e-sports ou identidade visual..."
-                            style="min-height: 100px; resize: vertical;"></textarea>
-                    </div>
-                    <button class="btn-submit" type="submit" id="m-btn-envio"
-                        style="width: 100%; background: #fff; color: #000; padding: 16px; border-radius: 6px; font-weight: 600; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        <span class="m-spinner"
-                            style="display: none; width: 20px; height: 20px; border: 2px solid rgba(0,0,0,0.1); border-top-color: #000; border-radius: 50%; animation: spin 0.8s linear infinite;"></span>
-                        <span id="m-btn-text">Enviar Proposta</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <style>
-        #budget-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            opacity: 0;
-            transition: opacity 0.4s var(--ease);
-        }
-
-        #budget-modal.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        #budget-modal .modal-content {
->>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
             width: min(92vw, 420px);
             max-height: min(82vh, 680px);
             overflow-y: auto;
@@ -500,7 +410,6 @@
             aspect-ratio: 1 / 1;
             border-radius: 50%;
             color: var(--text-muted);
-<<<<<<< HEAD
             cursor: pointer;
             transition: color 0.3s;
             background: rgba(255,255,255,.05);
@@ -579,86 +488,6 @@
             }
 
             // Send telemetry (non-blocking)
-=======
-            cursor: pointer;
-            transition: color 0.3s;
-            background: rgba(255,255,255,.05);
-            border: 1px solid rgba(255,255,255,.1);
-        }
-
-        .modal-close:hover {
-            color: #fff;
-        }
-
-        #budget-modal .input-group {
-            margin-bottom: 18px;
-            text-align: left;
-        }
-
-        #budget-modal .input-label {
-            display: block;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
-
-        #budget-modal .input-control {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            color: #fff;
-            padding: 12px 16px;
-            border-radius: 6px;
-            font-family: var(--font-b);
-            font-size: 0.9rem;
-            transition: border-color 0.3s, background-color 0.3s;
-        }
-
-        #budget-modal .input-control:focus {
-            outline: none;
-            border-color: rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.04);
-        }
-
-        #budget-modal .btn-submit:disabled {
-            background: #444;
-            color: #888;
-            cursor: not-allowed;
-        }
-
-        #budget-modal .btn-submit:disabled .m-spinner {
-            display: inline-block !important;
-        }
-    </style>
-
-    <script>
-        /* ============================================
-           ALDEIA TELEMETRY MODULE — Zero-CLS Tracker
-           AES-256-CBC | sendBeacon | performance.now
-           ============================================ */
-        (function() {
-            const TELEMETRY_URL = `/api/telemetry`;
-
-            // Session state
-            window.__aldeiaTelemetry = {
-                sessionId: null,
-                modalOpenTime: null,
-                converted: false,
-                initialized: false
-            };
-
-            // Generate anonymous session ID
-            function generateSessionId() {
-                const arr = new Uint8Array(16);
-                crypto.getRandomValues(arr);
-                return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
-            }
-
-            // Send telemetry (non-blocking)
->>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
             function sendTelemetry(eventType, converted) {
                 if (localStorage.getItem('aldeia_cookie_consent') !== 'accepted') return;
                 const t = window.__aldeiaTelemetry;
@@ -763,28 +592,6 @@
                 status.setAttribute('role', 'alert');
                 status.style.cssText = 'margin:10px 0 0;color:#fca5a5;font-size:.78rem;line-height:1.45;text-align:center;';
                 modalSubmitBtn.insertAdjacentElement('afterend', status);
-<<<<<<< HEAD
-            }
-            status.textContent = message;
-        };
-
-        modalForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            modalSubmitBtn.disabled = true;
-            modalBtnText.textContent = 'Enviando...';
-
-            const nome = document.getElementById('m-nome').value;
-            const email = document.getElementById('m-email').value;
-            const telefone = document.getElementById('m-telefone').value;
-            const instagram = document.getElementById('m-instagram') ? document.getElementById('m-instagram').value : '';
-            const projeto = document.getElementById('m-projeto').value;
-
-            let trackingData = {};
-            if (window.__aldeiaTracker) {
-                trackingData = window.__aldeiaTracker.getTrackingData();
-=======
->>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
             }
             status.textContent = message;
         };
@@ -806,109 +613,19 @@
                 trackingData = window.__aldeiaTracker.getTrackingData();
             }
 
-            const data = {
-                nome: nome,
-                email: email,
-                telefone: telefone,
-                instagram: instagram,
-                projeto: projeto,
-                ...trackingData
-            };
-
-            const requestController = new AbortController();
-            const requestTimeout = window.setTimeout(() => requestController.abort(), 12000);
-
+            const controller = new AbortController();
+            const requestTimeout = window.setTimeout(() => controller.abort(), 12000);
             try {
-                const response = await fetch('/api/cadastro', {
+                const response = await fetch('/api/submissions', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data),
-                    signal: requestController.signal
-<<<<<<< HEAD
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, telefone, instagram, projeto, ...trackingData }),
+                    signal: controller.signal
                 });
-
-                if (response.ok) {
-                    let submissionId = null;
-                    try {
-                        const resData = await response.json();
-                        submissionId = resData.id;
-                    } catch (e) {
-                        console.warn('Failed to parse submission ID:', e);
-                    }
-
-                    // [TELEMETRY] Track conversion
-                    window.__aldeiaTelemetry.converted = true;
-                    sendTelemetry('conversion', true);
-                    window.__aldeiaTelemetry.modalOpenTime = null;
-
-                    const cleanPhone = telefone.replace(/\D/g, '');
-                    const waBtn = document.getElementById('modal-wa-btn');
-                    waBtn.href = `https://wa.me/5521980638271?text=Olá!%20Meu%20nome%20é%20${encodeURIComponent(nome)}.%20Acabei%20de%20solicitar%20um%20orçamento%20no%20site%20para%20o%20projeto:%20${encodeURIComponent(projeto)}.`;
-
-                    // Register WhatsApp click event
-                    if (submissionId) {
-                        waBtn.onclick = async function () {
-                            try {
-                                await fetch('/api/cadastro/click-link', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ id: submissionId })
-                                });
-                            } catch (clickErr) {
-                                console.error('Failed to register WA click:', clickErr);
-                            }
-                        };
-                    }
-
-                    document.getElementById('modal-form-screen').style.display = 'none';
-                    document.getElementById('modal-success-screen').style.display = 'flex';
-                } else {
-                    showFormStatus('Não foi possível enviar agora. Tente novamente.');
-                }
-=======
-                });
-
-                if (response.ok) {
-                    let submissionId = null;
-                    try {
-                        const resData = await response.json();
-                        submissionId = resData.id;
-                    } catch (e) {
-                        console.warn('Failed to parse submission ID:', e);
-                    }
-
-                    // [TELEMETRY] Track conversion
-                    window.__aldeiaTelemetry.converted = true;
-                    sendTelemetry('conversion', true);
-                    window.__aldeiaTelemetry.modalOpenTime = null;
-
-                    const cleanPhone = telefone.replace(/\D/g, '');
-                    const waBtn = document.getElementById('modal-wa-btn');
-                    waBtn.href = `https://wa.me/5521980638271?text=Olá!%20Meu%20nome%20é%20${encodeURIComponent(nome)}.%20Acabei%20de%20solicitar%20um%20orçamento%20no%20site%20para%20o%20projeto:%20${encodeURIComponent(projeto)}.`;
-
-                    // Register WhatsApp click event
-                    if (submissionId) {
-                        waBtn.onclick = async function () {
-                            try {
-                                await fetch('/api/cadastro/click-link', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ id: submissionId })
-                                });
-                            } catch (clickErr) {
-                                console.error('Failed to register WA click:', clickErr);
-                            }
-                        };
-                    }
-
-                    document.getElementById('modal-form-screen').style.display = 'none';
-                    document.getElementById('modal-success-screen').style.display = 'flex';
-                } else {
-                    showFormStatus('Não foi possível enviar agora. Tente novamente.');
-                }
->>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result?.message || 'Erro no envio');
+                showFormStatus('Solicitação enviada com sucesso! Entraremos em contato em breve.', false);
+                modalForm.reset();
             } catch (err) {
                 console.error(err);
                 showFormStatus(err?.name === 'AbortError'

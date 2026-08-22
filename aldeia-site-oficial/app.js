@@ -1768,12 +1768,25 @@
               gl.uniform1f(uniforms.u_imgRatio, ratio);
               gl.uniform1f(uniforms.u_ratio, canvas.width / canvas.height);
 
-              // Intersection Observer to pause/play WebGL rendering loop based on viewport visibility
+              // Só mantém a animação ativa enquanto a arte estiver realmente visível.
+              // Antes, o loop continuava agendando frames fora da tela.
               let isVisible = false;
+              let frameId = 0;
+              let stopped = false;
+              const requestNextFrame = () => {
+                if (!stopped && isVisible && !document.hidden && !frameId) {
+                  frameId = requestAnimationFrame(render);
+                }
+              };
               const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                   isVisible = entry.isIntersecting;
                 });
+                if (isVisible) requestNextFrame();
+                else if (frameId) {
+                  cancelAnimationFrame(frameId);
+                  frameId = 0;
+                }
               }, { threshold: 0.01 });
               observer.observe(canvas);
 
@@ -1789,12 +1802,9 @@
 
               canvas.addEventListener('mousemove', handleMouseMove);
 
-              const render = (time) => {
-                if (!isVisible) {
-                  // Skip WebGL operations when off-screen to save 100% CPU/GPU resources
-                  requestAnimationFrame(render);
-                  return;
-                }
+              function render(time) {
+                frameId = 0;
+                if (stopped || !isVisible || document.hidden) return;
                 const delta = time - lastTime;
                 lastTime = time;
 
@@ -1808,10 +1818,28 @@
 
                 gl.uniform1f(uniforms.u_time, animTime);
                 gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-                requestAnimationFrame(render);
-              };
+                requestNextFrame();
+              }
 
-              requestAnimationFrame(render);
+              const handleVisibilityChange = () => {
+                if (document.hidden && frameId) {
+                  cancelAnimationFrame(frameId);
+                  frameId = 0;
+                } else {
+                  requestNextFrame();
+                }
+              };
+              const cleanup = () => {
+                stopped = true;
+                if (frameId) cancelAnimationFrame(frameId);
+                frameId = 0;
+                observer.disconnect();
+                canvas.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+              };
+              document.addEventListener('visibilitychange', handleVisibilityChange, { passive: true });
+              window.addEventListener('pagehide', cleanup, { once: true });
+              requestNextFrame();
             };
             img.src = imageSrc;
             });
@@ -1863,7 +1891,6 @@
             if (data.about && data.about.bigText) {
                 const el = document.querySelector('.about-big-text');
                 setSafeDynamicRichText(el, data.about.bigText);
-<<<<<<< HEAD
             }
 
             if (data.services && data.services.items && data.services.items.length > 0) {
@@ -1878,22 +1905,6 @@
                 });
             }
 
-=======
-            }
-
-            if (data.services && data.services.items && data.services.items.length > 0) {
-                const serviceCards = document.querySelectorAll('.service-card');
-                data.services.items.forEach((item, idx) => {
-                    if (serviceCards[idx]) {
-                        const titleEl = serviceCards[idx].querySelector('h3, .service-title');
-                        const textEl = serviceCards[idx].querySelector('p, .service-desc');
-                        if (titleEl && item.title) titleEl.textContent = item.title;
-                        if (textEl && item.text) textEl.textContent = item.text;
-                    }
-                });
-            }
-
->>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
             if (data.faqs && data.faqs.length > 0) {
                 const faqContainer = document.querySelector('.faq-list');
                 if (faqContainer) {
@@ -1920,7 +1931,6 @@
                     });
                     initFaqAccordion();
                 }
-<<<<<<< HEAD
             }
 
             if (data.homePortfolio) {
@@ -1932,19 +1942,6 @@
 
                 if (titleEl && hp.title) titleEl.textContent = hp.title;
                 if (subEl && hp.subtitle) subEl.textContent = hp.subtitle;
-=======
-            }
-
-            if (data.homePortfolio) {
-                const hp = data.homePortfolio;
-                const titleEl = document.getElementById('home-portfolio-title') || document.querySelector('.portfolio-section .mega-title');
-                const subEl = document.getElementById('home-portfolio-subtitle') || document.querySelector('.portfolio-section .section-desc');
-                const btnEl = document.getElementById('home-portfolio-btn') || document.querySelector('.portfolio-section .btn-cta');
-                const coverEl = document.getElementById('home-portfolio-cover') || document.querySelector('.portfolio-section img');
-
-                if (titleEl && hp.title) titleEl.textContent = hp.title;
-                if (subEl && hp.subtitle) subEl.textContent = hp.subtitle;
->>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
                 if (btnEl && hp.buttonText) {
                     btnEl.replaceChildren(document.createTextNode(String(hp.buttonText)));
                     const arrow = document.createElement('span');
@@ -1956,7 +1953,6 @@
                 if (coverEl && hp.cover && /^(?:https?:\/\/|\/?assets\/)/i.test(String(hp.cover))) {
                     coverEl.src = String(hp.cover);
                 }
-<<<<<<< HEAD
             }
         } catch (e) {
             console.warn('[CMS] Erro ao carregar conteúdo dinâmico:', e);
@@ -1981,32 +1977,6 @@
 
     try { if (typeof initGradualBlur === 'function') initGradualBlur(); } catch (e) {}
     try { if (typeof initScrollFloat === 'function') initScrollFloat(); } catch (e) {}
-=======
-            }
-        } catch (e) {
-            console.warn('[CMS] Erro ao carregar conteúdo dinâmico:', e);
-        }
-    }
-
-    function initFaqAccordion() {
-        const faqQuestions = document.querySelectorAll('.faq-question');
-        faqQuestions.forEach(q => {
-            q.removeEventListener('click', handleFaqClick);
-            q.addEventListener('click', handleFaqClick);
-        });
-    }
-
-    function handleFaqClick(e) {
-        const btn = e.currentTarget;
-        const item = btn.closest('.faq-item');
-        const isActive = item.classList.contains('active');
-        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
-        if (!isActive) item.classList.add('active');
-    }
-
-    try { if (typeof initGradualBlur === 'function') initGradualBlur(); } catch (e) {}
-    try { if (typeof initScrollFloat === 'function') initScrollFloat(); } catch (e) {}
->>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
     const metallicPaintTarget = document.querySelector('.metallic-paint');
     if (metallicPaintTarget && typeof initMetallicPaint === 'function') {
         const metallicObserver = new IntersectionObserver((entries, observer) => {
@@ -2082,7 +2052,6 @@
             img.loading = 'lazy';
             img.decoding = 'async';
             img.fetchPriority = 'low';
-<<<<<<< HEAD
 
             imgWrap.appendChild(img);
             itemEl.appendChild(imgWrap);
@@ -2132,57 +2101,6 @@
             if (!wrap) return;
             const realSrc = wrap.querySelector('img')?.src;
             if (realSrc && frame) {
-=======
-
-            imgWrap.appendChild(img);
-            itemEl.appendChild(imgWrap);
-            sphere.appendChild(itemEl);
-        });
-
-        let rotationX = 0;
-        let rotationY = 0;
-        let isDragging = false;
-        let startX = 0;
-        let startY = 0;
-        let startRotX = 0;
-        let startRotY = 0;
-
-        function updateRotation() {
-            sphere.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
-        }
-
-        main.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('.item__image')) return;
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            startRotX = rotationX;
-            startRotY = rotationY;
-            main.style.cursor = 'grabbing';
-        });
-
-        window.addEventListener('pointermove', (e) => {
-            if (!isDragging) return;
-            const deltaX = (e.clientX - startX) / dragSensitivity;
-            const deltaY = (e.clientY - startY) / dragSensitivity;
-            rotationY = startRotY + deltaX;
-            rotationX = Math.max(-maxVerticalRotationDeg, Math.min(maxVerticalRotationDeg, startRotX - deltaY));
-            updateRotation();
-        });
-
-        window.addEventListener('pointerup', () => {
-            if (isDragging) {
-                isDragging = false;
-                main.style.cursor = 'grab';
-            }
-        });
-
-        sphere.addEventListener('click', (e) => {
-            const wrap = e.target.closest('.item__image');
-            if (!wrap) return;
-            const realSrc = wrap.querySelector('img')?.src;
-            if (realSrc && frame) {
->>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
                 frame.replaceChildren();
                 if (!/^(?:https?:\/\/|\/?assets\/|data:image\/)/i.test(String(realSrc || ''))) return;
                 const preview = document.createElement('img');
@@ -2190,7 +2108,6 @@
                 preview.alt = 'Ampliação';
                 preview.style.cssText = 'max-width:90vw;max-height:85vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.8);object-fit:contain;';
                 frame.appendChild(preview);
-<<<<<<< HEAD
                 root.classList.add('enlarged');
             }
         });
@@ -2202,19 +2119,6 @@
         }
     }
 
-=======
-                root.classList.add('enlarged');
-            }
-        });
-
-        if (scrim) {
-            scrim.addEventListener('click', () => {
-                root.classList.remove('enlarged');
-            });
-        }
-    }
-
->>>>>>> 3825b93c404df3e3eb7b2290df927dc06297e812
     function scheduleDomeGallery() {
         const root = document.getElementById('portfolio-dome');
         if (!root || root.dataset.domeScheduled === 'true' || root.dataset.domeInitialized === 'true') return;

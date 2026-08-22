@@ -39,6 +39,11 @@ reconstructed_*
 original_*
 normal_*
 
+# Local Codex references and recoverable checkpoints
+.tooling/
+.codex-backups/
+vibe-coding-toolkit/
+
 # managed
 **.data.json
 **.node-persist**

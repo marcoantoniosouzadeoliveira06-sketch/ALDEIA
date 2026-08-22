@@ -1,82 +1,70 @@
 ---
-name: "ALDEIA CRM Design System"
+name: ALDEIA CRM
 colors:
-  bg: "#030303"
-  sidebar: "#090909"
-  card: "#0A0A0A"
-  accent: "#e4e4e7"
+  canvas: "#030303"
+  surface: "#090909"
+  steel: "#181818"
+  silver: "#e4e4e7"
+  text: "#ffffff"
 ---
 
 # Design System: ALDEIA CRM
-**Project ID:** 
 
 ## 1. Visual Theme & Atmosphere
-O CRM da ALDEIA segue uma estética brutalista de altíssimo luxo (QMA Architecture). É predominantemente escuro (Preto puro `#030303` a `#090909`), utilizando o contraste extremo com o Prata (`#e4e4e7`) e brancos com diferentes opacidades para gerar hierarquia sem recorrer a cores vibrantes. 
-A atmosfera é fria, matemática, precisa e altamente responsiva. A falta de bordas pesadas e o uso de opacidades translúcidas (`rgba(255,255,255,0.12)`) cria um ambiente de software imersivo.
+
+The CRM is a compact, high-contrast dark command center: black canvas,
+silver typography, restrained glass surfaces and fine borders. It should feel
+operational rather than decorative; density is deliberate and every tab keeps
+the same navigation and content hierarchy.
 
 ## 2. Color Palette & Roles
-### Primary Foundation
-- **QMA Preto (Fundo):** `#030303` - O abismo base do site.
-- **QMA Preto (Sidebar):** `#090909` - Leve elevação para o menu lateral.
-- **QMA Dark Steel (Cards):** `#0A0A0A` - Superfície de containers.
 
-### Accent & Interactive
-- **QMA Prata (Accent):** `#e4e4e7` - Usado para botões primários, ícones ativos e destaques importantes.
-
-### Typography & Text Hierarchy
-- **Texto Principal:** `rgba(255, 255, 255, 0.90)` - Títulos e dados primários.
-- **Texto Secundário (Muted):** `rgba(255, 255, 255, 0.50)` - Legendas, placeholders e dados secundários.
-
-### Functional States
-- Sem uso de cores semânticas vibrantes (verde/vermelho). O contraste dita o estado.
+- **Obsidian canvas — `#030303`:** page background and negative space.
+- **Dark steel — `#090909` / `#181818`:** sidebar, controls and table surfaces.
+- **Frosted silver — `rgba(255,255,255,.03-.08)`:** glass cards and hover states.
+- **Signal white — `#ffffff`:** primary actions and key headings.
+- **Muted silver — `#a1a1aa`:** supporting copy, metadata and inactive controls.
+- **Reserved red:** destructive actions only.
 
 ## 3. Typography Rules
-### Hierarchy & Weights
-- **Font Family:** 'Inter', sans-serif. Geométrica, suíça, limpa.
-- O sistema aposta no peso tipográfico (font-weight: 300, 400, 500, 600, 700) para criar hierarquia, reduzindo o uso de tamanho exacerbado.
 
-### Spacing Principles
-- Baseado no QMA Gap Scale:
-  - `--qma-gap-2: 8px;`
-  - `--qma-gap-4: 16px;`
-  - `--qma-gap-6: 24px;`
-  - `--qma-gap-8: 32px;`
+Use the existing sans-serif family with compact headings, high contrast titles
+and muted operational labels. Page titles use tight tracking; labels are small,
+uppercase where hierarchy benefits from it, and body copy remains readable at
+small dashboard densities.
 
 ## 4. Component Stylings
-### Buttons
-Raio de borda mínimo, fundos translúcidos ou bordas ultra finas (1px). O hover state aumenta a opacidade ou inverte a cor para prata sólido.
-
-### Cards & Containers
-Fundos em `#0A0A0A` com bordas sutis `rgba(255,255,255,0.12)`. Ausência de sombras pesadas (Drop Shadows) em favor de hierarquia por cor.
 
 ### Navigation
-Sidebar vertical densa (QMA Preto), com ícones minimalistas (svgs) e texto opaco que acende ao hover.
 
-### Inputs & Forms
-Fundo escuro, bordas sutis, preenchimento minimalista.
+Desktop navigation is a full-height left sidebar organized in the groups
+Visão Geral, Produtividade, Inteligência and Sistema. The active item receives
+a restrained rounded dark-steel surface; icons and labels remain visible in the
+expanded state. The compact state shows only centered icons with tooltips.
+
+### Cards, tables and forms
+
+Cards use dark glass, 16px rounded corners, hairline white borders and subtle
+inset highlights. Tables preserve an operational header and compact rows.
+Inputs are dark steel with a gentle silver focus ring. Primary actions are
+white with black text; destructive actions are dark red, never bright red.
+
+### Domain modules
+
+Dashboard uses metrics, heatmap and ranked portfolio. Kanban preserves five
+work columns. Agenda is calendar-first. Portfolio uses editor + preview +
+case list. Analytics and Segurança remain dense, readable audit tables.
 
 ## 5. Layout Principles
-### Grid & Structure
-Baseado em CSS Flex/Grid com gaps precisos do QMA. Sidebar fixa à esquerda, conteúdo fluindo à direita.
 
-### Whitespace Strategy
-Uso generoso de padding interno nos containers para dar respiro aos dados analíticos.
+Main content stays centered with a practical maximum width. Topbar, page
+context and active tab share one aligned content column. On small screens the
+sidebar becomes horizontal navigation, grids collapse and tables may scroll
+horizontally rather than clipping data.
 
-### Alignment & Visual Balance
-Alinhamento prioritariamente à esquerda (Left-aligned).
+## 6. Stitch Generation Notes
 
-### Responsive Behavior & Touch
-Adaptação agressiva para mobile (Sidebar colapsa para bottom-nav ou drawer).
-
-## 6. Design System Notes for Stitch Generation
-### Language to Use
-"Design sombrio, premium, fundo preto abissal, acentos prata e cinza. Geométrico e luxuoso."
-
-### Color References
-Background: #030303. Cards: #0A0A0A. Accent: #e4e4e7.
-
-### Component Prompts
-"Crie um card de métrica no estilo ALDEIA, fundo #0A0A0A, borda translúcida 12%, texto principal 90% branco."
-
-### Incremental Iteration
-Manter sempre a regra de não usar cores vivas. Confiar na tipografia 'Inter' para organizar a informação.
+Use: “ALDEIA dark operational CRM, monochrome glass, precision dashboard,
+compact sidebar, silver hairline borders, black negative space, rounded dark
+steel controls.” Do not introduce purple, gradients with saturated colors,
+oversized marketing cards or alternate navigation structures.
