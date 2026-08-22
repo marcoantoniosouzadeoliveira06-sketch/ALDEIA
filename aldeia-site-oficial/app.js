@@ -279,6 +279,10 @@
     // ===== SCROLL REVEAL (Intersection Observer) =====
     const revealElements = document.querySelectorAll('.reveal-up, .reveal-scale');
     if (revealElements.length > 0) {
+        document.documentElement.classList.add('motion-ready');
+        if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            revealElements.forEach((el) => el.classList.add('active'));
+        } else {
         const revealObserver = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
@@ -295,6 +299,7 @@
         );
 
         revealElements.forEach((el) => revealObserver.observe(el));
+        }
     }
 
     // ===== WORD-BY-WORD TEXT REVEAL =====

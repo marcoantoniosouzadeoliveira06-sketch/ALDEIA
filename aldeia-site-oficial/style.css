@@ -598,24 +598,32 @@ body.preloader-done #main-nav.hide-nav {
 }
 
 /* ===== REVEAL ANIMATIONS ===== */
-.reveal-up {
+.reveal-up,
+.reveal-scale {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* O conteúdo nunca depende do JavaScript para existir. A ocultação inicial
+   só é aplicada depois que o script confirma que as animações podem rodar. */
+.motion-ready .reveal-up {
     opacity: 0;
     transform: translateY(50px);
     transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
 }
 
-.reveal-up.active {
+.motion-ready .reveal-up.active {
     opacity: 1;
     transform: translateY(0);
 }
 
-.reveal-scale {
+.motion-ready .reveal-scale {
     opacity: 0;
     transform: scale(0.92);
     transition: opacity 1s var(--ease), transform 1s var(--ease);
 }
 
-.reveal-scale.active {
+.motion-ready .reveal-scale.active {
     opacity: 1;
     transform: scale(1);
 }
