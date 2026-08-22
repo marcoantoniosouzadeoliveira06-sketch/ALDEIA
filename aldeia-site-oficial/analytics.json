@@ -6,6 +6,33 @@
     "elementId": "",
     "x": 0,
     "y": 0,
+    "timestamp": "2026-08-22T19:10:51.401Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
+    "timestamp": "2026-08-22T19:10:36.186Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "click",
+    "path": "/",
+    "elementId": "",
+    "x": 38,
+    "y": 3,
+    "timestamp": "2026-08-22T19:10:36.186Z"
+  },
+  {
+    "sessionId": "s_1786039681246_9rb0s5",
+    "eventType": "pageview",
+    "path": "/",
+    "elementId": "",
+    "x": 0,
+    "y": 0,
     "timestamp": "2026-08-22T17:15:30.937Z"
   },
   {
